@@ -9,11 +9,18 @@
   ...
 }:
 
+let
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
+in
 {
   imports = [
+    (import "${home-manager}/nixos")
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
   ];
+
+  nixpkgs.config.system = "x86_64-linux";
+  nixpkgs.config.allowUnsupportedSystem = false;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -71,13 +78,21 @@
     ];
   };
 
-  # programs.firefox.enable = true;
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      nodejs
+    ];
+  };
   programs.fish.enable = true;
   programs.yazi.enable = true;
   programs.npm.enable = true;
   programs.npm.npmrc = ''
     registry=https://registry.npmmirror.com
   '';
+  programs.tmux = {
+    enable = true;
+  };
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
@@ -89,9 +104,11 @@
     ripgrep
     zenith
     tree-sitter
-    nodejs
-    bun
+    nodePackages.pnpm
+    # opencode
+    # bun # requires AVX CPU instructions
     gcc
+
     neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     git
@@ -140,9 +157,15 @@
     };
   };
 
-  # services.tailscale = {
-  #   enable = true;
-  # };
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  services.xray = {
+    enable = true;
+    settingsFile = "/etc/xray/config.json";
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
