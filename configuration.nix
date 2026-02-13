@@ -9,14 +9,11 @@
   ...
 }:
 
-let
-  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
-in
 {
   imports = [
-    (import "${home-manager}/nixos")
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    ./user.nix
   ];
 
   nixpkgs.config.system = "x86_64-linux";
