@@ -32,7 +32,7 @@ in
   networking.networkmanager.enable = true;
 
   # Set your time zone.
-  # time.timeZone = "Europe/Amsterdam";
+  time.timeZone = "Asia/Shanghai";
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -98,6 +98,7 @@ in
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
     gnumake
+    lsof
 
     fzf
     fd
@@ -160,6 +161,7 @@ in
   services.tailscale = {
     enable = true;
     openFirewall = true;
+    extraDaemonFlags = ["--no-logs-no-support"];
   };
 
   services.xray = {
@@ -172,24 +174,28 @@ in
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
-  networking.nftables.enable = true;
   networking.firewall = {
     enable = true;
+    # Only allow specific ports from external sources
     allowedTCPPorts = [
-      22
-      80
-      443
+      22  # SSH
+      80  # HTTP
+      443 # HTTPS
     ];
-    allowedUDPPortRanges = [
-      {
-        from = 4000;
-        to = 4007;
-      }
-      {
-        from = 8000;
-        to = 8010;
-      }
-    ];
+    # Allow LAN and Tailscale sources full access
+    trustedInterfaces = [ "tailscale0" ];
+    # Allow LAN traffic (common private IP ranges)
+    extraCommands = ''
+      ip46tables -A nixos-fw -s 192.168.0.0/16 -j nixos-fw-accept
+      ip46tables -A nixos-fw -s 100.64.0.0/8 -j nixos-fw-accept
+      ip46tables -A nixos-fw -s 172.16.0.0/12 -j nixos-fw-accept
+    '';
+    # Clean up rules when firewall stops
+    extraStopCommands = ''
+      ip46tables -D nixos-fw -s 192.168.0.0/16 -j nixos-fw-accept 2>/dev/null || true
+      ip46tables -D nixos-fw -s 100.64.0.0/8 -j nixos-fw-accept 2>/dev/null || true
+      ip46tables -D nixos-fw -s 172.16.0.0/12 -j nixos-fw-accept 2>/dev/null || true
+    '';
   };
 
   # Copy the NixOS configuration file and link it from the resulting system
