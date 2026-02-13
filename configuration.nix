@@ -186,15 +186,13 @@ in
     trustedInterfaces = [ "tailscale0" ];
     # Allow LAN traffic (common private IP ranges)
     extraCommands = ''
-      ip46tables -A nixos-fw -s 192.168.0.0/16 -j nixos-fw-accept
-      ip46tables -A nixos-fw -s 100.64.0.0/8 -j nixos-fw-accept
-      ip46tables -A nixos-fw -s 172.16.0.0/12 -j nixos-fw-accept
+      iptables -A nixos-fw -s 192.168.1.0/16 -j nixos-fw-accept
+      iptables -A nixos-fw -s 100.64.0.0/8 -j nixos-fw-accept
     '';
     # Clean up rules when firewall stops
     extraStopCommands = ''
-      ip46tables -D nixos-fw -s 192.168.0.0/16 -j nixos-fw-accept 2>/dev/null || true
-      ip46tables -D nixos-fw -s 100.64.0.0/8 -j nixos-fw-accept 2>/dev/null || true
-      ip46tables -D nixos-fw -s 172.16.0.0/12 -j nixos-fw-accept 2>/dev/null || true
+      iptables -D nixos-fw -s 192.168.1.0/16 -j nixos-fw-accept 2>/dev/null || true
+      iptables -D nixos-fw -s 100.64.0.0/8 -j nixos-fw-accept 2>/dev/null || true
     '';
   };
 
