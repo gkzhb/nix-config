@@ -13,7 +13,6 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ./user.nix
   ];
 
   nixpkgs.config.system = "x86_64-linux";
@@ -22,6 +21,8 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # networking.hostName = "nixos"; # Define your hostname.
 
