@@ -35,6 +35,16 @@
   # Set your time zone.
   time.timeZone = "Asia/Shanghai";
 
+  sops = {
+    defaultSopsFile = ./secrets/db.yaml;
+    age = {
+      keyFile = "/home/zhb/.config/sops/age/keys.txt";
+      generateKey = false;
+    };
+    secrets = {
+      "psql/admin_user" = { };
+    };
+  };
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
@@ -112,8 +122,11 @@
     gcc
     just
     age
+    sops
+    gnupg
+    ssh-to-pgp
 
-    neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    neovim
     wget
     git
     tmux

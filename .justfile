@@ -8,3 +8,12 @@ build-cn:
   export http_proxy=http://localhost:10881
   export https_proxy=http://localhost:10881
   just build
+
+# update flake and package versions
+# need to rebuild after running this
+update:
+  nix flake update
+
+# update secrets file after adding new hosts in .sops.yaml
+update-secrets:
+  sops updatekeys secrets/db.yaml
