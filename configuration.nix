@@ -22,7 +22,10 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # networking.hostName = "nixos"; # Define your hostname.
 
@@ -107,6 +110,7 @@
     # opencode
     # bun # requires AVX CPU instructions
     gcc
+    just
 
     neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
@@ -159,7 +163,7 @@
   services.tailscale = {
     enable = true;
     openFirewall = true;
-    extraDaemonFlags = ["--no-logs-no-support"];
+    extraDaemonFlags = [ "--no-logs-no-support" ];
   };
 
   services.xray = {
@@ -176,8 +180,8 @@
     enable = true;
     # Only allow specific ports from external sources
     allowedTCPPorts = [
-      22  # SSH
-      80  # HTTP
+      22 # SSH
+      80 # HTTP
       443 # HTTPS
     ];
     # Allow LAN and Tailscale sources full access
