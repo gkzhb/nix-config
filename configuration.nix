@@ -165,6 +165,7 @@
     node-red = {
       enable = true;
       port = 1880;
+      user = "zhb";
       withNpmAndGcc = true; # Allow imperative download of nodes. Need to enable nix-ld, see below
       configFile = ./node-red/settings.js;
       userDir = "/mnt/data/nodered/data";
