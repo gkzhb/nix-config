@@ -53,7 +53,10 @@
   users.users.zhb = {
     isNormalUser = true;
     home = "/home/zhb";
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "docker"
+    ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
     packages = with pkgs; [
       tree
@@ -79,6 +82,7 @@
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
+    musl
     gnumake
     lsof
 
@@ -102,6 +106,7 @@
     git
     tmux
     zoxide
+    docker-compose
 
     nixfmt
     nil
@@ -153,6 +158,9 @@
       guiAddress = "0.0.0.0:8384";
     };
   };
+
+  # Enable the Docker service
+  virtualisation.docker.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
