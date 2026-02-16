@@ -174,6 +174,7 @@
   systemd.services = {
     node-red = {
       path = with pkgs; [
+        musl
         # git is needed for projects, but systemd resets the path so we need to add it back
         git
         # needed by nodejs to install for instance node-red-dashboard (or "error syscall spawn sh")
@@ -203,8 +204,9 @@
             util-linux
             xz
             systemd
-            musl
           ];
+        # fix loading sqlite nodes, which requires musl lib
+        LD_LIBRARY_PATH = "${pkgs.musl}/lib";
       };
       serviceConfig = {
         LoadCredential = [
