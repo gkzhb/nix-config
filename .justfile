@@ -17,3 +17,6 @@ update:
 # update secrets file after adding new hosts in .sops.yaml
 update-secrets:
   sops updatekeys secrets/db.yaml
+
+edit-secrets:
+  sops secrets/db.yaml

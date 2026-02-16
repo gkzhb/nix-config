@@ -43,6 +43,9 @@
     };
     secrets = {
       "psql/admin_user" = { };
+      "node_red/sso_client_id" = { };
+      "node_red/sso_client_secret" = { };
+      "node_red/http_api_key" = { };
     };
   };
 
@@ -56,6 +59,7 @@
     extraGroups = [
       "wheel"
       "docker"
+      "zhb"
     ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
     packages = with pkgs; [
@@ -156,6 +160,59 @@
       dataDir = "/home/zhb/syncthing"; # Default folder for new synced folders
       configDir = "/home/zhb/.config/syncthing"; # Folder for Syncthing's settings and keys
       guiAddress = "0.0.0.0:8384";
+    };
+
+    node-red = {
+      enable = true;
+      port = 1880;
+      withNpmAndGcc = true; # Allow imperative download of nodes. Need to enable nix-ld, see below
+      configFile = ./node-red/settings.js;
+      userDir = "/mnt/data/nodered/data";
+    };
+  };
+
+  systemd.services = {
+    node-red = {
+      path = with pkgs; [
+        # git is needed for projects, but systemd resets the path so we need to add it back
+        git
+        # needed by nodejs to install for instance node-red-dashboard (or "error syscall spawn sh")
+        bash
+        fish
+      ];
+      environment = {
+        # environment variables are removed, so we need to specify nix-ld environment here
+        NIX_LD = lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
+        # load npm dependencies ("passport-openidconnect")
+        NODE_PATH = "/mnt/data/nodered/data/node_modules";
+        NIX_LD_LIBRARY_PATH =
+          with pkgs;
+          lib.makeLibraryPath [
+            # List by default
+            zlib
+            zstd
+            stdenv.cc.cc
+            curl
+            openssl
+            attr
+            libssh
+            bzip2
+            libxml2
+            acl
+            libsodium
+            util-linux
+            xz
+            systemd
+            musl
+          ];
+      };
+      serviceConfig = {
+        LoadCredential = [
+          "sso_client_id:${config.sops.secrets."node_red/sso_client_id".path}"
+          "sso_client_secret:${config.sops.secrets."node_red/sso_client_secret".path}"
+          "http_api_key:${config.sops.secrets."node_red/http_api_key".path}"
+        ];
+      };
     };
   };
 
