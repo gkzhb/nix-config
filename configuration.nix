@@ -17,6 +17,12 @@
 
   nixpkgs.config.system = "x86_64-linux";
   nixpkgs.config.allowUnsupportedSystem = false;
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "steam"
+      "steam-unwrapped"
+    ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -67,10 +73,12 @@
     ];
   };
 
-  programs.nix-ld = {
+  programs.nix-ld.dev = {
     enable = true;
     libraries = with pkgs; [
-      nodejs
+      stdenv.cc.cc.lib
+      zlib
+      musl
     ];
   };
   programs.fish.enable = true;
@@ -89,6 +97,7 @@
     musl
     gnumake
     lsof
+    steam-run
 
     fzf
     fd
@@ -104,6 +113,8 @@
     sops
     gnupg
     ssh-to-pgp
+    uv
+    python312
 
     neovim
     wget
@@ -114,10 +125,16 @@
 
     nixfmt
     nil
+
+    # pkgs.llm-agents.opencode
+    # pkgs.llm-agents.openclaw
   ];
 
   # List services that you want to enable:
   services = {
+    envfs = {
+      enable = true;
+    };
     # Enable the OpenSSH daemon.
     openssh = {
       enable = true;
@@ -222,11 +239,6 @@
   # Enable the Docker service
   virtualisation.docker.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
   networking.firewall = {
     enable = true;
     # Only allow specific ports from external sources
