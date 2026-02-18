@@ -52,6 +52,7 @@
       "node_red/sso_client_id" = { };
       "node_red/sso_client_secret" = { };
       "node_red/http_api_key" = { };
+      "frp/auth_token" = { };
     };
   };
 
@@ -150,7 +151,8 @@
       settings = {
         serverAddr = "gkzhb.top";
         serverPort = 7000;
-        auth.token = "gkzhb-frp";
+        auth.tokenSource.type = "file";
+        auth.tokenSource.file.path = config.sops.secrets."frp/auth_token".path;
         proxies = [
           {
             name = "ssh";
