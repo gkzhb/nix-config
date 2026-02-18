@@ -152,7 +152,7 @@
         serverAddr = "gkzhb.top";
         serverPort = 7000;
         auth.tokenSource.type = "file";
-        auth.tokenSource.file.path = config.sops.secrets."frp/auth_token".path;
+        auth.tokenSource.file.path = "/run/credentials/frp.service/frp_auth_token";
         proxies = [
           {
             name = "ssh";
@@ -233,6 +233,13 @@
           "sso_client_id:${config.sops.secrets."node_red/sso_client_id".path}"
           "sso_client_secret:${config.sops.secrets."node_red/sso_client_secret".path}"
           "http_api_key:${config.sops.secrets."node_red/http_api_key".path}"
+        ];
+      };
+    };
+    frp = {
+      serviceConfig = {
+        LoadCredential = [
+          "frp_auth_token:${config.sops.secrets."frp/auth_token".path}"
         ];
       };
     };
