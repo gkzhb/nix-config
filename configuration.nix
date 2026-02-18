@@ -124,6 +124,8 @@
     tmux
     zoxide
     docker-compose
+    ty # python lsp
+    ruff # python linter and formatter
 
     nixfmt
     nil
@@ -193,6 +195,24 @@
       withNpmAndGcc = true; # Allow imperative download of nodes. Need to enable nix-ld, see below
       configFile = ./node-red/settings.js;
       userDir = "/mnt/data/nodered/data";
+    };
+
+    postgresql = {
+      enable = true;
+      # manually set db version
+      package = pkgs.postgresql_18;
+      ensureDatabases = [ "miniflux" ];
+      enableTCPIP = true;
+      # port = 5432;
+      extensions = with pkgs.postgresql18Packages; [ pgvector ];
+      authentication = pkgs.lib.mkOverride 10 ''
+        #type database  DBuser  auth-method
+        local all       all     trust
+        # ipv4
+        host  all      all     127.0.0.1/32   trust
+        # ipv6
+        host all       all     ::1/128        trust
+      '';
     };
 
     # GUI env
