@@ -99,6 +99,7 @@
     gnumake
     lsof
     steam-run
+    nix-your-shell # use fish inside `niv develop`
 
     fzf
     fd
@@ -129,9 +130,13 @@
 
     # pkgs.llm-agents.opencode
     # pkgs.llm-agents.openclaw
+
+    # GUI app
+    # kdePackages.sddm-kcm
+    # vlc
+    # wayland-utils
   ];
 
-  # List services that you want to enable:
   services = {
     envfs = {
       enable = true;
@@ -189,6 +194,25 @@
       configFile = ./node-red/settings.js;
       userDir = "/mnt/data/nodered/data";
     };
+
+    # GUI env
+    # Enable the KDE Plasma 6 Desktop Environment.
+    # displayManager = {
+    #   sddm.enable = true;
+    #   sddm.wayland.enable = true;
+    # };
+    # desktopManager.plasma6.enable = true;
+    # # Enable the X11 windowing system.
+    # xserver = {
+    #   enable = true;
+    #   # Configure keymap in X11
+    #   xkb = {
+    #     layout = "us";
+    #     variant = "";
+    #   };
+    #   # Enable touchpad support (enabled default in most desktopManager).
+    #   # libinput.enable = true;
+    # };
   };
 
   systemd.services = {
