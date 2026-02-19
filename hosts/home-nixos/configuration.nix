@@ -54,6 +54,9 @@
       "node_red/http_api_key" = { };
       "frp/auth_token" = { };
       "miniflux/pg-password" = { };
+      "miniflux/admin-username" = { };
+      "miniflux/admin-password" = { };
+      "miniflux/oidc-client-secret" = { };
     };
   };
 
@@ -126,6 +129,7 @@
     tmux
     zoxide
     docker-compose
+    qbittorrent-cli
 
     ty # python lsp
     ruff # python linter and formatter
@@ -270,6 +274,7 @@
         Preferences = {
           General = {
             Locale = "zh_CN";
+            SavePath = "/mnt/data/transmission";
           };
           WebUI = {
             AlternativeUIEnabled = true;
@@ -287,9 +292,14 @@
     };
 
     minifluxng = {
-      # enable = true;
+      enable = true;
       baseUrl = "https://read.gkzhb.top";
       listenAddress = "0.0.0.0:8050";
+      enableOidc = true;
+      oidcClientId = "PBAkbEhUMwPlcd8r2pZtdtui7TGlSHmd4awPALSh";
+      oidcRedirectUrl = "https://miniflux.gkzhb.top/oauth2/oidc/callback";
+      oidcDiscoveryEndpoint = "https://sso.gkzhb.top/application/o/miniflux/";
+      enableOidcUserCreation = true;
     };
 
     # GUI env
