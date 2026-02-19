@@ -265,11 +265,22 @@
       enable = true;
       webuiPort = 8051;
       user = "zhb";
+      profileDir = "/mnt/data/qbittorrent";
       serverConfig = {
         Preferences = {
+          General = {
+            Locale = "zh_CN";
+          };
           WebUI = {
             AlternativeUIEnabled = true;
             RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
+            Username = "zhb";
+            Password_PBKDF2 = "@ByteArray(4O9mQMfIWzaA2NkMQMPkmw==:H6ltTYPekYs2Y8hS46tV/dv4tHyizOceyIsBgDUl/gAzNSVpMZHnXIUxfS0UT4+iEqANcRiNIAZOlbeKhgckDw==)";
+          };
+          # seems not working in webui
+          BitTorrent = {
+            Session.DefaultSavePath = "/mnt/data/transmission";
+            Session.PeXEnabled = false;
           };
         };
       };
