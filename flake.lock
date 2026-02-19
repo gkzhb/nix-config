@@ -63,6 +63,26 @@
         "type": "github"
       }
     },
+    "minifluxng": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1767475739,
+        "narHash": "sha256-lXs8sei64JU1A+yNhbDX0ohxxz4rT7SC5cAyaXClc+w=",
+        "ref": "refs/heads/master",
+        "rev": "db76b1906fcc97968905a37bf36a415b2e302c45",
+        "revCount": 14,
+        "type": "git",
+        "url": "https://git.sr.ht/~bwolf/miniflux.nix"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.sr.ht/~bwolf/miniflux.nix"
+      }
+    },
     "nix-ld": {
       "inputs": {
         "nixpkgs": [
@@ -85,11 +105,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1771147098,
-        "narHash": "sha256-jpfPdBjKO232s5NueoNEvvVzpndiUzPLNYcH4/Ov0gY=",
+        "lastModified": 1771177547,
+        "narHash": "sha256-trTtk3WTOHz7hSw89xIIvahkgoFJYQ0G43IlqprFoMA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e3cb16bccd9facebae3ba29c6a76a4cc1b73462a",
+        "rev": "ac055f38c798b0d87695240c7b761b82fc7e5bc2",
         "type": "github"
       },
       "original": {
@@ -119,6 +139,7 @@
       "inputs": {
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
+        "minifluxng": "minifluxng",
         "nix-ld": "nix-ld",
         "nixpkgs": "nixpkgs_2",
         "sops-nix": "sops-nix"

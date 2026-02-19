@@ -14,6 +14,9 @@
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    minifluxng.url = "git+https://git.sr.ht/~bwolf/miniflux.nix";
+    minifluxng.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -24,6 +27,7 @@
       home-manager,
       sops-nix,
       llm-agents,
+      minifluxng,
       ...
     }:
     {
@@ -45,6 +49,7 @@
               # arguments to home.nix
             }
             sops-nix.nixosModules.sops
+            minifluxng.nixosModules.minifluxng
           ];
         };
       };

@@ -53,12 +53,14 @@
       "node_red/sso_client_secret" = { };
       "node_red/http_api_key" = { };
       "frp/auth_token" = { };
+      "miniflux/pg-password" = { };
     };
   };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
+  users.groups.zhb = { };
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.zhb = {
     isNormalUser = true;
@@ -124,14 +126,16 @@
     tmux
     zoxide
     docker-compose
+
     ty # python lsp
     ruff # python linter and formatter
-
     nixfmt
     nil
+    # playwright-driver.browsers
 
-    # pkgs.llm-agents.opencode
-    # pkgs.llm-agents.openclaw
+    # llm-agents.opencode
+    # llm-agents.openclaw
+    # llm-agents.agent-browser
 
     # GUI app
     # kdePackages.sddm-kcm
@@ -188,6 +192,42 @@
       guiAddress = "0.0.0.0:8384";
     };
 
+    samba = {
+      enable = true;
+      securityType = "user";
+      openFirewall = true;
+      settings = {
+        global = {
+          "workgroup" = "WORKGROUP";
+          "server string" = "nixos";
+          "netbios name" = "nixos";
+          "security" = "user";
+          "browseable" = "yes";
+          #"use sendfile" = "yes";
+          "max protocol" = "smb2";
+          # note: localhost is the ipv6 localhost ::1
+          "hosts allow" = "192.168.2.0/16 127.0.0.1 localhost";
+          # "hosts deny" = "0.0.0.0/0";
+          "guest account" = "zhb";
+          "map to guest" = "bad user";
+        };
+        "public" = {
+          "path" = "/mnt/data";
+          "browseable" = "yes";
+          "public" = "yes";
+          "read only" = "no";
+          "guest ok" = "yes";
+          "create mask" = "0644";
+          "directory mask" = "0755";
+          "force user" = "zhb";
+          "force group" = "zhb";
+        };
+      };
+    };
+    samba-wsdd = {
+      enable = true;
+      openFirewall = true;
+    };
     node-red = {
       enable = true;
       port = 1880;
@@ -202,6 +242,12 @@
       # manually set db version
       package = pkgs.postgresql_18;
       ensureDatabases = [ "miniflux" ];
+      ensureUsers = [
+        {
+          name = "miniflux";
+          ensureDBOwnership = true;
+        }
+      ];
       enableTCPIP = true;
       # port = 5432;
       extensions = with pkgs.postgresql18Packages; [ pgvector ];
@@ -213,6 +259,12 @@
         # ipv6
         host all       all     ::1/128        trust
       '';
+    };
+
+    minifluxng = {
+      # enable = true;
+      baseUrl = "https://read.gkzhb.top";
+      listenAddress = "0.0.0.0:8050";
     };
 
     # GUI env
@@ -236,6 +288,26 @@
   };
 
   systemd.services = {
+    postgresql-init-miniflux-password = {
+      description = "Set PostgreSQL miniflux user password from sops-nix";
+      after = [
+        "postgresql.service"
+        "sops-nix.service"
+      ];
+      requires = [
+        "postgresql.service"
+        "sops-nix.service"
+      ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "postgres";
+        ExecStart = pkgs.writeShellScript "init-miniflux-password" ''
+          PASSWORD=$(cat ${config.sops.secrets."miniflux/pg-password".path})
+          ${pkgs.postgresql_18}/bin/psql -c "ALTER USER miniflux WITH PASSWORD '$PASSWORD';"
+        '';
+      };
+    };
     node-red = {
       path = with pkgs; [
         musl
@@ -285,6 +357,14 @@
         LoadCredential = [
           "frp_auth_token:${config.sops.secrets."frp/auth_token".path}"
         ];
+      };
+    };
+    docker = {
+      environment = {
+        # set network proxy to fetch images
+        HTTP_PROXY = "http://localhost:10881";
+        HTTPS_PROXY = "http://localhost:10881";
+        NO_PROXY = "localhost,127.0.0.1,.example.com";
       };
     };
   };
