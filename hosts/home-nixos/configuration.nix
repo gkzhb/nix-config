@@ -42,7 +42,7 @@
   time.timeZone = "Asia/Shanghai";
 
   sops = {
-    defaultSopsFile = ./secrets/db.yaml;
+    defaultSopsFile = ../../secrets/db.yaml;
     age = {
       keyFile = "/home/zhb/.config/sops/age/keys.txt";
       generateKey = false;
@@ -259,6 +259,20 @@
         # ipv6
         host all       all     ::1/128        trust
       '';
+    };
+
+    qbittorrent = {
+      enable = true;
+      webuiPort = 8051;
+      user = "zhb";
+      serverConfig = {
+        Preferences = {
+          WebUI = {
+            AlternativeUIEnabled = true;
+            RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
+          };
+        };
+      };
     };
 
     minifluxng = {
