@@ -33,6 +33,12 @@
     "flakes"
   ];
 
+  # 设置 nix 的 trusted-users，允许 zhb 用户无需 sudo 执行 nix 命令
+  nix.settings.trusted-users = [
+    "root"
+    "zhb"
+  ];
+
   # networking.hostName = "nixos"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
@@ -122,6 +128,7 @@
     ssh-to-pgp
     uv
     python312
+    mise
 
     neovim
     wget
