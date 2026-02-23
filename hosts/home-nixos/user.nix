@@ -48,6 +48,7 @@
       Service = {
         Type = "simple";
         ExecStart = "${pkgs.fish}/bin/fish -c %h/scripts/services/litellm/run.fish";
+        WorkingDirectory = "%h/scripts/services/litellm";
         Restart = "on-failure";
       };
       Install = {
