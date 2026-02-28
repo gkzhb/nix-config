@@ -55,5 +55,20 @@
         WantedBy = [ "default.target" ];
       };
     };
+
+    web-mcp = {
+      Unit = {
+        Description = "web mcp server";
+        After = [ "network.target" ];
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = "${pkgs.fish}/bin/fish -c %h/scripts/services/web-mcp/run.fish";
+        Restart = "on-failure";
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
+    };
   };
 }
