@@ -208,6 +208,7 @@
     # set ddns for ipv6
     godns = {
       enable = true;
+      # useless config, login_token_file not working
       settings = {
         provider = "Cloudflare";
         login_token_file = "$CREDENTIALS_DIRECTORY/login_token";
@@ -354,6 +355,7 @@
   systemd.services = {
     godns = {
       serviceConfig = {
+        ExecStart = lib.mkForce "${pkgs.godns}/bin/godns -c /etc/godns/config.yaml";
         LoadCredential = [
           "login_token:${config.sops.secrets."cloudflare/api-key".path}"
         ];
