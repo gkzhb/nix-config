@@ -63,6 +63,7 @@
       "miniflux/admin-username" = { };
       "miniflux/admin-password" = { };
       "miniflux/oidc-client-secret" = { };
+      "cloudflare/api-key" = { };
     };
   };
 
@@ -188,7 +189,9 @@
     tailscale = {
       enable = true;
       openFirewall = true;
+      useRoutingFeatures = "server";
       extraDaemonFlags = [ "--no-logs-no-support" ];
+      extraUpFlags = [ "--advertise-exit-node" ];
     };
     xray = {
       enable = true;
@@ -201,6 +204,26 @@
       dataDir = "/home/zhb/syncthing"; # Default folder for new synced folders
       configDir = "/home/zhb/.config/syncthing"; # Folder for Syncthing's settings and keys
       guiAddress = "0.0.0.0:8384";
+    };
+    # set ddns for ipv6
+    godns = {
+      enable = true;
+      settings = {
+        provider = "Cloudflare";
+        login_token_file = "$CREDENTIALS_DIRECTORY/login_token";
+        interval = 300;
+        ip_type = "IPv6";
+        domains = [
+          {
+            domain_name = "gkzhb.top";
+            sub_domains = [
+              "home"
+              "h"
+              "*.h"
+            ];
+          }
+        ];
+      };
     };
 
     samba = {
@@ -329,6 +352,13 @@
   };
 
   systemd.services = {
+    godns = {
+      serviceConfig = {
+        LoadCredential = [
+          "login_token:${config.sops.secrets."cloudflare/api-key".path}"
+        ];
+      };
+    };
     postgresql-init-miniflux-password = {
       description = "Set PostgreSQL miniflux user password from sops-nix";
       after = [
@@ -415,6 +445,7 @@
 
   networking.firewall = {
     enable = true;
+    checkReversePath = "loose";
     # Only allow specific ports from external sources
     allowedTCPPorts = [
       22 # SSH
