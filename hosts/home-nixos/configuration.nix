@@ -145,9 +145,9 @@
     nil
     # playwright-driver.browsers
 
-    # llm-agents.opencode
-    # llm-agents.openclaw
-    # llm-agents.agent-browser
+    llm-agents.opencode
+    llm-agents.openclaw
+    llm-agents.agent-browser
 
     # GUI app
     # kdePackages.sddm-kcm
