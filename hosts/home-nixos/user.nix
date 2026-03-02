@@ -82,7 +82,9 @@ in
       };
       Service = {
         Type = "simple";
-        ExecStart = "${pkgs.nodejs}/bin/node ${openclawPkg}/lib/openclaw/dist/entry.js gateway --port 18789";
+        # use shell script to startup to preserve shell envs
+        # ExecStart = "${pkgs.nodejs}/bin/node ${openclawPkg}/lib/openclaw/dist/entry.js gateway --port 18789";
+        ExecStart = "${pkgs.fish}/bin/fish -c %h/scripts/services/openclaw/run.fish";
         Restart = "always";
         RestartSec = 5;
         KillMode = "process";
