@@ -138,6 +138,8 @@
     zoxide
     docker-compose
     qbittorrent-cli
+    taskwarrior3
+    taskwarrior-tui
 
     ty # python lsp
     ruff # python linter and formatter
@@ -146,6 +148,8 @@
     # playwright-driver.browsers
 
     llm-agents.opencode
+    llm-agents.claude-code
+    llm-agents.codex
     llm-agents.agent-browser
 
     llm-agents.openclaw
@@ -325,7 +329,7 @@
 
     minifluxng = {
       enable = true;
-      baseUrl = "https://read.gkzhb.top";
+      baseUrl = "https://miniflux.gkzhb.top";
       listenAddress = "0.0.0.0:8050";
       enableOidc = true;
       oidcClientId = "PBAkbEhUMwPlcd8r2pZtdtui7TGlSHmd4awPALSh";
