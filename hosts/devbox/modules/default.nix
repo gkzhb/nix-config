@@ -5,19 +5,21 @@
     system-manager.allowAnyDistro = true;
     nixpkgs.hostPlatform = "x86_64-linux";
 
-    nix.settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      trusted-users = [
-        "root"
-        "zhanghaibin.zhb"
-      ];
+    nix = {
+      package = pkgs.nix;
+      settings = {
+        experimental-features = [
+          "nix-command"
+          "flakes"
+        ];
+        trusted-users = [
+          "root"
+          "zhanghaibin.zhb"
+        ];
+      };
     };
 
     environment.systemPackages = with pkgs; [
-      nix
       git
       fish
       just

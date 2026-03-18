@@ -144,7 +144,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
@@ -218,6 +218,27 @@
       "original": {
         "type": "git",
         "url": "https://git.sr.ht/~bwolf/miniflux.nix"
+      }
+    },
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773000227,
+        "narHash": "sha256-zm3ftUQw0MPumYi91HovoGhgyZBlM4o3Zy0LhPNwzXE=",
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "rev": "da529ac9e46f25ed5616fd634079a5f3c579135f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-darwin",
+        "ref": "master",
+        "repo": "nix-darwin",
+        "type": "github"
       }
     },
     "nix-ld": {
@@ -321,6 +342,7 @@
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
         "minifluxng": "minifluxng",
+        "nix-darwin": "nix-darwin",
         "nix-ld": "nix-ld",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",

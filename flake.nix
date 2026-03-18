@@ -14,7 +14,7 @@
     nix-ld.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager/release-25.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
@@ -26,6 +26,10 @@
 
     system-manager = {
       url = "github:numtide/system-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
@@ -41,6 +45,7 @@
       llm-agents,
       minifluxng,
       system-manager,
+      nix-darwin,
       ...
     }:
     let
@@ -89,6 +94,25 @@
             inherit inputs;
           };
           modules = [ ./hosts/devbox/user.nix ];
+        };
+      };
+      # Build darwin flake using:
+      # $ darwin-rebuild build --flake .#gkzhb-MBP-6
+      darwinConfigurations = {
+        "gkzhb-MBP" = nix-darwin.lib.darwinSystem {
+          modules = [
+            ./hosts/gkzhb-mbp/configuration.nix
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.bytedance = ./hosts/gkzhb-mbp/user.nix;
+
+              # Optionally, use home-manager.extraSpecialArgs to pass
+              # arguments to home.nix
+            }
+          ];
+          specialArgs = { inherit self; };
         };
       };
     };

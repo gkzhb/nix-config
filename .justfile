@@ -27,3 +27,12 @@ build-devbox:
 # build standalone home-manager config
 build-home user:
   home-manager switch --flake .#{{user}}
+
+build-darwin:
+  # nix run nix-darwin/master#darwin-rebuild -- switch
+  darwin-rebuild switch --flake .#gkzhb-MBP
+
+build-darwin-cn:
+  export https_proxy=http://localhost:10881
+  export http_proxy=http://localhost:10881
+  just build-darwin
