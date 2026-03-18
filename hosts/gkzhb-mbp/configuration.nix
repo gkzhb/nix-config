@@ -41,9 +41,10 @@
   nix = {
     package = pkgs.nix;
     settings = {
-      # "extra-experimental-features" = [ "nix-command" "flakes" ];
-      # Necessary for using flakes on this system.
-      experimental-features = "nix-command flakes";
+      trusted-users = [
+        "root"
+        "bytedance"
+      ];
     };
   };
 
