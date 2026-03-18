@@ -5,7 +5,19 @@
     system-manager.allowAnyDistro = true;
     nixpkgs.hostPlatform = "x86_64-linux";
 
+    nix.settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      trusted-users = [
+        "root"
+        "zhanghaibin.zhb"
+      ];
+    };
+
     environment.systemPackages = with pkgs; [
+      nix
       fish
       tree-sitter
       fzf
