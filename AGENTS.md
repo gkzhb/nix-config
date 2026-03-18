@@ -26,3 +26,9 @@
 使用 system-manager 管理安装系统包，使用 `just build-devbox` 来构建 system-manager 配置。
 
 使用 standalone home-manager 管理用户包，使用 `just build-home zhanghaibin.zhb` 构建 home-manager 配置。
+
+### gkzhb-MBP
+
+在 gkzhb-MBP 上使用 nix-darwin ，此仓库被软链到 `/etc/nix-darwin`，使用 `just build-darwin` 来构建 nix-darwin。
+
+构建 nix-darwin 的同时也会更新构建 home-manager。

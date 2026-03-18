@@ -11,6 +11,10 @@
     zoxide
     yazi
     zenith
+    uv
+    nodejs
+    bun
+    deno
   ];
 
   # Auto upgrade nix package and the daemon service.
@@ -43,4 +47,8 @@
     name = "bytedance";
     home = "/Users/bytedance";
   };
+
+  imports = [
+    ./services.nix
+  ];
 }
