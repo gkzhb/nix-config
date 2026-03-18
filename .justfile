@@ -20,3 +20,6 @@ update-secrets:
 
 edit-secrets:
   sops secrets/db.yaml
+
+build-devbox:
+  nix run 'github:numtide/system-manager' -- switch --flake .#devbox --sudo

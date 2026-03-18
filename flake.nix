@@ -8,6 +8,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+
     nix-ld.url = "github:Mic92/nix-ld";
     nix-ld.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -21,6 +23,11 @@
 
     minifluxng.url = "git+https://git.sr.ht/~bwolf/miniflux.nix";
     minifluxng.inputs.nixpkgs.follows = "nixpkgs";
+
+    system-manager = {
+      url = "github:numtide/system-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs =
@@ -28,12 +35,20 @@
       self,
       nix-ld,
       nixpkgs,
+      nixpkgs-unstable,
       home-manager,
       sops-nix,
       llm-agents,
       minifluxng,
+      system-manager,
       ...
     }:
+    let
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+    in
     {
       nixosConfigurations = {
         home-nixos = nixpkgs.lib.nixosSystem {
@@ -54,6 +69,14 @@
             }
             sops-nix.nixosModules.sops
             minifluxng.nixosModules.minifluxng
+          ];
+        };
+      };
+
+      systemConfigs = {
+        devbox = system-manager.lib.makeSystemConfig {
+          modules = [
+            ./hosts/devbox/modules/default.nix
           ];
         };
       };
