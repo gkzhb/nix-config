@@ -84,6 +84,11 @@
             ./hosts/devbox/modules/default.nix
           ];
         };
+        "gkzhb-vps" = system-manager.lib.makeSystemConfig {
+          modules = [
+            ./hosts/gkzhb-vps/modules/default.nix
+          ];
+        };
       };
 
       homeConfigurations = {
@@ -94,6 +99,14 @@
             inherit inputs;
           };
           modules = [ ./hosts/devbox/user.nix ];
+        };
+
+        "zhb" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          extraSpecialArgs = {
+            inherit inputs;
+          };
+          modules = [ ./hosts/gkzhb-vps/user.nix ];
         };
       };
       # Build darwin flake using:
