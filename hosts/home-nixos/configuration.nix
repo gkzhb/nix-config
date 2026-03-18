@@ -140,6 +140,7 @@
     qbittorrent-cli
     taskwarrior3
     taskwarrior-tui
+    timewarrior
 
     ty # python lsp
     ruff # python linter and formatter
