@@ -22,6 +22,7 @@
     environment.systemPackages = with pkgs; [
       git
       fish
+      tmux
       just
       tree-sitter
       fzf
@@ -43,6 +44,11 @@
       chromium
       timewarrior
       taskwarrior-tui
+
+      # server services
+      tailscale
+      nginx
+      frp
     ];
 
   };

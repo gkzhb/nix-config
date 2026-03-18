@@ -9,6 +9,6 @@
   };
   programs.home-manager.enable = true;
   imports = [
-    # ./user-systemd.nix
+    ./user-systemd.nix
   ];
 }

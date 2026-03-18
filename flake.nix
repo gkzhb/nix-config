@@ -87,6 +87,7 @@
         "gkzhb-vps" = system-manager.lib.makeSystemConfig {
           modules = [
             ./hosts/gkzhb-vps/modules/default.nix
+            ./hosts/gkzhb-vps/modules/systemd.nix
           ];
         };
       };
@@ -94,7 +95,7 @@
       homeConfigurations = {
         # for devbox user
         "zhanghaibin.zhb" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux;
           extraSpecialArgs = {
             inherit inputs;
           };
@@ -102,7 +103,7 @@
         };
 
         "zhb" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          pkgs = nixpkgs-unstable.legacyPackages.x86_64-linux;
           extraSpecialArgs = {
             inherit inputs;
           };
