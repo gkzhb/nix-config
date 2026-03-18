@@ -2,19 +2,39 @@
 {
   # packages installed in system profile
   environment.systemPackages = with pkgs; [
-    nil
-    nixfmt
-    git
+    # shell tools
     tmux
     fish
-    neovim
     zoxide
     yazi
     zenith
+    neovim
+    fzf
+    fd
+    ripgrep
+
+    # devtools
+    just
+    tree-sitter
+    nil
+    nixfmt
+    git
     uv
+    ty
+    ruff
     nodejs
     bun
     deno
+    thrift-ls
+
+    # proxy
+    xray
+    # v2raya # not supported
+
+    # todo cli tools
+    taskwarrior3
+    timewarrior
+    taskwarrior-tui
   ];
 
   # Auto upgrade nix package and the daemon service.
@@ -42,6 +62,8 @@
 
   # The platform the configuration will be used on.
   nixpkgs.hostPlatform = "aarch64-darwin";
+
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   users.users.bytedance = {
     name = "bytedance";
