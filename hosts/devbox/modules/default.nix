@@ -18,7 +18,9 @@
 
     environment.systemPackages = with pkgs; [
       nix
+      git
       fish
+      just
       tree-sitter
       fzf
       fd

@@ -23,3 +23,7 @@ edit-secrets:
 
 build-devbox:
   nix run 'github:numtide/system-manager' -- switch --flake .#devbox --sudo
+
+# build standalone home-manager config
+build-home user:
+  home-manager switch --flake .#{{user}}
