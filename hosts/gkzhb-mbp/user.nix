@@ -19,4 +19,16 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  programs.neovim = {
+    enable = true;
+    withPython3 = true;
+    extraPython3Packages =
+      ps: with ps; [
+        pynvim
+        # other required python packages
+        ruff
+        ty
+      ];
+  };
 }
