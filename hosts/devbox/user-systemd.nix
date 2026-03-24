@@ -31,6 +31,21 @@
       ];
     };
   };
+  systemd.user.services.tmux-mcp = {
+    Unit = {
+      Description = "tmux-mcp service";
+      After = [ "network.target" ];
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.fish}/bin/fish -l %h/scripts/tmux/tmux-mcp.fish";
+      Restart = "on-failure";
+      RestartSec = "10";
+    };
+  };
   systemd.user.services.web-mcp = {
     Unit = {
       Description = "web-mcp service";
