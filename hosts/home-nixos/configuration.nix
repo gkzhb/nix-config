@@ -45,7 +45,6 @@
     impure-env = "GOPROXY=http://localhost:8333,direct";
   };
 
-
   # networking.hostName = "nixos"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
@@ -141,6 +140,7 @@
     python312
     mise
 
+    pandoc
     neovim
     wget
     git
@@ -193,21 +193,23 @@
       };
     };
     frp = {
-      enable = true;
-      role = "client";
-      settings = {
-        serverAddr = "gkzhb.top";
-        serverPort = 7000;
-        auth.tokenSource.type = "file";
-        auth.tokenSource.file.path = "/run/credentials/frp.service/frp_auth_token";
-        proxies = [
-          {
-            name = "ssh";
-            type = "tcp";
-            localPort = 22;
-            remotePort = 4424;
-          }
-        ];
+      instances.default = {
+        enable = true;
+        role = "client";
+        settings = {
+          serverAddr = "gkzhb.top";
+          serverPort = 7000;
+          auth.tokenSource.type = "file";
+          auth.tokenSource.file.path = "/run/credentials/frp.service/frp_auth_token";
+          proxies = [
+            {
+              name = "ssh";
+              type = "tcp";
+              localPort = 22;
+              remotePort = 4424;
+            }
+          ];
+        };
       };
     };
     tailscale = {
