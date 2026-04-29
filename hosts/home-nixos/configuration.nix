@@ -15,23 +15,31 @@
     ./hardware-configuration.nix
   ];
 
-  nixpkgs.config.system = "x86_64-linux";
-  nixpkgs.config.allowUnsupportedSystem = false;
-  nixpkgs.config.allowUnfreePredicate =
-    pkg:
-    builtins.elem (lib.getName pkg) [
-      "steam"
-      "steam-unwrapped"
-    ];
+  nixpkgs.config = {
+    system = "x86_64-linux";
+    allowUnsupportedSystem = false;
+    allowUnfreePredicate =
+      pkg:
+      builtins.elem (lib.getName pkg) [
+        "steam"
+        "steam-unwrapped"
+      ];
+  };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+      "configurable-impure-env"
+    ];
+    # use local athens
+    impure-env = "GOPROXY=http://localhost:8333,direct";
+
+  };
 
   # 设置 nix 的 trusted-users，允许 zhb 用户无需 sudo 执行 nix 命令
   nix.settings.trusted-users = [
@@ -166,6 +174,13 @@
     envfs = {
       enable = true;
     };
+    athens = {
+      enable = true;
+      port = 8333;
+      downloadMode = "async_redirect";
+      downloadURL = "https://goproxy.cn";
+    };
+
     # Enable the OpenSSH daemon.
     openssh = {
       enable = true;
@@ -360,6 +375,9 @@
   };
 
   systemd.services = {
+    # use local athens
+    nix-daemon.environment.GOPROXY = "http://localhost:8333,direct";
+
     godns = {
       serviceConfig = {
         ExecStart = lib.mkForce "${pkgs.godns}/bin/godns -c /etc/godns/config.yaml";
