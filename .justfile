@@ -7,6 +7,7 @@ build:
 build-cn:
   export http_proxy=http://localhost:10881
   export https_proxy=http://localhost:10881
+  export GOPROXY=https://goproxy.cn,direct
   just build
 
 # update flake and package versions

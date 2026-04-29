@@ -36,16 +36,15 @@
       "flakes"
       "configurable-impure-env"
     ];
+    # 设置 nix 的 trusted-users，允许 zhb 用户无需 sudo 执行 nix 命令
+    trusted-users = [
+      "root"
+      "zhb"
+    ];
     # use local athens
     impure-env = "GOPROXY=http://localhost:8333,direct";
-
   };
 
-  # 设置 nix 的 trusted-users，允许 zhb 用户无需 sudo 执行 nix 命令
-  nix.settings.trusted-users = [
-    "root"
-    "zhb"
-  ];
 
   # networking.hostName = "nixos"; # Define your hostname.
 
@@ -111,6 +110,9 @@
   programs.tmux = {
     enable = true;
   };
+  programs.direnv = {
+    enable = true;
+  };
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
@@ -126,7 +128,7 @@
     ripgrep
     zenith
     tree-sitter
-    nodePackages.pnpm
+    pnpm
     # opencode
     # bun # requires AVX CPU instructions
     gcc
@@ -174,13 +176,13 @@
     envfs = {
       enable = true;
     };
+    # cache go module downloads
     athens = {
       enable = true;
       port = 8333;
       downloadMode = "async_redirect";
       downloadURL = "https://goproxy.cn";
     };
-
     # Enable the OpenSSH daemon.
     openssh = {
       enable = true;
@@ -466,6 +468,9 @@
       };
     };
   };
+  # Temporarily disable this to fix python3.12 build error
+  # https://github.com/NixOS/nixpkgs/issues/499166
+  documentation.doc.enable = false;
 
   # Enable the Docker service
   virtualisation.docker.enable = true;
