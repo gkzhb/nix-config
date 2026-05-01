@@ -200,7 +200,7 @@
           serverAddr = "gkzhb.top";
           serverPort = 7000;
           auth.tokenSource.type = "file";
-          auth.tokenSource.file.path = "/run/credentials/frp.service/frp_auth_token";
+          auth.tokenSource.file.path = "/run/credentials/frp-default.service/frp_auth_token";
           proxies = [
             {
               name = "ssh";
@@ -454,7 +454,7 @@
         ];
       };
     };
-    frp = {
+    frp-default = {
       serviceConfig = {
         LoadCredential = [
           "frp_auth_token:${config.sops.secrets."frp/auth_token".path}"

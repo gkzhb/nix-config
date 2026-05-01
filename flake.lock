@@ -210,15 +210,15 @@
       "locked": {
         "lastModified": 1767475739,
         "narHash": "sha256-lXs8sei64JU1A+yNhbDX0ohxxz4rT7SC5cAyaXClc+w=",
-        "ref": "refs/heads/master",
+        "owner": "gkzhb",
+        "repo": "miniflux.nix",
         "rev": "db76b1906fcc97968905a37bf36a415b2e302c45",
-        "revCount": 14,
-        "type": "git",
-        "url": "https://git.sr.ht/~bwolf/miniflux.nix"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://git.sr.ht/~bwolf/miniflux.nix"
+        "owner": "gkzhb",
+        "repo": "miniflux.nix",
+        "type": "github"
       }
     },
     "nix-darwin": {

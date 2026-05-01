@@ -19,7 +19,7 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
-    minifluxng.url = "git+https://git.sr.ht/~bwolf/miniflux.nix";
+    minifluxng.url = "github:gkzhb/miniflux.nix";
     minifluxng.inputs.nixpkgs.follows = "nixpkgs";
 
     system-manager = {
