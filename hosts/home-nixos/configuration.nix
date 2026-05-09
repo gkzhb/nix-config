@@ -158,12 +158,13 @@
     nil
     # playwright-driver.browsers
 
+    llm-agents.pi
     llm-agents.opencode
-    llm-agents.claude-code
-    llm-agents.codex
-    llm-agents.agent-browser
+    # llm-agents.claude-code
+    # llm-agents.codex
+    # llm-agents.agent-browser
 
-    llm-agents.openclaw
+    # llm-agents.openclaw
     llm-agents.mcporter
 
     # GUI app
