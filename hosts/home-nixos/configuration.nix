@@ -168,10 +168,51 @@
     llm-agents.mcporter
 
     # GUI app
+    tigervnc
+    xfce4-session
+    xfconf
+    xfce4-panel
+    xfce4-terminal
+    thunar
+    dbus
+    xauth
+    xinit
+    firefox
+    brave
     # kdePackages.sddm-kcm
     # vlc
     # wayland-utils
   ];
+
+  environment.etc."tigervnc/xstartup".source = pkgs.writeShellScript "tigervnc-xstartup" ''
+    exec >"$HOME/.vnc/xstartup.log" 2>&1
+
+    export PATH=${
+      pkgs.lib.makeBinPath [
+        pkgs.coreutils
+        pkgs.dbus
+        pkgs.xrdb
+        pkgs.xfce4-session
+        pkgs.xfconf
+        pkgs.xfce4-panel
+        pkgs.xfce4-terminal
+        pkgs.thunar
+      ]
+    }:$PATH
+    export HOME=/home/zhb
+    export USER=zhb
+    export LOGNAME=zhb
+    export SHELL=${pkgs.fish}/bin/fish
+    export XDG_SESSION_DESKTOP=xfce
+    export XDG_CURRENT_DESKTOP=XFCE
+    export XDG_SESSION_TYPE=x11
+    export XDG_CONFIG_DIRS=${pkgs.xfce4-session}/etc/xdg:/etc/xdg
+    export XDG_RUNTIME_DIR=/run/tigervnc-zhb
+    export XDG_DATA_DIRS=${pkgs.xfce4-session}/share:${pkgs.xfce4-panel}/share:$XDG_DATA_DIRS
+
+    echo "=== Starting TigerVNC XFCE session $(date -Is) ==="
+    exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.xfce4-session}/bin/xfce4-session
+  '';
 
   services = {
     envfs = {
@@ -460,6 +501,80 @@
         LoadCredential = [
           "frp_auth_token:${config.sops.secrets."frp/auth_token".path}"
         ];
+      };
+    };
+    tigervnc-zhb = {
+      description = "TigerVNC server for zhb";
+      after = [
+        "network-online.target"
+        "tailscaled.service"
+      ];
+      wants = [
+        "network-online.target"
+        "tailscaled.service"
+      ];
+      wantedBy = [ "multi-user.target" ];
+      path = with pkgs; [
+        coreutils
+        gnugrep
+        gnused
+        procps
+        tailscale
+        tigervnc
+        dbus
+        xauth
+        xinit
+        xfce4-session
+        xfconf
+        xfce4-panel
+        xfce4-terminal
+        thunar
+        xrdb
+      ];
+      serviceConfig = {
+        Type = "simple";
+        User = "zhb";
+        Group = "zhb";
+        WorkingDirectory = "/home/zhb";
+        Restart = "on-failure";
+        RestartSec = "5s";
+        RuntimeDirectory = "tigervnc-zhb";
+        RuntimeDirectoryMode = "0700";
+        UMask = "0077";
+        KillMode = "mixed";
+        TimeoutStopSec = "30s";
+        ExecStartPre = [
+          "${pkgs.coreutils}/bin/install -d -m 700 /home/zhb/.vnc"
+          "${pkgs.coreutils}/bin/test -f /home/zhb/.vnc/passwd"
+          "${pkgs.coreutils}/bin/touch /home/zhb/.vnc/xstartup.log"
+          "${pkgs.coreutils}/bin/rm -f /tmp/.X1-lock /tmp/.X11-unix/X1"
+        ];
+        ExecStart = pkgs.writeShellScript "start-tigervnc-zhb" ''
+          set -eu
+
+          interface_ip="$(${pkgs.tailscale}/bin/tailscale ip -4 2>/dev/null | ${pkgs.gnugrep}/bin/grep -m1 . || true)"
+          if [ -z "$interface_ip" ]; then
+            interface_ip="127.0.0.1"
+          fi
+
+          export HOME=/home/zhb
+          export USER=zhb
+          export LOGNAME=zhb
+          export SHELL=${pkgs.fish}/bin/fish
+          export XAUTHORITY=/home/zhb/.Xauthority
+          export XDG_RUNTIME_DIR=/run/tigervnc-zhb
+
+          exec ${pkgs.xinit}/bin/xinit /etc/tigervnc/xstartup -- \
+            ${pkgs.tigervnc}/bin/Xvnc :1 \
+            -geometry 1920x1080 \
+            -depth 24 \
+            -rfbport 5901 \
+            -interface "$interface_ip" \
+            -localhost no \
+            -SecurityTypes VncAuth \
+            -PasswordFile /home/zhb/.vnc/passwd
+        '';
+        ExecStopPost = "${pkgs.coreutils}/bin/rm -f /tmp/.X1-lock /tmp/.X11-unix/X1";
       };
     };
     docker = {
