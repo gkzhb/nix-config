@@ -76,6 +76,30 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
+  fonts = {
+    packages = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
+      noto-fonts-color-emoji
+    ];
+    fontconfig.defaultFonts = {
+      sansSerif = [
+        "Noto Sans CJK SC"
+        "Noto Sans"
+      ];
+      serif = [
+        "Noto Serif CJK SC"
+        "Noto Serif"
+      ];
+      monospace = [
+        "Noto Sans Mono CJK SC"
+        "Noto Sans Mono"
+      ];
+      emoji = [ "Noto Color Emoji" ];
+    };
+  };
+
   users.groups.zhb = { };
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.zhb = {
@@ -173,7 +197,11 @@
     xfconf
     xfce4-panel
     xfce4-terminal
+    xfdesktop
+    xfwm4
+    xfce4-settings
     thunar
+    hicolor-icon-theme
     dbus
     xauth
     xinit
@@ -196,7 +224,11 @@
         pkgs.xfconf
         pkgs.xfce4-panel
         pkgs.xfce4-terminal
+        pkgs.xfdesktop
+        pkgs.xfwm4
+        pkgs.xfce4-settings
         pkgs.thunar
+        pkgs.hicolor-icon-theme
       ]
     }:$PATH
     export HOME=/home/zhb
@@ -208,7 +240,7 @@
     export XDG_SESSION_TYPE=x11
     export XDG_CONFIG_DIRS=${pkgs.xfce4-session}/etc/xdg:/etc/xdg
     export XDG_RUNTIME_DIR=/run/tigervnc-zhb
-    export XDG_DATA_DIRS=${pkgs.xfce4-session}/share:${pkgs.xfce4-panel}/share:$XDG_DATA_DIRS
+    export XDG_DATA_DIRS=${pkgs.xfce4-session}/share:${pkgs.xfce4-panel}/share:${pkgs.xfdesktop}/share:${pkgs.xfwm4}/share:${pkgs.xfce4-settings}/share:${pkgs.hicolor-icon-theme}/share:$XDG_DATA_DIRS
 
     echo "=== Starting TigerVNC XFCE session $(date -Is) ==="
     exec ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.xfce4-session}/bin/xfce4-session
@@ -528,8 +560,12 @@
         xfconf
         xfce4-panel
         xfce4-terminal
+        xfdesktop
+        xfwm4
+        xfce4-settings
         thunar
         xrdb
+        hicolor-icon-theme
       ];
       serviceConfig = {
         Type = "simple";
