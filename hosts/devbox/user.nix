@@ -6,6 +6,9 @@
     homeDirectory = "/home/zhanghaibin.zhb";
     stateVersion = "25.11";
     packages = with pkgs; [ ];
+    sessionPath = [
+      "$HOME/.nix-profile/bin"
+    ];
   };
   programs.home-manager.enable = true;
   programs.neovim = {
@@ -14,6 +17,7 @@
     withNodeJs = true;
     withPython3 = true;
     vimAlias = true;
+    viAlias = true;
     extraPython3Packages =
       ps: with ps; [
         pynvim
