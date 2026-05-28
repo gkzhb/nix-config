@@ -22,6 +22,10 @@
     minifluxng.url = "github:gkzhb/miniflux.nix";
     minifluxng.inputs.nixpkgs.follows = "nixpkgs";
 
+    # buggy program
+    # codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
+    # codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
+
     system-manager = {
       url = "github:numtide/system-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -41,6 +45,7 @@
       sops-nix,
       llm-agents,
       minifluxng,
+      # codebase-memory-mcp,
       system-manager,
       nix-darwin,
       ...
@@ -123,7 +128,9 @@
               # arguments to home.nix
             }
           ];
-          specialArgs = { inherit self; };
+          specialArgs = {
+            inherit self; # codebase-memory-mcp;
+          };
         };
       };
     };

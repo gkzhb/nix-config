@@ -1,4 +1,9 @@
-{ pkgs, self, ... }:
+{
+  pkgs,
+  self,
+  # codebase-memory-mcp,
+  ...
+}:
 {
   # packages installed in system profile
   environment.systemPackages = with pkgs; [
@@ -12,6 +17,7 @@
     fzf
     fd
     ripgrep
+    television
 
     # devtools
     just
@@ -35,12 +41,18 @@
     taskwarrior3
     timewarrior
     taskwarrior-tui
+    beads
+    # codebase-memory-mcp.packages.${pkgs.system}.default
   ];
 
   # Auto upgrade nix package and the daemon service.
   nix = {
     package = pkgs.nix;
     settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
       trusted-users = [
         "root"
         "bytedance"
