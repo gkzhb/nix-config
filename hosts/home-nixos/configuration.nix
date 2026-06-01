@@ -175,6 +175,7 @@
     taskwarrior3
     taskwarrior-tui
     timewarrior
+    nginx # required by deer-flow
 
     ty # python lsp
     ruff # python linter and formatter

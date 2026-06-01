@@ -55,6 +55,8 @@
         "x86_64-linux"
         "aarch64-linux"
       ];
+      # Local package overlay for mmx-cli
+      local-packages = import ./packages;
     in
     {
       nixosConfigurations = {
@@ -63,7 +65,7 @@
           modules = [
             nix-ld.nixosModules.nix-ld
 
-            { nixpkgs.overlays = [ llm-agents.overlays.default ]; }
+            { nixpkgs.overlays = [ llm-agents.overlays.default local-packages ]; }
             ./hosts/home-nixos/configuration.nix
             home-manager.nixosModules.home-manager
             {
@@ -114,6 +116,20 @@
       };
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#gkzhb-MBP-6
+      packages = nixpkgs.lib.genAttrs systems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ llm-agents.overlays.default local-packages ];
+          };
+        in
+        {
+          inherit (pkgs) mmx-cli;
+          default = pkgs.mmx-cli;
+        }
+      );
+
       darwinConfigurations = {
         "gkzhb-MBP" = nix-darwin.lib.darwinSystem {
           modules = [
