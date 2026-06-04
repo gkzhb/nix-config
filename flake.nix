@@ -55,6 +55,9 @@
         "x86_64-linux"
         "aarch64-linux"
       ];
+      llm-agents-overlay = final: prev: {
+        llm-agents = llm-agents.packages.${prev.stdenv.hostPlatform.system} or { };
+      };
       # Local package overlay for mmx-cli
       local-packages = import ./packages;
     in
@@ -85,6 +88,7 @@
       systemConfigs = {
         devbox = system-manager.lib.makeSystemConfig {
           modules = [
+            { nixpkgs.overlays = [ llm-agents-overlay ]; }
             ./hosts/devbox/modules/default.nix
           ];
         };
@@ -121,7 +125,7 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ llm-agents.overlays.default local-packages ];
+            overlays = [ llm-agents-overlay local-packages ];
           };
         in
         {

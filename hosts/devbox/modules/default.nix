@@ -53,6 +53,7 @@ in
       v2raya
       thrift-ls
       chromium
+      llm-agents.claude-code
       timewarrior
       taskwarrior-tui
 
