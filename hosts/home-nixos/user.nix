@@ -45,6 +45,27 @@ in
       };
     };
 
+    brave-browser = {
+      Unit = {
+        Description = "Brave remote debugging service";
+        After = [ "network.target" "tigervnc-zhb.service" ];
+        Requires = [ "tigervnc-zhb.service" ];
+      };
+      Service = {
+        Type = "simple";
+        ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9222 --user-data-dir=%h/.local/share/brave-mcp";
+        Restart = "on-failure";
+        RestartSec = "10";
+        Environment = [
+          "DISPLAY=:1"
+          "XAUTHORITY=%h/.Xauthority"
+        ];
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
+    };
+
     cleanup-backups = {
       Unit = {
         Description = "Cleanup old backup archives";
