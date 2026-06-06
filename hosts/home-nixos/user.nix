@@ -9,6 +9,8 @@ in
     homeDirectory = "/home/zhb";
     stateVersion = "25.11";
     packages = [ pkgs.mmx-cli ];
+
+    file."scripts/backups/cleanup_backups.py".source = ./scripts/backups/cleanup_backups.py;
   };
   programs.home-manager.enable = true;
 
@@ -43,6 +45,16 @@ in
       };
     };
 
+    cleanup-backups = {
+      Unit = {
+        Description = "Cleanup old backup archives";
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.python3}/bin/python3 %h/scripts/backups/cleanup_backups.py";
+      };
+    };
+
     # openclaw-gateway = {
     #   Unit = {
     #     Description = "OpenClaw Gateway (v${openclawVersion})";
@@ -69,5 +81,19 @@ in
     #     WantedBy = [ "default.target" ];
     #   };
     # };
+  };
+
+  systemd.user.timers.cleanup-backups = {
+    Unit = {
+      Description = "Run backup cleanup daily at 04:00";
+    };
+    Timer = {
+      OnCalendar = "*-*-* 04:00:00";
+      Persistent = true;
+      Unit = "cleanup-backups.service";
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
   };
 }
