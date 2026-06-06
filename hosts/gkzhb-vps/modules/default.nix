@@ -35,13 +35,11 @@
       ty
       ruff
       bun
-      code-server
       xray
       taskwarrior3
       nil
       nixfmt
       thrift-ls
-      chromium
       timewarrior
       taskwarrior-tui
 
@@ -50,6 +48,19 @@
       nginx
       frp
     ];
+
+    # logrotate config for xray logs
+    environment.etc."logrotate.d/xray".text = ''
+      /var/log/xray/*.log {
+          daily
+          rotate 7
+          missingok
+          notifempty
+          compress
+          delaycompress
+          copytruncate
+      }
+    '';
 
   };
 }
