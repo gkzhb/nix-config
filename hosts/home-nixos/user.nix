@@ -48,11 +48,11 @@ in
     brave-browser = {
       Unit = {
         Description = "Brave remote debugging service";
-        After = [ "network.target" "tigervnc-zhb.service" ];
-        Requires = [ "tigervnc-zhb.service" ];
+        After = [ "network.target" ];
       };
       Service = {
         Type = "simple";
+        ExecStartPre = "${pkgs.bash}/bin/bash -c 'until [ -S /tmp/.X11-unix/X1 ]; do sleep 1; done'";
         ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9222 --user-data-dir=%h/.local/share/brave-mcp";
         Restart = "on-failure";
         RestartSec = "10";
