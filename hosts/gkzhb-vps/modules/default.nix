@@ -26,6 +26,7 @@
       tmux
       just
       tree-sitter
+      zenith
       fzf
       fd
       neovim
