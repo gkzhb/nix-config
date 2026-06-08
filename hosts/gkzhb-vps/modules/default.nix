@@ -6,6 +6,7 @@
     nixpkgs.hostPlatform = "x86_64-linux";
 
     nix = {
+      enable = true;
       package = pkgs.nix;
       settings = {
         experimental-features = [
@@ -13,13 +14,13 @@
           "flakes"
         ];
         trusted-users = [
-          "root"
           "zhb"
         ];
       };
     };
 
     environment.systemPackages = with pkgs; [
+      system-manager
       git
       fish
       tmux

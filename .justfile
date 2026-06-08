@@ -26,7 +26,7 @@ build-devbox:
   nix run 'github:numtide/system-manager' -- switch --flake .#devbox --sudo
 
 build-vps:
-  nix run 'github:numtide/system-manager' -- switch --flake .#gkzhb-vps --sudo
+  system-manager switch --flake .#gkzhb-vps --sudo
 
 # build standalone home-manager config
 build-home user:
