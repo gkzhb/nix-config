@@ -4,6 +4,11 @@
   ...
 }:
 
+let
+  # system-manager 默认 PATH 不含 curl/docker 等系统二进制;
+  # 这里覆盖为系统 PATH + system-manager 自己的 sw/bin
+  systemPath = "PATH=/run/wrappers/bin:/run/system-manager/sw/bin:/usr/local/bin:/usr/bin:/bin";
+in
 {
   systemd.services = {
     frp = {
@@ -189,6 +194,7 @@
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "/home/zhb/scripts/refresh-codex.sh";
+        Environment = systemPath;
       };
     };
 
@@ -197,6 +203,7 @@
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "/home/zhb/scripts/certbot/renew.sh";
+        Environment = systemPath;
       };
     };
   };
