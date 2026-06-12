@@ -22,6 +22,8 @@
     minifluxng.url = "github:gkzhb/miniflux.nix";
     minifluxng.inputs.nixpkgs.follows = "nixpkgs";
 
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+
     # buggy program
     # codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
     # codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +47,7 @@
       sops-nix,
       llm-agents,
       minifluxng,
+      hermes-agent,
       # codebase-memory-mcp,
       system-manager,
       nix-darwin,
@@ -69,6 +72,7 @@
             nix-ld.nixosModules.nix-ld
 
             { nixpkgs.overlays = [ llm-agents.overlays.default local-packages ]; }
+            hermes-agent.nixosModules.default
             ./hosts/home-nixos/configuration.nix
             home-manager.nixosModules.home-manager
             {

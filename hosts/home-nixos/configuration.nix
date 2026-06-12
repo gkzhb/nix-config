@@ -185,7 +185,7 @@
 
     llm-agents.pi
     llm-agents.opencode
-    # llm-agents.claude-code
+    llm-agents.claude-code
     # llm-agents.codex
     # llm-agents.agent-browser
 
@@ -431,6 +431,43 @@
       oidcRedirectUrl = "https://miniflux.gkzhb.top/oauth2/oidc/callback";
       oidcDiscoveryEndpoint = "https://sso.gkzhb.top/application/o/miniflux/";
       enableOidcUserCreation = true;
+    };
+
+    hermes-agent = {
+      enable = true;
+      extraDependencyGroups = [ "anthropic" ];
+      extraPythonPackages = with pkgs.python312Packages; [ aiohttp ];
+
+      # .hermes/config.yaml
+      settings = {
+        model = {
+          default = "gpt-5.4";
+          provider = "custom:NewAPI";
+          context_length = 250000;
+        };
+        custom_providers = [
+          {
+            name = "NewAPI";
+            model = "gpt-5.4";
+            base_url = "\${NEWAPI_BASE_URL}";
+            key_env = "NEWAPI_API_KEY";
+            api_mode = "anthropic_messages";
+          }
+        ];
+        platforms = {
+          qqbot = {
+            enabled = true;
+            extra = {
+              markdown_support = true;
+              dm_policy = "open";
+              group_policy = "open";
+            };
+          };
+        };
+      };
+
+      environmentFiles = [ "/var/lib/hermes/env" ];
+      addToSystemPackages = true;
     };
 
     # GUI env
