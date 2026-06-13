@@ -187,7 +187,7 @@
     llm-agents.opencode
     llm-agents.claude-code
     # llm-agents.codex
-    # llm-agents.agent-browser
+    llm-agents.agent-browser
 
     # llm-agents.openclaw
     llm-agents.mcporter
@@ -435,7 +435,10 @@
 
     hermes-agent = {
       enable = true;
-      extraDependencyGroups = [ "anthropic" ];
+      extraDependencyGroups = [
+        "anthropic"
+        "feishu"
+      ];
       extraPythonPackages = with pkgs.python312Packages; [ aiohttp ];
 
       # .hermes/config.yaml
@@ -449,7 +452,7 @@
           {
             name = "NewAPI";
             model = "gpt-5.4";
-            base_url = "\${NEWAPI_BASE_URL}";
+            base_url = "http://localhost:8056";
             key_env = "NEWAPI_API_KEY";
             api_mode = "anthropic_messages";
           }
@@ -463,7 +466,55 @@
               group_policy = "open";
             };
           };
+          feishu = {
+            extra = {
+              default_group_policy = "admin_only";
+              admins = [ "ou_17408acacef02572c681dc5043e98191" ];
+            };
+          };
         };
+        display = {
+          language = "zh";
+          tool_progress = "all";
+        };
+        approvals = {
+          mode = "smart";
+        };
+        browser = {
+          cdp_url = "http://localhost:9222";
+        };
+        # 辅助工具
+        auxiliary = {
+          vision = {
+            provider = "custom/NewAPI";
+            model = "gpt-5.4";
+          };
+          web_extract = {
+            provider = "custom/NewAPI";
+            model = "MiniMax-M3";
+          };
+          approval = {
+            provider = "custom/NewAPI";
+            model = "MiniMax-M3";
+          };
+          compression = {
+            provider = "custom/NewAPI";
+            model = "MiniMax-M3";
+          };
+          skills_hub = {
+            provider = "custom/NewAPI";
+            model = "MiniMax-M3";
+          };
+          mcp = {
+            provider = "custom/NewAPI";
+            model = "MiniMax-M3";
+          };
+          triage_specifier = {
+            provider = "custom/NewAPI";
+            model = "MiniMax-M3";
+          };
+        };
+
       };
 
       environmentFiles = [ "/var/lib/hermes/env" ];
