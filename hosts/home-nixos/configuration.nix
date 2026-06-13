@@ -483,34 +483,39 @@
         browser = {
           cdp_url = "http://localhost:9222";
         };
+        compression = {
+          threshold = 0.8;
+          target_ratio = 0.15;
+          protect_last_n = 5;
+        };
         # 辅助工具
         auxiliary = {
           vision = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "gpt-5.4";
           };
           web_extract = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "MiniMax-M3";
           };
           approval = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "MiniMax-M3";
           };
           compression = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "MiniMax-M3";
           };
           skills_hub = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "MiniMax-M3";
           };
           mcp = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "MiniMax-M3";
           };
           triage_specifier = {
-            provider = "custom/NewAPI";
+            provider = "custom:NewAPI";
             model = "MiniMax-M3";
           };
         };
