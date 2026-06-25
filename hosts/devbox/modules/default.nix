@@ -54,6 +54,7 @@ in
       thrift-ls
       chromium
       llm-agents.claude-code
+      llm-agents.agent-browser
       timewarrior
       taskwarrior-tui
 

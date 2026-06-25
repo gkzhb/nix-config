@@ -5,32 +5,32 @@
 }:
 
 {
-  systemd.user.services.openclaw-gateway = {
-    Unit = {
-      Description = "OpenClaw Gateway";
-      After = [ "network-online.target" ];
-      Wants = [ "network-online.target" ];
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.fish}/bin/fish -l %h/openclaw/run.fish";
-      Restart = "always";
-      RestartSec = "5";
-      KillMode = "process";
-      Environment = [
-        "HOME=%h"
-        "TMPDIR=/tmp"
-        "OPENCLAW_GATEWAY_PORT=18789"
-        "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
-        "OPENCLAW_SERVICE_MARKER=openclaw"
-        "OPENCLAW_SERVICE_KIND=gateway"
-        "OPENCLAW_SERVICE_VERSION=2026.3.2"
-      ];
-    };
-  };
+  # systemd.user.services.openclaw-gateway = {
+  #   Unit = {
+  #     Description = "OpenClaw Gateway";
+  #     After = [ "network-online.target" ];
+  #     Wants = [ "network-online.target" ];
+  #   };
+  #   Install = {
+  #     WantedBy = [ "default.target" ];
+  #   };
+  #   Service = {
+  #     Type = "simple";
+  #     ExecStart = "${pkgs.fish}/bin/fish -l %h/openclaw/run.fish";
+  #     Restart = "always";
+  #     RestartSec = "5";
+  #     KillMode = "process";
+  #     Environment = [
+  #       "HOME=%h"
+  #       "TMPDIR=/tmp"
+  #       "OPENCLAW_GATEWAY_PORT=18789"
+  #       "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
+  #       "OPENCLAW_SERVICE_MARKER=openclaw"
+  #       "OPENCLAW_SERVICE_KIND=gateway"
+  #       "OPENCLAW_SERVICE_VERSION=2026.3.2"
+  #     ];
+  #   };
+  # };
   systemd.user.services.tmux-mcp = {
     Unit = {
       Description = "tmux-mcp service";
@@ -124,9 +124,9 @@
       RestartSec = "10";
     };
   };
-  systemd.user.services.chromium = {
+  systemd.user.services.brave = {
     Unit = {
-      Description = "chromium service";
+      Description = "brave browser service";
       After = [ "network.target" ];
     };
     Install = {
@@ -134,7 +134,12 @@
     };
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.fish}/bin/fish -l %h/scripts/tmux/chrome.fish";
+      ExecStartPre = "${pkgs.bash}/bin/bash -c 'until [ -S /tmp/.X11-unix/X1 ]; do sleep 1; done'";
+      ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9222 --user-data-dir=%h/.local/share/brave-mcp";
+      Environment = [
+        "DISPLAY=:1"
+        "XAUTHORITY=%h/.Xauthority"
+      ];
       Restart = "on-failure";
       RestartSec = "10";
     };
