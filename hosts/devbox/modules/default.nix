@@ -74,6 +74,25 @@ in
       brave
     ];
 
+    security.sudo = {
+      enable = true;
+      extraRules = [
+        {
+          groups = [ "sudo" ];
+          commands = [ "ALL" ];
+        }
+        {
+          users = [ "zhanghaibin.zhb" ];
+          commands = [
+            {
+              command = "/usr/bin/systemctl";
+              options = [ "NOPASSWD" ];
+            }
+          ];
+        }
+      ];
+    };
+
     systemd.services.tigervnc = {
       description = "TigerVNC server";
       wantedBy = [ "system-manager.target" ];
@@ -138,19 +157,10 @@ in
             rfbauth=${vncConfigDir}/passwd
             EOF
                         ${pkgs.coreutils}/bin/chmod 600 "${vncConfigDir}/config"
-
-                        # Create dbus session.d listen config in user's home dir
-                        mkdir -p "${vncConfigDir}/dbus-1/session.d"
-                        cat > "${vncConfigDir}/dbus-1/session.d/listen.conf" <<'EODBUS'
-            <busconfig>
-              <listen>unix:tmpdir=/run</listen>
-              <fork>true</fork>
-            </busconfig>
-            EODBUS
           '')
           "${pkgs.coreutils}/bin/rm -f /tmp/.X1-lock /tmp/.X11-unix/X1"
         ];
-        ExecStart = pkgs.writeShellScriptBin "start-tigervnc" ''
+        ExecStart = pkgs.writeShellScript "start-tigervnc" ''
           set -eu
 
           # Get Tailscale IP for binding, fallback to all interfaces
@@ -177,7 +187,7 @@ in
           export XDG_SESSION_TYPE=x11
           export DISPLAY=:1
           export XDG_CONFIG_DIRS=${pkgs.xfce4-session}/etc/xdg:/etc/xdg
-          export XDG_DATA_DIRS=${pkgs.xfce4-session}/share:${pkgs.xfce4-panel}/share:${pkgs.xfdesktop}/share:${pkgs.xfwm4}/share:${pkgs.xfce4-settings}/share:${pkgs.hicolor-icon-theme}/share
+          export XDG_DATA_DIRS=${pkgs.xfconf}/share:${pkgs.xfce4-session}/share:${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:/usr/local/share:/usr/share
           export PATH=${
             pkgs.lib.makeBinPath [
               pkgs.coreutils
@@ -195,29 +205,27 @@ in
               pkgs.xauth
               pkgs.xinit
               pkgs.tigervnc
+              pkgs.xfconf
             ]
           }:$PATH
 
-          # Clean up any stale lock files
           rm -f /tmp/.X1-lock /tmp/.X11-unix/X1
-
-          # Create runtime directory in user-writable location (not /run which is owned by systemd)
           mkdir -p ${vncConfigDir}/run
           chmod 700 ${vncConfigDir}/run
 
-          # Start Xvnc in background
           ${pkgs.tigervnc}/bin/Xvnc :1 -geometry 1920x1080 -depth 24 -rfbport 5901 -interface "$iface_ip" -localhost no -SecurityTypes VncAuth -PasswordFile "${vncConfigDir}/passwd" &
 
-          # Wait for Xvnc to initialize
+          dbus_info_file=$(mktemp "${vncConfigDir}/run/dbus-session.XXXXXX")
+          trap 'rm -f "$dbus_info_file"' EXIT
+          ${pkgs.dbus}/bin/dbus-daemon --fork --print-address=1 --print-pid=1 --config-file ${pkgs.dbus}/share/dbus-1/session.conf > "$dbus_info_file"
+          IFS= read -r DBUS_SESSION_BUS_ADDRESS < "$dbus_info_file"
+          IFS= read -r _DBUS_SESSION_BUS_PID < <(${pkgs.coreutils}/bin/tail -n 1 "$dbus_info_file")
+          export DBUS_SESSION_BUS_ADDRESS
+
           sleep 3
-
-          # Start dbus session with xfce4-session
-          # dbus-run-session handles session bus setup properly
-          ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.xfce4-session}/bin/xfce4-session &
-
-          # Keep the script running while xfce4-session is alive
-          wait
+          exec ${pkgs.xfce4-session}/bin/startxfce4
         '';
+
         ExecStopPost = "${pkgs.coreutils}/bin/rm -f /tmp/.X1-lock /tmp/.X11-unix/X1";
       };
     };
