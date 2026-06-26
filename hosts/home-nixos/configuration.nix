@@ -519,11 +519,58 @@
             model = "MiniMax-M3";
           };
         };
-
+        dashboard = {
+          oauth = {
+            provider = "self-hosted";
+          };
+        };
       };
 
       environmentFiles = [ "/var/lib/hermes/env" ];
       addToSystemPackages = true;
+    };
+
+    # push notification service
+    ntfy-sh = {
+      enable = true;
+      user = "zhb";
+      group = "zhb";
+      settings = {
+        base-url = "https://ntfy.gkzhb.top";
+        listen-http = "0.0.0.0:9248";
+        behind-proxy = true;
+        enable-login = true;
+        require-login = true;
+
+        # 持久化消息缓存，否则默认内存缓存重启会丢
+        cache-file = "/mnt/data/ntfy/cache-file.db";
+        cache-duration = "12h";
+
+        # 附件存储；如果不用附件可以不管，但 NixOS 默认也配置了
+        attachment-cache-dir = "/mnt/data/ntfy/attachments";
+        attachment-total-size-limit = "5G";
+        attachment-file-size-limit = "15M";
+
+        # 开启认证数据库
+        auth-file = "/mnt/data/ntfy/user.db";
+
+        # 私有实例强烈建议：默认拒绝匿名读写
+        auth-default-access = "deny-all";
+      };
+    };
+    # matrix chat server
+    matrix-continuwuity = {
+      enable = true;
+      settings = {
+        global = {
+          server_name = "matrix.gkzhb.top";
+          address = [ "100.64.0.13" ];
+          port = [ 9246 ];
+
+          # You can add any further configuration here, e.g.
+          # trusted_servers = [ "matrix.org" ];
+        };
+      };
     };
 
     # GUI env
@@ -627,6 +674,12 @@
         LoadCredential = [
           "frp_auth_token:${config.sops.secrets."frp/auth_token".path}"
         ];
+      };
+    };
+    ntfy-sh = {
+      serviceConfig = {
+        ReadWritePaths = [ "/mnt/data/ntfy" ];
+        DynamicUser = lib.mkForce false;
       };
     };
     tigervnc-zhb = {
