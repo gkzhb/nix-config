@@ -569,6 +569,7 @@
           address = [ "100.64.0.13" ];
           port = [ 9246 ];
 
+          login_via_existing_session = true;
           # You can add any further configuration here, e.g.
           # trusted_servers = [ "matrix.org" ];
         };
