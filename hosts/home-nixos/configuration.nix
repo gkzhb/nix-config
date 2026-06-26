@@ -438,6 +438,7 @@
       extraDependencyGroups = [
         "anthropic"
         "feishu"
+        "matrix"
       ];
       extraPythonPackages = with pkgs.python312Packages; [ aiohttp ];
 
@@ -535,6 +536,7 @@
       enable = true;
       user = "zhb";
       group = "zhb";
+      environmentFile = "/mnt/data/ntfy/.env";
       settings = {
         base-url = "https://ntfy.gkzhb.top";
         listen-http = "0.0.0.0:9248";
