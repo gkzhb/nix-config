@@ -19,6 +19,15 @@
       };
     };
 
+    users = {
+      groups.nginx = { };
+
+      users.nginx = {
+        isSystemUser = true;
+        group = "nginx";
+      };
+    };
+
     environment.systemPackages = with pkgs; [
       system-manager
       git
@@ -47,7 +56,6 @@
 
       # server services
       tailscale
-      nginx
       frp
     ];
 
@@ -63,6 +71,20 @@
           copytruncate
       }
     '';
+
+    services = {
+      nginx = {
+        enable = true;
+
+        recommendedProxySettings = true;
+        recommendedTlsSettings = true;
+        recommendedGzipSettings = true;
+
+        appendHttpConfig = ''
+          include /etc/nginx/conf.d/*.conf;
+        '';
+      };
+    };
 
   };
 }

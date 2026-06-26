@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -11,6 +12,30 @@ let
 in
 {
   systemd.services = {
+    nginx.serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      User = lib.mkForce "";
+      Group = lib.mkForce "";
+      ReadOnlyPaths = [
+        "/etc/letsencrypt"
+      ];
+      ProtectSystem = lib.mkForce "false";
+      # ProtectHome = lib.mkForce false;
+      # NoNewPrivileges = lib.mkForce false;
+      # PrivateUsers = lib.mkForce false;
+      PrivateTmp = lib.mkForce false;
+      SystemCallFilter = lib.mkForce [ "" ];
+      SystemCallArchitectures = lib.mkForce "";
+      SystemCallErrorNumber = lib.mkForce "";
+      CapabilityBoundingSet = lib.mkForce [
+        "CAP_NET_BIND_SERVICE"
+        "CAP_SETUID"
+        "CAP_SETGID"
+      ];
+      AmbientCapabilities = lib.mkForce [
+        ""
+      ];
+    };
     frp = {
       description = "frp server service";
       wantedBy = [ "system-manager.target" ];
