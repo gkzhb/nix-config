@@ -568,6 +568,13 @@
           server_name = "matrix.gkzhb.top";
           address = [ "100.64.0.13" ];
           port = [ 9246 ];
+          well_known = {
+            # defaults to port :443 if not specified
+            client = "https://matrix.gkzhb.top";
+
+            # port number MUST be specified
+            server = "matrix.gkzhb.top:443";
+          };
 
           login_via_existing_session = true;
           # You can add any further configuration here, e.g.
