@@ -571,11 +571,14 @@
           well_known = {
             # defaults to port :443 if not specified
             client = "https://matrix.gkzhb.top";
-
             # port number MUST be specified
             server = "matrix.gkzhb.top:443";
+
+            support_role = "m.role.admin";
+            support_mxid = "@gkzhb:matrix.gkzhb.top";
           };
 
+          allow_registration = true;
           login_via_existing_session = true;
           # You can add any further configuration here, e.g.
           # trusted_servers = [ "matrix.org" ];
