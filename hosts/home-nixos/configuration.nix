@@ -396,6 +396,12 @@
       '';
     };
 
+    gatus = {
+      enable = true;
+      # port 8756
+      configFile = "/var/lib/gatus/config.yaml";
+    };
+
     qbittorrent = {
       enable = true;
       webuiPort = 8051;
@@ -528,7 +534,7 @@
         };
       };
 
-      environmentFiles = [ "/var/lib/hermes/env" ];
+      environmentFiles = [ "/home/zhb/.config/hermes/env" ];
       addToSystemPackages = true;
     };
 
@@ -696,6 +702,11 @@
         DynamicUser = lib.mkForce false;
       };
     };
+    gatus = {
+      serviceConfig = {
+        StateDirectory = "gatus";
+      };
+    };
     tigervnc-zhb = {
       description = "TigerVNC server for zhb";
       after = [
@@ -830,6 +841,14 @@
   # and migrated your data accordingly.
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "25.11"; # Did you read the comment?
+  system = {
+    stateVersion = "25.11"; # Did you read the comment?
+    activationScripts = {
+      gatusConfig = ''
+        install -d -m 0755 /var/lib/gatus
+        install -m 0644 /home/zhb/.config/gatus/config.yaml /var/lib/gatus/config.yaml
+      '';
+    };
+  };
 
 }
