@@ -458,6 +458,7 @@
             api_mode = "anthropic_messages";
           }
         ];
+        group_sessions_per_user = false;
         platforms = {
           qqbot = {
             enabled = true;
