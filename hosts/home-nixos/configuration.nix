@@ -59,6 +59,22 @@
       keyFile = "/home/zhb/.config/sops/age/keys.txt";
       generateKey = false;
     };
+    templates."telegraf-influxdb2.env" = {
+      owner = "telegraf";
+      group = "telegraf";
+      mode = "0400";
+      content = ''
+        INFLUX_TOKEN=${config.sops.placeholder."influxdb2/telegraf_token"}
+      '';
+    };
+    templates."grafana-influxdb2-token" = {
+      owner = "grafana";
+      group = "grafana";
+      mode = "0400";
+      content = ''
+        ${config.sops.placeholder."influxdb2/grafana_token"}
+      '';
+    };
     secrets = {
       "psql/admin_user" = { };
       "node_red/sso_client_id" = { };
@@ -70,6 +86,26 @@
       "miniflux/admin-password" = { };
       "miniflux/oidc-client-secret" = { };
       "cloudflare/api-key" = { };
+      "influxdb2/admin_password" = {
+        owner = "influxdb2";
+        group = "influxdb2";
+        mode = "0440";
+      };
+      "influxdb2/admin_token" = {
+        owner = "influxdb2";
+        group = "influxdb2";
+        mode = "0440";
+      };
+      "influxdb2/telegraf_token" = {
+        owner = "influxdb2";
+        group = "influxdb2";
+        mode = "0440";
+      };
+      "influxdb2/grafana_token" = {
+        owner = "influxdb2";
+        group = "influxdb2";
+        mode = "0440";
+      };
       "grafana/env" = {
         sopsFile = ../../secrets/grafana.yaml;
         key = "env";
@@ -180,7 +216,7 @@
     taskwarrior-tui
     timewarrior
     nginx # required by deer-flow
-    influxdb3
+    influxdb2
     telegraf
 
     ty # python lsp
@@ -378,6 +414,82 @@
       userDir = "/mnt/data/nodered/data";
     };
 
+    influxdb2 = {
+      enable = true;
+      settings = {
+        "http-bind-address" = "0.0.0.0:8086";
+        "reporting-disabled" = true;
+      };
+      provision = {
+        enable = true;
+        initialSetup = {
+          organization = "home";
+          bucket = "telegraf";
+          username = "admin";
+          passwordFile = config.sops.secrets."influxdb2/admin_password".path;
+          tokenFile = config.sops.secrets."influxdb2/admin_token".path;
+        };
+        organizations.home = {
+          auths = {
+            telegraf = {
+              description = "Telegraf write token";
+              writeBuckets = [ "telegraf" ];
+              tokenFile = config.sops.secrets."influxdb2/telegraf_token".path;
+            };
+            grafana = {
+              description = "Grafana read token";
+              readBuckets = [ "telegraf" ];
+              tokenFile = config.sops.secrets."influxdb2/grafana_token".path;
+            };
+          };
+        };
+      };
+    };
+
+    telegraf = {
+      enable = true;
+      environmentFiles = [ config.sops.templates."telegraf-influxdb2.env".path ];
+      extraConfig = {
+        agent = {
+          interval = "10s";
+          round_interval = true;
+          metric_batch_size = 1000;
+          metric_buffer_limit = 10000;
+          flush_interval = "10s";
+          hostname = "home-nixos";
+        };
+        outputs.influxdb_v2 = {
+          urls = [ "http://127.0.0.1:8086" ];
+          token = "$INFLUX_TOKEN";
+          organization = "home";
+          bucket = "telegraf";
+        };
+        inputs = {
+          cpu = {
+            percpu = true;
+            totalcpu = true;
+            collect_cpu_time = false;
+            report_active = false;
+          };
+          mem = { };
+          disk = {
+            ignore_fs = [
+              "tmpfs"
+              "devtmpfs"
+              "devfs"
+              "overlay"
+              "squashfs"
+              "nsfs"
+            ];
+          };
+          diskio = { };
+          net = { };
+          system = { };
+          processes = { };
+        };
+      };
+    };
+
     postgresql = {
       enable = true;
       # manually set db version
@@ -452,6 +564,31 @@
           admin_user = "admin";
           admin_password = "$__env{GF_SECURITY_ADMIN_PASSWORD}";
           secret_key = "$__env{GF_SECURITY_SECRET_KEY}";
+        };
+      };
+      provision = {
+        enable = true;
+        datasources.settings = {
+          apiVersion = 1;
+          datasources = [
+            {
+              name = "InfluxDB2-telegraf";
+              uid = "influxdb2-telegraf";
+              type = "influxdb";
+              access = "proxy";
+              url = "http://127.0.0.1:8086";
+              isDefault = true;
+              editable = true;
+              jsonData = {
+                version = "Flux";
+                organization = "home";
+                defaultBucket = "telegraf";
+              };
+              secureJsonData = {
+                token = "$__file{${config.sops.templates."grafana-influxdb2-token".path}}";
+              };
+            }
+          ];
         };
       };
     };
