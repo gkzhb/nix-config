@@ -70,6 +70,10 @@
       "miniflux/admin-password" = { };
       "miniflux/oidc-client-secret" = { };
       "cloudflare/api-key" = { };
+      "grafana/env" = {
+        sopsFile = ../../secrets/grafana.yaml;
+        key = "env";
+      };
     };
   };
 
@@ -176,6 +180,8 @@
     taskwarrior-tui
     timewarrior
     nginx # required by deer-flow
+    influxdb3
+    telegraf
 
     ty # python lsp
     ruff # python linter and formatter
@@ -428,6 +434,28 @@
       };
     };
 
+    grafana = {
+      enable = true;
+      settings = {
+        server = {
+          # Listening Address
+          http_addr = "0.0.0.0";
+          # and Port
+          http_port = 8749;
+          protocol = "http";
+          # Grafana needs to know on which domain and URL it's running
+          domain = "grafana.gkzhb.top";
+          root_url = "https://grafana.gkzhb.top/";
+        };
+        # admin_password / secret_key 通过 EnvironmentFile 注入
+        security = {
+          admin_user = "admin";
+          admin_password = "$__env{GF_SECURITY_ADMIN_PASSWORD}";
+          secret_key = "$__env{GF_SECURITY_SECRET_KEY}";
+        };
+      };
+    };
+
     minifluxng = {
       enable = true;
       baseUrl = "https://miniflux.gkzhb.top";
@@ -623,6 +651,11 @@
         LoadCredential = [
           "login_token:${config.sops.secrets."cloudflare/api-key".path}"
         ];
+      };
+    };
+    grafana = {
+      serviceConfig = {
+        EnvironmentFile = config.sops.secrets."grafana/env".path;
       };
     };
     postgresql-init-miniflux-password = {
