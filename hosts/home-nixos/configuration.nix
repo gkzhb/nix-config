@@ -65,6 +65,8 @@
       mode = "0400";
       content = ''
         INFLUX_TOKEN=${config.sops.placeholder."influxdb2/telegraf_token"}
+        NEWAPI_API_KEY=${config.sops.placeholder."newapi/api_key"}
+        NEWAPI_USER_ID=${config.sops.placeholder."newapi/user_id"}
       '';
     };
     templates."grafana-influxdb2-token" = {
@@ -86,6 +88,8 @@
       "miniflux/admin-password" = { };
       "miniflux/oidc-client-secret" = { };
       "cloudflare/api-key" = { };
+      "newapi/api_key" = { };
+      "newapi/user_id" = { };
       "influxdb2/admin_password" = {
         owner = "influxdb2";
         group = "influxdb2";
@@ -486,6 +490,14 @@
           net = { };
           system = { };
           processes = { };
+          exec = [
+            {
+              commands = [ "${pkgs.nodejs_24}/bin/node ${../../scripts/newapi-usage.ts}" ];
+              timeout = "30s";
+              interval = "15m";
+              data_format = "influx";
+            }
+          ];
         };
       };
     };
@@ -616,14 +628,14 @@
       # .hermes/config.yaml
       settings = {
         model = {
-          default = "gpt-5.4";
+          default = "gpt-5.6-terra";
           provider = "custom:NewAPI";
-          context_length = 250000;
+          context_length = 500000;
         };
         custom_providers = [
           {
             name = "NewAPI";
-            model = "gpt-5.4";
+            model = "gpt-5.6-terra";
             base_url = "http://localhost:8056";
             key_env = "NEWAPI_API_KEY";
             api_mode = "anthropic_messages";
