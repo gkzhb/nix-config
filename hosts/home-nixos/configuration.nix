@@ -497,6 +497,10 @@
           diskio = { };
           net = { };
           system = { };
+          prometheus = {
+            urls = [ "http://127.0.0.1:8756/metrics" ];
+            interval = "1m";
+          };
           processes = { };
           exec = [
             {
