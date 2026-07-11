@@ -67,6 +67,10 @@
         INFLUX_TOKEN=${config.sops.placeholder."influxdb2/telegraf_token"}
         NEWAPI_API_KEY=${config.sops.placeholder."newapi/api_key"}
         NEWAPI_USER_ID=${config.sops.placeholder."newapi/user_id"}
+        MINIMAX_API_TOKEN=${config.sops.placeholder."minimax/api_token"}
+        CODEX_USAGE_PROXY_TOKEN=${config.sops.placeholder."codex/proxy_token"}
+        CODEX_USAGE_AUTH_INDEX=${config.sops.placeholder."codex/auth_index"}
+        CODEX_USAGE_ACCOUNT_ID=${config.sops.placeholder."codex/account_id"}
       '';
     };
     templates."grafana-influxdb2-token" = {
@@ -90,6 +94,10 @@
       "cloudflare/api-key" = { };
       "newapi/api_key" = { };
       "newapi/user_id" = { };
+      "minimax/api_token" = { };
+      "codex/proxy_token" = { };
+      "codex/auth_index" = { };
+      "codex/account_id" = { };
       "influxdb2/admin_password" = {
         owner = "influxdb2";
         group = "influxdb2";
@@ -493,6 +501,18 @@
           exec = [
             {
               commands = [ "${pkgs.nodejs_24}/bin/node ${../../scripts/newapi-usage.ts}" ];
+              timeout = "30s";
+              interval = "15m";
+              data_format = "influx";
+            }
+            {
+              commands = [ "${pkgs.nodejs_24}/bin/node ${../../scripts/minimax-token-plan-usage.ts}" ];
+              timeout = "30s";
+              interval = "15m";
+              data_format = "influx";
+            }
+            {
+              commands = [ "${pkgs.nodejs_24}/bin/node ${../../scripts/codex-subscription-usage.ts}" ];
               timeout = "30s";
               interval = "15m";
               data_format = "influx";
