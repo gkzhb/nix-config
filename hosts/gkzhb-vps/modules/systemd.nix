@@ -12,6 +12,11 @@ let
 in
 {
   systemd.services = {
+    nix-daemon.environment = {
+      http_proxy = "http://localhost:10881";
+      https_proxy = "http://localhost:10881";
+      no_proxy = "localhost,127.0.0.1";
+    };
     nginx.serviceConfig = {
       DynamicUser = lib.mkForce false;
       User = lib.mkForce "";
