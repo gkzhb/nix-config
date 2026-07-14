@@ -9,6 +9,9 @@
       enable = true;
       package = pkgs.nix;
       settings = {
+        builders = [ "ssh-ng://zg x86_64-linux" ];
+        max-jobs = 0;
+        builders-use-substitutes = true;
         experimental-features = [
           "nix-command"
           "flakes"

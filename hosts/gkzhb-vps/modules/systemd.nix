@@ -36,6 +36,7 @@ in
         "CAP_NET_BIND_SERVICE"
         "CAP_SETUID"
         "CAP_SETGID"
+        "CAP_CHOWN"
       ];
       AmbientCapabilities = lib.mkForce [
         ""
