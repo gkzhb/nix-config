@@ -15,6 +15,9 @@ build-cn:
 update:
   nix flake update
 
+update-nix:
+  nix flake update nixpkgs nix-ld sops-nix home-manager nix-darwin system-manager
+
 # update secrets file after adding new hosts in .sops.yaml
 update-secrets:
   sops updatekeys secrets/db.yaml

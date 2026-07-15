@@ -47,6 +47,7 @@
 
   # Auto upgrade nix package and the daemon service.
   nix = {
+    enable = true;
     package = pkgs.nix;
     settings = {
       experimental-features = [
