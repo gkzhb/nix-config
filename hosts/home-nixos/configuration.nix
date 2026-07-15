@@ -816,7 +816,12 @@
 
   systemd.services = {
     # use local athens
-    nix-daemon.environment.GOPROXY = "http://localhost:8333,direct";
+    nix-daemon.environment = {
+      GOPROXY = "http://localhost:8333,direct";
+      http_proxy = "http://100.64.0.10:10881";
+      https_proxy = "http://100.64.0.10:10881";
+      no_proxy = "localhost,127.0.0.1,100.64.0.0/10";
+    };
 
     godns = {
       serviceConfig = {

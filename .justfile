@@ -3,13 +3,6 @@
 build:
     nixos-rebuild switch --flake "/etc/nixos#home-nixos"
 
-# Set network proxy before build
-build-cn:
-  export http_proxy=http://localhost:10881
-  export https_proxy=http://localhost:10881
-  export GOPROXY=https://goproxy.cn,direct
-  just build
-
 # update flake and package versions
 # need to rebuild after running this
 update:
@@ -38,8 +31,3 @@ build-home user:
 build-darwin:
   # nix run nix-darwin/master#darwin-rebuild -- switch
   darwin-rebuild switch --flake .#gkzhb-MBP
-
-build-darwin-cn:
-  export https_proxy=http://localhost:10881
-  export http_proxy=http://localhost:10881
-  just build-darwin
