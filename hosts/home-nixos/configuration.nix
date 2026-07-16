@@ -176,6 +176,7 @@
       musl
     ];
   };
+  programs.mosh.enable = true;
   programs.fish.enable = true;
   programs.yazi.enable = true;
   programs.npm.enable = true;
