@@ -1,0 +1,82 @@
+# Project-local optnix scopes.
+#
+# Every scope evaluates this flake, so option metadata always comes from the
+# same pinned inputs and module composition as the configuration it describes.
+# Run from the repository root, for example:
+#   optnix -c ./optnix.toml -s nixos-home -n services.openssh.enable
+#   optnix -c ./optnix.toml -s darwin-gkzhb-mbp -n nix.settings.experimental-features
+#   optnix -c ./optnix.toml -s home-vps -n programs.home-manager.enable
+
+min_score = 1
+debounce_time = 25
+default_scope = "nixos-home"
+formatter_cmd = "nixfmt"
+
+# `options-list-cmd` intentionally derives documentation from each evaluated
+# module system rather than from a global nixpkgs checkout.  This includes
+# options supplied by the project's imported third-party modules as well.
+[scopes.nixos-home]
+description = "NixOS host home-nixos (including its imported NixOS modules)"
+options-list-cmd = '''
+nix eval .#nixosConfigurations.home-nixos --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval .#nixosConfigurations.home-nixos.config.{{ .Option }}"
+
+[scopes.darwin-gkzhb-mbp]
+description = "nix-darwin host gkzhb-MBP (including its imported darwin modules)"
+options-list-cmd = '''
+nix eval .#darwinConfigurations.gkzhb-MBP --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval .#darwinConfigurations.gkzhb-MBP.config.{{ .Option }}"
+
+[scopes.home-devbox]
+description = "Home Manager configuration zhanghaibin.zhb for devbox"
+options-list-cmd = '''
+nix eval '.#homeConfigurations."zhanghaibin.zhb"' --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval '.#homeConfigurations.\"zhanghaibin.zhb\".config.{{ .Option }}'"
+
+[scopes.home-vps]
+description = "Home Manager configuration zhb for gkzhb-vps"
+options-list-cmd = '''
+nix eval .#homeConfigurations.zhb --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval .#homeConfigurations.zhb.config.{{ .Option }}"
+
+[scopes.system-manager-devbox]
+description = "system-manager configuration devbox"
+options-list-cmd = '''
+nix eval .#systemConfigs.devbox --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval .#systemConfigs.devbox.config.{{ .Option }}"
+
+[scopes.system-manager-vps]
+description = "system-manager configuration gkzhb-vps"
+options-list-cmd = '''
+nix eval '.#systemConfigs."gkzhb-vps"' --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval '.#systemConfigs.\"gkzhb-vps\".config.{{ .Option }}'"
