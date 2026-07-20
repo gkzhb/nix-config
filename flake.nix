@@ -141,6 +141,7 @@
       darwinConfigurations = {
         "gkzhb-MBP" = nix-darwin.lib.darwinSystem {
           modules = [
+            { nixpkgs.overlays = [ llm-agents-overlay local-packages ]; }
             ./hosts/gkzhb-mbp/configuration.nix
             home-manager.darwinModules.home-manager
             {

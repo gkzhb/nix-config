@@ -1,4 +1,24 @@
 final: prev: {
+  fmd = final.rustPlatform.buildRustPackage rec {
+    pname = "fmd";
+    version = "0.1.1";
+
+    src = final.fetchCrate {
+      inherit pname version;
+      hash = "sha256-XzVVcPtELpn1B9GzVGeUm2CmeMSJrDSCt6QLQjxrf3s=";
+    };
+
+    cargoHash = "sha256-U72p3NAeYqfBhiSddADfu+zjTLd3ID6VUxJhT3tImDg=";
+
+    meta = with final.lib; {
+      description = "Find Markdown files by metadata";
+      homepage = "https://github.com/zhouer/fmd";
+      license = licenses.mit;
+      platforms = platforms.all;
+      mainProgram = "fmd";
+    };
+  };
+
   mmx-cli = final.stdenvNoCC.mkDerivation rec {
     pname = "mmx-cli";
     version = "1.0.15";

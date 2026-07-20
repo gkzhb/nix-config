@@ -32,6 +32,8 @@
     bun
     deno
     thrift-ls
+    optnix
+    fmd
 
     # proxy
     xray
