@@ -919,6 +919,11 @@
         StateDirectory = "gatus";
       };
     };
+    minifluxng = {
+      environment = {
+        FETCHER_ALLOW_PRIVATE_NETWORKS = "1";
+      };
+    };
     tigervnc-zhb = {
       description = "TigerVNC server for zhb";
       after = [
