@@ -216,6 +216,7 @@
     uv
     python312
     mise
+    optnix
 
     pandoc
     neovim
@@ -926,21 +927,14 @@
     };
     tigervnc-zhb = {
       description = "TigerVNC server for zhb";
-      after = [
-        "network-online.target"
-        "tailscaled.service"
-      ];
-      wants = [
-        "network-online.target"
-        "tailscaled.service"
-      ];
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       path = with pkgs; [
         coreutils
         gnugrep
         gnused
         procps
-        tailscale
         tigervnc
         dbus
         xauth
@@ -977,10 +971,7 @@
         ExecStart = pkgs.writeShellScript "start-tigervnc-zhb" ''
           set -eu
 
-          interface_ip="$(${pkgs.tailscale}/bin/tailscale ip -4 2>/dev/null | ${pkgs.gnugrep}/bin/grep -m1 . || true)"
-          if [ -z "$interface_ip" ]; then
-            interface_ip="127.0.0.1"
-          fi
+          interface_ip="0.0.0.0"
 
           export HOME=/home/zhb
           export USER=zhb
