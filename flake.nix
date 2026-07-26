@@ -11,6 +11,8 @@
     nix-ld.url = "github:Mic92/nix-ld";
     nix-ld.inputs.nixpkgs.follows = "nixpkgs";
 
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
+
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -42,6 +44,7 @@
     inputs@{
       self,
       nix-ld,
+      vscode-server,
       nixpkgs,
       home-manager,
       sops-nix,
@@ -70,6 +73,7 @@
           system = "x86_64-linux";
           modules = [
             nix-ld.nixosModules.nix-ld
+            vscode-server.nixosModules.default
 
             { nixpkgs.overlays = [ llm-agents.overlays.default local-packages ]; }
             hermes-agent.nixosModules.default

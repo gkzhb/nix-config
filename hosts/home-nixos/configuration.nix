@@ -304,6 +304,8 @@
   '';
 
   services = {
+    vscode-server.enable = true;
+
     envfs = {
       enable = true;
     };
