@@ -75,7 +75,7 @@
             nix-ld.nixosModules.nix-ld
             vscode-server.nixosModules.default
 
-            { nixpkgs.overlays = [ llm-agents.overlays.default local-packages ]; }
+            { nixpkgs.overlays = [ llm-agents.overlays.shared-nixpkgs local-packages ]; }
             hermes-agent.nixosModules.default
             ./hosts/home-nixos/configuration.nix
             home-manager.nixosModules.home-manager

@@ -239,11 +239,13 @@
     nil
     # playwright-driver.browsers
 
-    llm-agents.pi
-    llm-agents.opencode
-    llm-agents.claude-code
+    # Bun 1.3's Linux x64 binary requires AVX. Build Pi in its supported
+    # Node.js mode instead, so it works on this machine's pre-AVX CPU.
+    (llm-agents.pi.override { useBun = false; })
+    # llm-agents.opencode
+    # llm-agents.claude-code
     # llm-agents.codex
-    llm-agents.agent-browser
+    # llm-agents.agent-browser
 
     # llm-agents.openclaw
     llm-agents.mcporter
