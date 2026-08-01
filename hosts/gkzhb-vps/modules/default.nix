@@ -35,6 +35,7 @@
       system-manager
       git
       fish
+      mosh
       tmux
       just
       tree-sitter
