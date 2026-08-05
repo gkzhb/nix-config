@@ -94,6 +94,11 @@
       };
 
       systemConfigs = {
+        mido = system-manager.lib.makeSystemConfig {
+          modules = [
+            ./hosts/mido/modules/default.nix
+          ];
+        };
         devbox = system-manager.lib.makeSystemConfig {
           modules = [
             { nixpkgs.overlays = [ llm-agents-overlay ]; }

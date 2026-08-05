@@ -31,6 +31,12 @@
 
 使用 standalone home-manager 管理用户包，使用 `just build-home zhanghaibin.zhb` 构建 home-manager 配置。
 
+### mido
+
+`mido` 是运行 systemd 的 postmarketOS（aarch64）主机。System Manager 仅管理全局 Nix 软件环境；内核、设备服务、`nix-daemon`、`/etc/nix/nix.conf` 和 apk 软件包仍由 postmarketOS/apk 管理。
+
+postmarketOS 不在 System Manager 上游正式支持的发行版范围内，因此配置显式设置了 `system-manager.allowAnyDistro = true`。使用 `just build-mido` 激活；将需要全局提供的 Nix 软件包添加到 `hosts/mido/modules/default.nix` 的 `environment.systemPackages`。
+
 ### gkzhb-MBP
 
 在 gkzhb-MBP 上使用 nix-darwin ，此仓库被软链到 `/etc/nix-darwin`，使用 `just build-darwin` 来构建 nix-darwin。

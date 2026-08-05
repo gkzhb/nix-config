@@ -24,6 +24,9 @@ build-devbox:
 build-vps:
   system-manager switch --flake .#gkzhb-vps --sudo
 
+build-mido:
+  system-manager switch --flake .#mido --sudo
+
 # build standalone home-manager config
 build-home user:
   home-manager switch --flake .#{{user}}
