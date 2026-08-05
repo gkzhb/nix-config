@@ -469,7 +469,7 @@
       environmentFiles = [ config.sops.templates."telegraf-influxdb2.env".path ];
       extraConfig = {
         agent = {
-          interval = "10s";
+          interval = "1m";
           round_interval = true;
           metric_batch_size = 1000;
           metric_buffer_limit = 10000;
