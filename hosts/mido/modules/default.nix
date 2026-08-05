@@ -55,16 +55,8 @@
     # available interface; remote access is anonymous until credentials, ACLs,
     # and TLS are configured here.
     environment.etc."mosquitto/mosquitto.conf" = {
+      source = ./mosquitto.conf;
       replaceExisting = true;
-      text = ''
-        listener 1883
-        allow_anonymous true
-
-        persistence true
-        persistence_location /var/lib/mosquitto/
-
-        log_dest stdout
-      '';
     };
 
     systemd.services.battery-reporter = {
