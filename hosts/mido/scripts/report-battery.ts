@@ -45,7 +45,7 @@ async function main(): Promise<void> {
     battery: Math.max(0, Math.min(100, Number(capacityRaw))),
     // The battery status changes on USB insertion; USB online=1 means power
     // is actually available from the charger.
-    charging: (await readTrimmed(usbOnlinePath)) === "1",
+    charging: (await readTrimmed(usbOnlinePath)) === "1" ? 1 : 0,
   };
 
   const temperatureRaw = await readTrimmed(`${batteryDir}/temp`, true);
