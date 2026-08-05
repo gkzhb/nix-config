@@ -50,6 +50,12 @@
           interval = "1m";
         };
         processes = { };
+        mqtt_consumer = {
+          servers = [ "tcp://100.64.0.15:1883" ];
+          topics = [ "device/+/battery" ];
+          topic_tag = "mqtt_topic";
+          data_format = "json";
+        };
         exec = [
           {
             commands = [ "${pkgs.nodejs_24}/bin/node ${../../scripts/newapi-usage.ts}" ];
