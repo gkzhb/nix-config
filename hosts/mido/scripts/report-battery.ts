@@ -9,7 +9,7 @@ const usbOnlinePath = "/sys/class/power_supply/qcom-smbchg-usb/online";
 
 type BatteryPayload = {
   battery: number;
-  charging: boolean;
+  charging: number;
   temperature?: number;
 };
 

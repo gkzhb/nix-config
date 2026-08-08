@@ -43,6 +43,7 @@
       tmux
       yazi
       zoxide
+      beads
       mosquitto
     ];
 
