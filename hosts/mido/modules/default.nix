@@ -128,7 +128,7 @@ in
         tuya-controller = {
           description = "Tuya controller service for user";
           wantedBy = [ "system-manager.target" ];
-          requires = [ "tuya-api.service" ];
+          requires = [ "mosquitto.service" ];
           after = [
             "network.target"
             "mosquitto.service"
