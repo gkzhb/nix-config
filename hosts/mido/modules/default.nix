@@ -36,7 +36,6 @@
       fd
       fish
       fzf
-      git
       just
       neovim
       ripgrep
@@ -45,6 +44,12 @@
       zoxide
       beads
       mosquitto
+
+      # dev tools
+      git
+      clang
+      ruff
+      ty
     ];
 
     environment.variables = {
