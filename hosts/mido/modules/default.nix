@@ -50,6 +50,7 @@ in
       mosquitto
 
       # dev tools
+      mkcert
       git
       clang
       ruff
