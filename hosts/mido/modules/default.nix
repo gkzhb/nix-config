@@ -25,6 +25,7 @@ in
           "user"
           "root"
         ];
+        build-dir = /mnt/sd/nix-build;
       };
     };
 
@@ -50,6 +51,7 @@ in
       mosquitto
 
       # dev tools
+      gnumake
       mkcert
       git
       clang
@@ -60,6 +62,7 @@ in
       nixfmt
 
       code-server
+      nginx
     ];
 
     environment.variables = {
@@ -72,6 +75,37 @@ in
     # and TLS are configured here.
     environment.etc."mosquitto/mosquitto.conf" = {
       source = ./mosquitto.conf;
+      replaceExisting = true;
+    };
+
+    # Nix's nginx package defaults to /var/log/nginx, which is not managed on
+    # this Alpine-derived host. Use a self-contained configuration instead.
+    environment.etc."nginx/nginx.conf" = {
+      text = ''
+        worker_processes auto;
+        pid /run/nginx/nginx.pid;
+        error_log stderr warn;
+
+        events {
+          worker_connections 1024;
+        }
+
+        http {
+          include ${pkgs.nginx}/conf/mime.types;
+          default_type application/octet-stream;
+          access_log off;
+          sendfile on;
+
+          server {
+            listen 80 default_server;
+            server_name _;
+            root ${pkgs.nginx}/html;
+            index index.html;
+          }
+
+          include /etc/nginx/conf.d/*.conf;
+        }
+      '';
       replaceExisting = true;
     };
 
@@ -95,6 +129,23 @@ in
               servicePath
             ];
             ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry --disable-update-check";
+            Restart = "on-failure";
+            RestartSec = "5s";
+          };
+        };
+
+        # The declaratively managed configuration serves nginx's bundled
+        # static site on port 80 and logs errors to journald. Keep nginx in
+        # the foreground for systemd and give it a writable PID directory.
+        nginx = {
+          description = "Nginx web server";
+          wantedBy = [ "system-manager.target" ];
+          after = [ "network.target" ];
+          serviceConfig = {
+            ExecStart = "${pkgs.nginx}/bin/nginx -c /etc/nginx/nginx.conf -g 'daemon off;'";
+            ExecReload = "${pkgs.nginx}/bin/nginx -c /etc/nginx/nginx.conf -s reload";
+            RuntimeDirectory = "nginx";
+            RuntimeDirectoryMode = "0755";
             Restart = "on-failure";
             RestartSec = "5s";
           };
