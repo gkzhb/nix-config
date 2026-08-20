@@ -134,6 +134,29 @@ in
           };
         };
 
+        dsh-web = {
+          description = "DeepSeek Harness web service for user";
+          wantedBy = [ "system-manager.target" ];
+          wants = [ "network-online.target" ];
+          after = [ "network-online.target" ];
+          serviceConfig = {
+            User = "user";
+            Group = "user";
+            # A systemd service has no shell to expand ~; WorkingDirectory
+            # provides the requested `cd` before entering the dev shell.
+            WorkingDirectory = "/home/user/gitrep/deepseek-harness";
+            Environment = [
+              "HOME=/home/user"
+              servicePath
+            ];
+            # `nix develop --command` runs pnpm inside the project's dev-shell
+            # environment without relying on an interactive shell.
+            ExecStart = "${pkgs.nix}/bin/nix develop /home/user/gitrep/deepseek-harness --command pnpm dsh web";
+            Restart = "on-failure";
+            RestartSec = "5s";
+          };
+        };
+
         # The declaratively managed configuration serves nginx's bundled
         # static site on port 80 and logs errors to journald. Keep nginx in
         # the foreground for systemd and give it a writable PID directory.
