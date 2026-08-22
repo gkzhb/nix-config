@@ -126,6 +126,15 @@
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
 
+  # Use the proprietary NVIDIA driver for the TU106 GPU rather than nouveau.
+  # Kernel modesetting is required for a reliable Plasma Wayland session.
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia = {
+    modesetting.enable = true;
+    # TU106/Turing: use NVIDIA's proprietary kernel module for DP sound.
+    open = false;
+  };
+
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
