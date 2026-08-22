@@ -35,7 +35,7 @@
   programs = {
     fish = {
       enable = true;
-      };
+    };
     neovim = {
       enable = true;
     };
@@ -48,8 +48,11 @@
   services.tailscale.enable = true;
 
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+    grub.configurationLimit = 5;
+  };
 
   networking.hostName = "zhb-nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -65,18 +68,30 @@
   time.timeZone = "Asia/Shanghai";
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "zh_CN.UTF-8";
+  i18n = {
+    defaultLocale = "zh_CN.UTF-8";
+    extraLocaleSettings = {
+      LC_ADDRESS = "zh_CN.UTF-8";
+      LC_IDENTIFICATION = "zh_CN.UTF-8";
+      LC_MEASUREMENT = "zh_CN.UTF-8";
+      LC_MONETARY = "zh_CN.UTF-8";
+      LC_NAME = "zh_CN.UTF-8";
+      LC_NUMERIC = "zh_CN.UTF-8";
+      LC_PAPER = "zh_CN.UTF-8";
+      LC_TELEPHONE = "zh_CN.UTF-8";
+      LC_TIME = "zh_CN.UTF-8";
+    };
 
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "zh_CN.UTF-8";
-    LC_IDENTIFICATION = "zh_CN.UTF-8";
-    LC_MEASUREMENT = "zh_CN.UTF-8";
-    LC_MONETARY = "zh_CN.UTF-8";
-    LC_NAME = "zh_CN.UTF-8";
-    LC_NUMERIC = "zh_CN.UTF-8";
-    LC_PAPER = "zh_CN.UTF-8";
-    LC_TELEPHONE = "zh_CN.UTF-8";
-    LC_TIME = "zh_CN.UTF-8";
+    inputMethod = {
+      type = "fcitx5";
+      enable = true;
+      fcitx5 = {
+        waylandFrontend = true;
+        addons = with pkgs; [
+          fcitx5-rime
+        ];
+      };
+    };
   };
 
   # Enable the X11 windowing system.
@@ -130,14 +145,14 @@
     ];
   };
 
-
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    ntfs3g
+
     neovim
     git
     fish
@@ -153,7 +168,21 @@
     wget
     just
 
+    # AI
+    llm-agents.pi
+
     # GUI apps
+    (vscode-with-extensions.override {
+      vscodeExtensions =
+        with vscode-extensions;
+        [
+          bbenoist.nix
+          ms-python.python
+          ms-vscode-remote.remote-ssh
+        ]
+        ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+        ];
+    })
     brave
     kitty
     bitwarden-desktop

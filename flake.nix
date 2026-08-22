@@ -96,6 +96,7 @@
           modules = [
             # nix-ld.nixosModules.nix-ld
             ./hosts/zhb-nixos/configuration.nix
+            { nixpkgs.overlays = [ llm-agents.overlays.shared-nixpkgs ]; }
             # home-manager.nixosModules.home-manager
             # {
             #   home-manager.useGlobalPkgs = true;

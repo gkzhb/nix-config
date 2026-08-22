@@ -50,6 +50,18 @@
     fsType = "ext4";
   };
 
+  fileSystems."/mnt/data" = {
+    device = "/dev/disk/by-uuid/142876759FFD4958";
+    fsType = "ntfs-3g";
+    options = [
+      "rw"
+      "uid=1000"
+      "gid=100"
+      "umask=022"
+      "nofail"
+    ];
+  };
+
   swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
