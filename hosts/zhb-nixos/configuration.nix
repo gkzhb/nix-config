@@ -94,6 +94,34 @@
     };
   };
 
+  fonts = {
+    packages = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
+      noto-fonts-color-emoji
+
+      # nerd fonts
+      nerd-fonts.fira-code
+      nerd-fonts.droid-sans-mono
+    ];
+    fontconfig.defaultFonts = {
+      sansSerif = [
+        "Noto Sans CJK SC"
+        "Noto Sans"
+      ];
+      serif = [
+        "Noto Serif CJK SC"
+        "Noto Serif"
+      ];
+      monospace = [
+        "Noto Sans Mono CJK SC"
+        "Noto Sans Mono"
+      ];
+      emoji = [ "Noto Color Emoji" ];
+    };
+  };
+
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
@@ -167,6 +195,7 @@
     television
     wget
     just
+    optnix
 
     # AI
     llm-agents.pi
