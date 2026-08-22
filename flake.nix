@@ -91,6 +91,23 @@
             minifluxng.nixosModules.minifluxng
           ];
         };
+        zhb-nixos = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            # nix-ld.nixosModules.nix-ld
+            ./hosts/zhb-nixos/configuration.nix
+            # home-manager.nixosModules.home-manager
+            # {
+            #   home-manager.useGlobalPkgs = true;
+            #   home-manager.useUserPackages = true;
+            #   home-manager.users.zhb = ./hosts/home-nixos/user.nix;
+            #
+            #   # Optionally, use home-manager.extraSpecialArgs to pass
+            #   # arguments to home.nix
+            # }
+            # sops-nix.nixosModules.sops
+          ];
+        };
       };
 
       systemConfigs = {
