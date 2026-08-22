@@ -26,6 +26,17 @@ in optionsList'
 '''
 evaluator = "nix eval .#nixosConfigurations.home-nixos.config.{{ .Option }}"
 
+[scopes.nixos-zhb]
+description = "NixOS host zhb-nixos (including its imported NixOS modules)"
+options-list-cmd = '''
+nix eval .#nixosConfigurations.zhb-nixos --json --apply 'input: let
+  inherit (input) options pkgs;
+  optionsList = builtins.filter (v: v.visible && !v.internal)
+    (pkgs.lib.optionAttrSetToDocList options);
+in optionsList'
+'''
+evaluator = "nix eval .#nixosConfigurations.zhb-nixos.config.{{ .Option }}"
+
 [scopes.darwin-gkzhb-mbp]
 description = "nix-darwin host gkzhb-MBP (including its imported darwin modules)"
 options-list-cmd = '''
