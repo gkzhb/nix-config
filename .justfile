@@ -3,6 +3,9 @@
 build:
     nixos-rebuild switch --flake "/etc/nixos#home-nixos"
 
+build-zhb:
+    nixos-rebuild switch --flake "/etc/nixos#zhb-nixos"
+
 # update flake and package versions
 # need to rebuild after running this
 update:

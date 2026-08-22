@@ -27,18 +27,23 @@
     # use local athens
     nix-daemon.environment = {
       # GOPROXY = "http://localhost:8333,direct";
-      http_proxy = "http://192.168.3.133:10881";
-      https_proxy = "http://192.168.3.133:10881";
-      no_proxy = "localhost,127.0.0.1,192.168.3.133,100.64.0.0/10";
+      http_proxy = "http://100.64.0.10:10881";
+      https_proxy = "http://100.64.0.10:10881";
+      no_proxy = "localhost,127.0.0.1,100.64.0.0/10";
     };
   };
   programs = {
+    fish = {
+      enable = true;
+      };
     neovim = {
       enable = true;
     };
     vscode = {
       enable = true;
     };
+    localsend.enable = true;
+    firefox.enable = true;
   };
   services.tailscale.enable = true;
 
@@ -114,6 +119,7 @@
   users.users."zhb" = {
     isNormalUser = true;
     description = "zhb";
+    shell = pkgs.fish;
     extraGroups = [
       "networkmanager"
       "wheel"
@@ -124,8 +130,7 @@
     ];
   };
 
-  # Install firefox.
-  programs.firefox.enable = true;
+
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -146,9 +151,12 @@
     ripgrep
     television
     wget
+    just
 
-    localsend
+    # GUI apps
     brave
+    kitty
+    bitwarden-desktop
 
     nil
     nixfmt
