@@ -26,6 +26,9 @@
 
     hermes-agent.url = "github:NousResearch/hermes-agent";
 
+    helium-flake.url = "github:oxcl/nix-flake-helium-browser";
+    helium-flake.inputs.nixpkgs.follows = "nixpkgs";
+
     # buggy program
     # codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
     # codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
@@ -51,6 +54,7 @@
       llm-agents,
       minifluxng,
       hermes-agent,
+      helium-flake,
       # codebase-memory-mcp,
       system-manager,
       nix-darwin,
@@ -96,7 +100,7 @@
           modules = [
             # nix-ld.nixosModules.nix-ld
             ./hosts/zhb-nixos/configuration.nix
-            { nixpkgs.overlays = [ llm-agents.overlays.shared-nixpkgs ]; }
+            { nixpkgs.overlays = [ llm-agents.overlays.shared-nixpkgs helium-flake.overlays.default ]; }
             # home-manager.nixosModules.home-manager
             # {
             #   home-manager.useGlobalPkgs = true;

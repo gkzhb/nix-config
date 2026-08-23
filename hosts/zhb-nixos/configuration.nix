@@ -44,9 +44,17 @@
     };
     localsend.enable = true;
     firefox.enable = true;
+    steam = {
+      # enable = true;
+    };
   };
   services.tailscale.enable = true;
 
+  # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
+  boot.kernelParams = [
+    "ahci.mobile_lpm_policy=1"
+    "libata.force=6:3.0"
+  ];
   # Bootloader.
   boot.loader = {
     systemd-boot = {
@@ -215,6 +223,10 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     ntfs3g
+    p7zip # provides 7z; supports extracting RAR archives
+    pciutils
+    usbutils
+    smartmontools
 
     neovim
     git
@@ -248,6 +260,7 @@
         ];
     })
     brave
+    helium
     kitty
     bitwarden-desktop
 
