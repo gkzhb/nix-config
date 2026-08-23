@@ -34,10 +34,10 @@
         protocol: efi
         path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
 
-        /:Memtest
-        comment: MS Memory Test
+        /:Memtest86+
+        comment: Memory diagnostic
         protocol: efi
-        path: boot():/EFI/Microsoft/Boot/memtest.efi
+        path: boot():/EFI/memtest86plus/memtest86plus.efi
       '';
     };
     efi.canTouchEfiVariables = true;
