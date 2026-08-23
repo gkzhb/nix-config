@@ -64,6 +64,19 @@
   };
   services = {
     tailscale.enable = true;
+    openssh = {
+      enable = true;
+      settings = {
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        PubkeyAuthentication = true;
+        AuthenticationMethods = "publickey";
+        MaxAuthTries = 3;
+        PerSourcePenalties = "crash:3600s authfail:3600s max:86400s";
+        AllowUsers = [ "zhb" ];
+      };
+    };
 
     v2raya = {
       enable = true;
