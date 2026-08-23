@@ -27,9 +27,9 @@
     # use local athens
     nix-daemon.environment = {
       # GOPROXY = "http://localhost:8333,direct";
-      http_proxy = "http://100.64.0.10:10881";
-      https_proxy = "http://100.64.0.10:10881";
-      no_proxy = "localhost,127.0.0.1,100.64.0.0/10";
+      http_proxy = "http://localhost:10881";
+      https_proxy = "http://localhost:10881";
+      no_proxy = "localhost,127.0.0.1,192.168.0.0/16,100.64.0.0/10";
     };
   };
   programs = {
@@ -62,7 +62,14 @@
       # enable = true;
     };
   };
-  services.tailscale.enable = true;
+  services = {
+    tailscale.enable = true;
+
+    v2raya = {
+      enable = true;
+      cliPackage = pkgs.xray;
+    };
+  };
 
   networking.hostName = "zhb-nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -240,9 +247,6 @@
 
     nil
     nixfmt
-    xray
-    v2raya
-
   ];
   documentation.nixos.enable = false;
 
