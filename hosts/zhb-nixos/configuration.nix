@@ -64,44 +64,6 @@
   };
   services.tailscale.enable = true;
 
-  # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
-  boot.kernelParams = [
-    "ahci.mobile_lpm_policy=1"
-    "libata.force=6:3.0"
-  ];
-  # Bootloader.
-  boot.loader = {
-    systemd-boot = {
-      enable = false;
-      configurationLimit = 5;
-    };
-    limine = {
-      enable = true;
-      maxGenerations = 5;
-      extraEntries = ''
-        /:Windows 11
-        comment: Windows 11
-        protocol: efi
-        path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
-
-        /:Memtest
-        comment: MS Memory Test
-        protocol: efi
-        path: boot():/EFI/Microsoft/Boot/memtest.efi
-      '';
-    };
-    efi.canTouchEfiVariables = true;
-    # grub.configurationLimit = 5;
-  };
-
-  # Managed swap file on the ext4 root filesystem (32 GiB).
-  swapDevices = [
-    {
-      device = "/swapfile";
-      size = 32768; # MiB
-    }
-  ];
-
   networking.hostName = "zhb-nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -177,11 +139,6 @@
   # Use the proprietary NVIDIA driver for the TU106 GPU rather than nouveau.
   # Kernel modesetting is required for a reliable Plasma Wayland session.
   services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia = {
-    modesetting.enable = true;
-    # TU106/Turing: use NVIDIA's proprietary kernel module for DP sound.
-    open = false;
-  };
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
@@ -267,9 +224,11 @@
       vscodeExtensions =
         with vscode-extensions;
         [
-          bbenoist.nix
-          ms-python.python
+          # alefragnani.project-manager
+          jnoortheen.nix-ide
           ms-vscode-remote.remote-ssh
+          asvetliakov.vscode-neovim
+
         ]
         ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
         ];

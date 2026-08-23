@@ -14,6 +14,36 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
+  # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
+  boot.kernelParams = [
+    # "ahci.mobile_lpm_policy=1"
+    "libata.force=6:3.0"
+  ];
+  # Bootloader.
+  boot.loader = {
+    systemd-boot = {
+      enable = false;
+      configurationLimit = 5;
+    };
+    limine = {
+      enable = true;
+      maxGenerations = 5;
+      extraEntries = ''
+        /:Windows 11
+        comment: Windows 11
+        protocol: efi
+        path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
+
+        /:Memtest
+        comment: MS Memory Test
+        protocol: efi
+        path: boot():/EFI/Microsoft/Boot/memtest.efi
+      '';
+    };
+    efi.canTouchEfiVariables = true;
+    # grub.configurationLimit = 5;
+  };
+
   boot.initrd.availableKernelModules = [
     "xhci_pci"
     "ahci"
@@ -62,8 +92,18 @@
     ];
   };
 
-  swapDevices = [ ];
+  # Managed swap file on the ext4 root filesystem (32 GiB).
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 32768; # MiB
+    }
+  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.nvidia = {
+    modesetting.enable = true;
+    open = false;
+  };
 }
