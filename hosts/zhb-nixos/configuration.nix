@@ -49,10 +49,21 @@
 
   # Bootloader.
   boot.loader = {
-    systemd-boot.enable = true;
+    systemd-boot = {
+      enable = true;
+      configurationLimit = 5;
+    };
     efi.canTouchEfiVariables = true;
-    grub.configurationLimit = 5;
+    # grub.configurationLimit = 5;
   };
+
+  # Managed swap file on the ext4 root filesystem (32 GiB).
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 32768; # MiB
+    }
+  ];
 
   networking.hostName = "zhb-nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -105,21 +116,21 @@
       nerd-fonts.fira-code
       nerd-fonts.droid-sans-mono
     ];
-    fontconfig.defaultFonts = {
-      sansSerif = [
-        "Noto Sans CJK SC"
-        "Noto Sans"
-      ];
-      serif = [
-        "Noto Serif CJK SC"
-        "Noto Serif"
-      ];
-      monospace = [
-        "Noto Sans Mono CJK SC"
-        "Noto Sans Mono"
-      ];
-      emoji = [ "Noto Color Emoji" ];
-    };
+    # fontconfig.defaultFonts = {
+    #   sansSerif = [
+    #     "Noto Sans CJK SC"
+    #     "Noto Sans"
+    #   ];
+    #   serif = [
+    #     "Noto Serif CJK SC"
+    #     "Noto Serif"
+    #   ];
+    #   monospace = [
+    #     "Noto Sans Mono CJK SC"
+    #     "Noto Sans Mono"
+    #   ];
+    #   emoji = [ "Noto Color Emoji" ];
+    # };
   };
 
   # Enable the X11 windowing system.
