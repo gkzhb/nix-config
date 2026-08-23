@@ -50,8 +50,23 @@
   # Bootloader.
   boot.loader = {
     systemd-boot = {
-      enable = true;
+      enable = false;
       configurationLimit = 5;
+    };
+    limine = {
+      enable = true;
+      maxGenerations = 5;
+      extraEntries = ''
+        /:Windows 11
+        comment: Windows 11
+        protocol: efi
+        path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
+
+        /:Memtest
+        comment: MS Memory Test
+        protocol: efi
+        path: boot():/EFI/Microsoft/Boot/memtest.efi
+      '';
     };
     efi.canTouchEfiVariables = true;
     # grub.configurationLimit = 5;
