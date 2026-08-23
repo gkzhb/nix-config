@@ -170,7 +170,7 @@
         zhb-nixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
-            # nix-ld.nixosModules.nix-ld
+            nix-ld.nixosModules.nix-ld
             ./hosts/zhb-nixos/configuration.nix
             {
               nixpkgs.overlays = [

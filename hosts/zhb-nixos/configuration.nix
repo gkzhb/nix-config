@@ -20,8 +20,6 @@
       "root"
       "zhb"
     ];
-    # use local athens
-    # impure-env = "GOPROXY=http://localhost:8333,direct";
   };
   systemd.services = {
     # use local athens
@@ -33,33 +31,41 @@
     };
   };
   programs = {
+    nix-ld.dev = {
+      enable = true;
+      libraries = with pkgs; [
+        stdenv.cc.cc.lib
+        zlib
+        musl
+      ];
+    };
     fish = {
       enable = true;
     };
-    #   direnv = {
-    #   enable = true;
-    # };
-    # tmux = {
-    #   enable = true;
-    # };
+    direnv = {
+      enable = true;
+    };
+    tmux = {
+      enable = true;
+    };
     neovim = {
       enable = true;
     };
-    # mosh.enable = true;
-    # yazi.enable = true;
-    # npm = {
-    # enable = true;
-    # npmrc = ''
-    #   registry=https://registry.npmmirror.com
-    # '';
-    # };
+    mosh.enable = true;
+    yazi.enable = true;
+    npm = {
+      enable = true;
+      npmrc = ''
+        registry=https://registry.npmmirror.com
+      '';
+    };
     vscode = {
       enable = true;
     };
     localsend.enable = true;
     firefox.enable = true;
     steam = {
-      # enable = true;
+      enable = true;
     };
   };
   services = {
@@ -192,7 +198,7 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Define user accounts
   users.users."zhb" = {
     isNormalUser = true;
     description = "zhb";
@@ -210,8 +216,6 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
     ntfs3g
     p7zip # provides 7z; supports extracting RAR archives
@@ -244,7 +248,7 @@
       vscodeExtensions =
         with vscode-extensions;
         [
-          # alefragnani.project-manager
+          alefragnani.project-manager
           jnoortheen.nix-ide
           ms-vscode-remote.remote-ssh
           asvetliakov.vscode-neovim
@@ -270,11 +274,6 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
