@@ -54,6 +54,21 @@ Or directly with Nix:
 sudo nixos-rebuild switch --flake .#home-nixos
 ```
 
+## Formatting and Git Hooks
+
+Nix files are formatted with `treefmt-nix` using `nixfmt`.
+
+```bash
+just format       # format all configured files
+just check-format # verify formatting with nix flake check
+just install-hooks
+```
+
+`just install-hooks` enters the development shell and installs the generated
+pre-commit hook. On every commit, it formats staged `*.nix` files and runs
+`git add` for those files, so their formatted content is included in the same
+commit. The generated `.pre-commit-config.yaml` is ignored by Git.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.

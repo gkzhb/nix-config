@@ -33,7 +33,10 @@ final: prev: {
       sha256 = "sha256-gNuW6OzIVLIwg+GnzosGnZZ0wYHcvoT9u3GouHEbTyQ=";
     };
 
-    nativeBuildInputs = [ final.makeWrapper final.gnutar ];
+    nativeBuildInputs = [
+      final.makeWrapper
+      final.gnutar
+    ];
 
     dontUnpack = true;
 

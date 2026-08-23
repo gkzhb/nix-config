@@ -33,6 +33,16 @@
     # codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
     # codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
 
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     system-manager = {
       url = "github:numtide/system-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -58,6 +68,8 @@
       # codebase-memory-mcp,
       system-manager,
       nix-darwin,
+      treefmt-nix,
+      git-hooks,
       ...
     }:
     let
@@ -65,6 +77,42 @@
         "x86_64-linux"
         "aarch64-linux"
       ];
+      formatterSystems = systems ++ [
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      forAllFormatterSystems = nixpkgs.lib.genAttrs formatterSystems;
+      treefmtEval = forAllFormatterSystems (
+        system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix
+      );
+      gitHooks = forAllFormatterSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          treefmt-stage = pkgs.writeShellApplication {
+            name = "treefmt-stage";
+            runtimeInputs = [
+              pkgs.git
+              treefmtEval.${system}.config.build.wrapper
+            ];
+            text = ''
+              treefmt "$@"
+              git add -- "$@"
+            '';
+          };
+        in
+        git-hooks.lib.${system}.run {
+          src = ./.;
+          hooks.treefmt-stage = {
+            enable = true;
+            name = "treefmt-stage";
+            entry = "${treefmt-stage}/bin/treefmt-stage";
+            files = "\\.nix$";
+            pass_filenames = true;
+            require_serial = true;
+          };
+        }
+      );
       llm-agents-overlay = final: prev: {
         llm-agents = llm-agents.packages.${prev.stdenv.hostPlatform.system} or { };
       };
@@ -72,6 +120,25 @@
       local-packages = import ./packages;
     in
     {
+      formatter = forAllFormatterSystems (system: treefmtEval.${system}.config.build.wrapper);
+
+      checks = forAllFormatterSystems (system: {
+        formatting = treefmtEval.${system}.config.build.check self;
+      });
+
+      devShells = forAllFormatterSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            packages = gitHooks.${system}.enabledPackages;
+            shellHook = gitHooks.${system}.shellHook;
+          };
+        }
+      );
+
       nixosConfigurations = {
         home-nixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -79,7 +146,12 @@
             nix-ld.nixosModules.nix-ld
             vscode-server.nixosModules.default
 
-            { nixpkgs.overlays = [ llm-agents.overlays.shared-nixpkgs local-packages ]; }
+            {
+              nixpkgs.overlays = [
+                llm-agents.overlays.shared-nixpkgs
+                local-packages
+              ];
+            }
             hermes-agent.nixosModules.default
             ./hosts/home-nixos/configuration.nix
             home-manager.nixosModules.home-manager
@@ -100,7 +172,12 @@
           modules = [
             # nix-ld.nixosModules.nix-ld
             ./hosts/zhb-nixos/configuration.nix
-            { nixpkgs.overlays = [ llm-agents.overlays.shared-nixpkgs helium-flake.overlays.default ]; }
+            {
+              nixpkgs.overlays = [
+                llm-agents.overlays.shared-nixpkgs
+                helium-flake.overlays.default
+              ];
+            }
             # home-manager.nixosModules.home-manager
             # {
             #   home-manager.useGlobalPkgs = true;
@@ -160,7 +237,10 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ llm-agents-overlay local-packages ];
+            overlays = [
+              llm-agents-overlay
+              local-packages
+            ];
           };
         in
         {
@@ -172,7 +252,12 @@
       darwinConfigurations = {
         "gkzhb-MBP" = nix-darwin.lib.darwinSystem {
           modules = [
-            { nixpkgs.overlays = [ llm-agents-overlay local-packages ]; }
+            {
+              nixpkgs.overlays = [
+                llm-agents-overlay
+                local-packages
+              ];
+            }
             ./hosts/gkzhb-mbp/configuration.nix
             home-manager.darwinModules.home-manager
             {

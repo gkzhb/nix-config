@@ -36,9 +36,23 @@
     fish = {
       enable = true;
     };
+    #   direnv = {
+    #   enable = true;
+    # };
+    # tmux = {
+    #   enable = true;
+    # };
     neovim = {
       enable = true;
     };
+    # mosh.enable = true;
+    # yazi.enable = true;
+    # npm = {
+    # enable = true;
+    # npmrc = ''
+    #   registry=https://registry.npmmirror.com
+    # '';
+    # };
     vscode = {
       enable = true;
     };
@@ -234,6 +248,7 @@
     zenith
     tmux
     curl
+    jq
     zoxide
     yazi
     fzf

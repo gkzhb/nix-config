@@ -37,3 +37,12 @@ build-home user:
 build-darwin:
   # nix run nix-darwin/master#darwin-rebuild -- switch
   darwin-rebuild switch --flake .#gkzhb-MBP
+
+format:
+  nix fmt
+
+check-format:
+  nix flake check
+
+install-hooks:
+  nix develop
