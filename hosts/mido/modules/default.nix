@@ -178,6 +178,24 @@ in
         # steps and long-running processes stay in those scripts; systemd
         # provides lifecycle management and the same runtime environment as
         # code-server.
+        pi-web = {
+          description = "pi-web service for user";
+          wantedBy = [ "system-manager.target" ];
+          after = [ "network.target" ];
+          serviceConfig = {
+            User = "user";
+            Group = "user";
+            WorkingDirectory = "/home/user";
+            Environment = [
+              "HOME=/home/user"
+              servicePath
+            ];
+            ExecStart = "/home/user/scripts/services/pi-web.fish";
+            Restart = "on-failure";
+            RestartSec = "5s";
+          };
+        };
+
         tuya-api = {
           description = "Tuya API service for user";
           wantedBy = [ "system-manager.target" ];
