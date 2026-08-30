@@ -261,6 +261,7 @@
     helium
     kitty
     bitwarden-desktop
+    vlc
 
     nil
     nixfmt
