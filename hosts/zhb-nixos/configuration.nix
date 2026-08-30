@@ -2,7 +2,12 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -88,6 +93,26 @@
       enable = true;
       cliPackage = pkgs.xray;
     };
+    qbittorrent = {
+      enable = true;
+      # package = pkgs.qbittorrent-enhanced;
+      user = "zhb";
+      group = "users";
+      # Keep the existing per-user qBittorrent state in $HOME.
+      profileDir = "/home/zhb/.local/share/qBittorrent";
+      serverConfig = {
+        BitTorrent.Session.DefaultSavePath = "/mnt/data/Windows/Downloads/qbittorrent";
+      };
+      openFirewall = true;
+    };
+  };
+
+  # The upstream qBittorrent module hardens the service with ProtectHome=yes
+  # and PrivateUsers=true. Both prevent a service using zhb's profile in $HOME
+  # from accessing that profile and cause qbittorrent-enhanced to abort at startup.
+  systemd.services.qbittorrent.serviceConfig = {
+    ProtectHome = lib.mkForce false;
+    PrivateUsers = lib.mkForce false;
   };
 
   networking.hostName = "zhb-nixos"; # Define your hostname.
