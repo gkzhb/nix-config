@@ -239,6 +239,7 @@
     nixfmt
     nil
     # playwright-driver.browsers
+    mcp-grafana
 
     # Bun 1.3's Linux x64 binary requires AVX. Build Pi in its supported
     # Node.js mode instead, so it works on this machine's pre-AVX CPU.
@@ -249,7 +250,7 @@
     # llm-agents.agent-browser
 
     # llm-agents.openclaw
-    llm-agents.mcporter
+    # llm-agents.mcporter
 
     # GUI app
     tigervnc
@@ -311,6 +312,19 @@
 
     envfs = {
       enable = true;
+    };
+    # dns server
+    coredns = {
+      enable = true;
+      config = ''
+      h.gkzhb.top:53 {
+
+        hosts {
+          100.64.0.15 mido.h.gkzhb.top
+          100.64.0.15 *.mido.h.gkzhb.top
+        }
+      }
+      '';
     };
     # cache go module downloads
     athens = {

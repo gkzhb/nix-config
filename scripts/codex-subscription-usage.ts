@@ -109,7 +109,7 @@ async function main() {
   const chatgptToken = process.env.CODEX_USAGE_CHATGPT_TOKEN ?? '$TOKEN$';
   const proxyUrl = process.env.CODEX_USAGE_PROXY_URL ?? 'https://llm-proxy.os.gkzhb.top/v0/management/api-call';
   const measurement = process.env.CODEX_USAGE_MEASUREMENT ?? 'codex_subscription_usage';
-  const userAgent = process.env.CODEX_USAGE_USER_AGENT ?? 'codex_cli_rs/0.76.0 (Debian 13.0.0; x86_64) WindowsTerminal';
+  const userAgent = process.env.CODEX_USAGE_USER_AGENT ?? 'codex-tui/0.149.1 (Mac OS 26.5.2; arm64) iTerm.app/3.6.11 (codex-tui; 0.149.1)';
 
   const response = await fetch(proxyUrl, {
     method: 'POST',
