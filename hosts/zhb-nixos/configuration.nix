@@ -26,13 +26,24 @@
       "zhb"
     ];
   };
-  systemd.services = {
-    # use local athens
-    nix-daemon.environment = {
-      # GOPROXY = "http://localhost:8333,direct";
-      http_proxy = "http://localhost:10881";
-      https_proxy = "http://localhost:10881";
-      no_proxy = "localhost,127.0.0.1,192.168.0.0/16,100.64.0.0/10";
+  systemd = {
+    settings.Manager.DefaultTimeoutStopSec = "25s";
+    user.settings.Manager.DefaultTimeoutStopSec = "15s";
+    services = {
+      # use local athens
+      nix-daemon.environment = {
+        # GOPROXY = "http://localhost:8333,direct";
+        http_proxy = "http://localhost:10881";
+        https_proxy = "http://localhost:10881";
+        no_proxy = "localhost,127.0.0.1,192.168.0.0/16,100.64.0.0/10";
+      };
+      # The upstream qBittorrent module hardens the service with ProtectHome=yes
+      # and PrivateUsers=true. Both prevent a service using zhb's profile in $HOME
+      # from accessing that profile and cause qbittorrent-enhanced to abort at startup.
+      qbittorrent.serviceConfig = {
+        ProtectHome = lib.mkForce false;
+        PrivateUsers = lib.mkForce false;
+      };
     };
   };
   programs = {
@@ -105,14 +116,6 @@
       };
       openFirewall = true;
     };
-  };
-
-  # The upstream qBittorrent module hardens the service with ProtectHome=yes
-  # and PrivateUsers=true. Both prevent a service using zhb's profile in $HOME
-  # from accessing that profile and cause qbittorrent-enhanced to abort at startup.
-  systemd.services.qbittorrent.serviceConfig = {
-    ProtectHome = lib.mkForce false;
-    PrivateUsers = lib.mkForce false;
   };
 
   networking.hostName = "zhb-nixos"; # Define your hostname.
@@ -248,6 +251,7 @@
     usbutils
     smartmontools
 
+    python3
     neovim
     git
     fish
