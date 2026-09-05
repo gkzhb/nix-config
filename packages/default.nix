@@ -1,4 +1,5 @@
 final: prev: {
+  alvr-master = final.callPackage ./alvr.nix { alvr = prev.alvr; };
   fmd = final.rustPlatform.buildRustPackage rec {
     pname = "fmd";
     version = "0.1.1";

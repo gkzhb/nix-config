@@ -6,6 +6,10 @@ build:
 build-zhb:
     nixos-rebuild switch --flake "/etc/nixos#zhb-nixos"
 
+# Build the pinned ALVR master snapshot without activating the system.
+build-alvr:
+    nix build .#alvr --cores 4 --max-jobs 1 -L
+
 # update flake and package versions
 # need to rebuild after running this
 update:

@@ -94,6 +94,7 @@
     };
     alvr = {
       enable = true;
+      package = pkgs.callPackage ../../packages/alvr.nix { };
       openFirewall = true;
     };
   };
@@ -262,6 +263,7 @@
     p7zip # provides 7z; supports extracting RAR archives
     pciutils
     usbutils
+    android-tools # provides adb for ALVR headset setup and USB connections
     smartmontools
 
     python3

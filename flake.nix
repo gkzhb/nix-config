@@ -116,7 +116,7 @@
       llm-agents-overlay = final: prev: {
         llm-agents = llm-agents.packages.${prev.stdenv.hostPlatform.system} or { };
       };
-      # Local package overlay for mmx-cli
+      # Local package overlay
       local-packages = import ./packages;
     in
     {
@@ -246,6 +246,9 @@
         {
           inherit (pkgs) mmx-cli;
           default = pkgs.mmx-cli;
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          alvr = pkgs.alvr-master;
         }
       );
 
