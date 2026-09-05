@@ -10,22 +10,8 @@
   android-tools,
 }:
 let
-  # Snapshot of upstream master. Update rev, source hash and cargoDeps.hash together.
-  rev = "0b9de252b3e8ad425199453648c11808a473c912";
-  src = fetchFromGitHub {
-    owner = "alvr-org";
-    repo = "ALVR";
-    inherit rev;
-    hash = "sha256-xmhDPH8bWwPZ5JN0GMfxTnSN1GHPV/YpG1DlW10es9I=";
-  };
-
-  # Pin the OpenVR submodule separately to avoid fetching its Git history.
-  openvrSrc = fetchFromGitHub {
-    owner = "ValveSoftware";
-    repo = "openvr";
-    rev = "0924064316de3effbcd1acf1e309182a2deb1c05";
-    hash = "sha256-xtCqro73fWQ6i0PiVmWYCK30DUSq1WeALoUolUjuWlE=";
-  };
+  snapshot = import ./alvr-source.nix { inherit fetchFromGitHub; };
+  inherit (snapshot) rev src openvrSrc;
 
   # Master uses FFmpeg 8.1, not the patched FFmpeg 6 used by ALVR 20.14.1.
   ffmpeg-alvr =
@@ -52,13 +38,13 @@ let
       });
 in
 (alvr.override { inherit ffmpeg-alvr; }).overrideAttrs (old: {
-  version = "21.0.0-dev12-unstable-2026-08-28";
+  inherit (snapshot) version;
   inherit src;
   # Recreate cargoDeps explicitly: overriding cargoHash alone leaves nixpkgs'
   # buildRustPackage dependency fetcher using the release's original hash.
   cargoDeps = rustPlatform.fetchCargoVendor {
     inherit src;
-    hash = "sha256-61x5txV+5j7k1+/6kPaEncWDAcyfERRjFb5ZoLhtUG4=";
+    hash = snapshot.cargoHash;
   };
 
   # The 20.x build-script patches no longer apply. Supply Nix dependencies in

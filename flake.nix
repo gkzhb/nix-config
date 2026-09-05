@@ -8,6 +8,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-ld.url = "github:Mic92/nix-ld";
     nix-ld.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -59,6 +64,7 @@
       nix-ld,
       vscode-server,
       nixpkgs,
+      rust-overlay,
       home-manager,
       sops-nix,
       llm-agents,
@@ -122,9 +128,27 @@
     {
       formatter = forAllFormatterSystems (system: treefmtEval.${system}.config.build.wrapper);
 
-      checks = forAllFormatterSystems (system: {
-        formatting = treefmtEval.${system}.config.build.check self;
-      });
+      checks = forAllFormatterSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          formatting = treefmtEval.${system}.config.build.check self;
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          alvr-android-workflow =
+            pkgs.runCommand "alvr-android-workflow-tests"
+              {
+                nativeBuildInputs = [ pkgs.python3 ];
+              }
+              ''
+                python3 ${./scripts/tests/test-alvr-android.py} \
+                  ${self.devShells.${system}.alvr-android.driver}/bin/alvr-android
+                touch $out
+              '';
+        }
+      );
 
       devShells = forAllFormatterSystems (
         system:
@@ -135,6 +159,19 @@
           default = pkgs.mkShell {
             packages = gitHooks.${system}.enabledPackages;
             shellHook = gitHooks.${system}.shellHook;
+          };
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          alvr-android = import ./packages/alvr-android-shell.nix {
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [ rust-overlay.overlays.default ];
+              # Only this Android development package set accepts SDK licenses.
+              config = {
+                android_sdk.accept_license = true;
+                allowUnfreePredicate = pkg: (pkg.meta.homepage or "") == "https://developer.android.com/tools";
+              };
+            };
           };
         }
       );
