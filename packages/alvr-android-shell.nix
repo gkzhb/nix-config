@@ -12,7 +12,8 @@ let
     buildToolsVersions = [ buildToolsVersion ];
     platformToolsVersion = "37.0.1";
     cmdLineToolsVersion = "13.0";
-    toolsVersion = "26.1.1";
+    # Modern command-line/build tools suffice; omit legacy tools and their JDK 8 dependencies.
+    toolsVersion = null;
     includeNDK = true;
     ndkVersions = [ ndkVersion ];
     includeCmake = false;
