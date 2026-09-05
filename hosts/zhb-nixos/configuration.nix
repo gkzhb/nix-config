@@ -27,6 +27,15 @@
     ];
   };
   systemd = {
+    coredump = {
+      enable = true;
+      # Keep crash metadata in the journal without writing or processing full cores.
+      # Storage=none alone still allows temporary core files for stack trace analysis.
+      settings.Coredump = {
+        Storage = "none";
+        ProcessSizeMax = 0;
+      };
+    };
     settings.Manager.DefaultTimeoutStopSec = "25s";
     user.settings.Manager.DefaultTimeoutStopSec = "15s";
     services = {
@@ -82,6 +91,10 @@
     firefox.enable = true;
     steam = {
       enable = true;
+    };
+    alvr = {
+      enable = true;
+      openFirewall = true;
     };
   };
   services = {

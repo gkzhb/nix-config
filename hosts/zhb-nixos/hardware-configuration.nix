@@ -14,10 +14,14 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
   boot.kernelParams = [
     # "ahci.mobile_lpm_policy=1"
+    # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
     "libata.force=6:3.0"
+
+    # Reserve the 4 KiB page containing the Memtest error at physical 0x00038d903130.
+    # Excluded range: 0x38d903000-0x38d903fff; takes effect after reboot.
+    "memmap=4K$0x38d903000"
   ];
   # Bootloader.
   boot.loader = {
