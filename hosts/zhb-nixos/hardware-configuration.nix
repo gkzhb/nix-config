@@ -64,9 +64,10 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/A5EB-573A";
     fsType = "vfat";
+    # Restrict access to the EFI partition, including the boot loader random seed.
     options = [
-      "fmask=0022"
-      "dmask=0022"
+      "fmask=0077"
+      "dmask=0077"
     ];
   };
 
