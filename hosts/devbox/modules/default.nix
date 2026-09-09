@@ -27,6 +27,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      system-manager
       git
       python3
       fish
@@ -57,6 +58,8 @@ in
       llm-agents.agent-browser
       timewarrior
       taskwarrior-tui
+      mosh
+      herdr
 
       # GUI apps
       tigervnc

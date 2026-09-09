@@ -44,7 +44,7 @@ edit-secrets:
   sops secrets/db.yaml
 
 build-devbox:
-  nix run 'github:numtide/system-manager' -- switch --flake .#devbox --sudo
+  system-manager switch --flake .#devbox --sudo
 
 build-vps:
   system-manager switch --flake .#gkzhb-vps --sudo
