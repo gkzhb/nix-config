@@ -26,7 +26,7 @@
     nixfmt
     git
     uv
-    ty
+    # ty
     ruff
     nodejs
     bun
@@ -45,6 +45,9 @@
     taskwarrior-tui
     beads
     # codebase-memory-mcp.packages.${pkgs.system}.default
+
+    # ai related
+    herdr
   ];
 
   # Auto upgrade nix package and the daemon service.

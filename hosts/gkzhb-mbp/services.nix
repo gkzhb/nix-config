@@ -10,6 +10,14 @@
         RunAtLoad = true;
       };
     };
+
+    dsh = {
+      command = "${pkgs.fish}/bin/fish -l /Users/bytedance/scripts/mcps/dsh.fish";
+      serviceConfig = {
+        KeepAlive = true;
+        RunAtLoad = true;
+      };
+    };
   };
   launchd.daemons.nix-daemon.serviceConfig.EnvironmentVariables = {
     HTTP_PROXY = "http://localhost:10881";
