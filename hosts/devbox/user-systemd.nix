@@ -31,6 +31,30 @@
   #     ];
   #   };
   # };
+  systemd.user.services.dsh = {
+    Unit.Description = "dsh script service";
+    Install.WantedBy = [ "default.target" ];
+    Service = {
+      Type = "simple";
+      # Load interactive Fish initialization (e.g. nvm), not just login config.
+      ExecStart = "${pkgs.fish}/bin/fish -i -l %h/scripts/services/dsh.fish";
+      WorkingDirectory = "%h";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+  };
+  systemd.user.services.newapi = {
+    Unit.Description = "newapi script service";
+    Install.WantedBy = [ "default.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.fish}/bin/fish -l %h/scripts/services/newapi.fish";
+      WorkingDirectory = "%h";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+  };
+
   systemd.user.services.tmux-mcp = {
     Unit = {
       Description = "tmux-mcp service";
