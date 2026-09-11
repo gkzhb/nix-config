@@ -91,12 +91,14 @@
     firefox.enable = true;
     steam = {
       enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = true;
     };
-    alvr = {
-      enable = true;
-      package = pkgs.callPackage ../../packages/alvr.nix { };
-      openFirewall = true;
-    };
+    # alvr = {
+    #   enable = true;
+    #   package = pkgs.callPackage ../../packages/alvr.nix { };
+    #   openFirewall = true;
+    # };
   };
   services = {
     tailscale.enable = true;
@@ -120,6 +122,7 @@
     };
     qbittorrent = {
       enable = true;
+      webuiPort = 8068;
       # package = pkgs.qbittorrent-enhanced;
       user = "zhb";
       group = "users";
@@ -127,6 +130,11 @@
       profileDir = "/home/zhb/.local/share/qBittorrent";
       serverConfig = {
         BitTorrent.Session.DefaultSavePath = "/mnt/data/Windows/Downloads/qbittorrent";
+        LegalNotice.Accepted = true;
+        Preferences.WebUI = {
+          Username = "admin";
+          Password_PBKDF2 = "@ByteArray(J69OTlcJFjK7m+YGmegPLw==:HYSdVgUgcU8HpyyLAHpp4a6IpeJKOsATZR3vK7bOCT9JJT/oFKqjfgms8pWWoRzkU1LbiEcPWJOGNrUISkh1RQ==)";
+        };
       };
       openFirewall = true;
     };
@@ -286,6 +294,7 @@
 
     # AI
     llm-agents.pi
+    herdr
 
     # GUI apps
     (vscode-with-extensions.override {
