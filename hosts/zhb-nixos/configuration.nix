@@ -273,6 +273,7 @@
     usbutils
     android-tools # provides adb for ALVR headset setup and USB connections
     smartmontools
+    appimage-run
 
     python3
     neovim
@@ -315,6 +316,9 @@
     kitty
     bitwarden-desktop
     vlc
+    mpv
+    kdePackages.kfind
+    # digikam
 
     nil
     nixfmt
