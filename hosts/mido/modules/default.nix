@@ -60,9 +60,13 @@ in
       optnix
       nil
       nixfmt
+      android-tools
 
       code-server
       nginx
+
+      # ai
+      herdr
     ];
 
     environment.variables = {
