@@ -37,6 +37,7 @@ in
       tree-sitter
       fzf
       fd
+      television
       neovim
       python313Packages.pynvim
       yazi
