@@ -101,6 +101,21 @@
     # };
   };
   services = {
+    comfyui = {
+      enable = true;
+      gpuSupport = "cuda";
+      # RTX 2070 (Turing): avoid compiling CUDA dependencies for other GPUs.
+      # cudaCapabilities = [ "7.5" ];
+      enableManager = true;
+      listenAddress = "0.0.0.0";
+      port = 8188;
+      openFirewall = true;
+      dataDir = "/home/zhb/comfyui";
+      user = "zhb";
+      group = "users";
+      createUser = false;
+    };
+
     tailscale.enable = true;
     openssh = {
       enable = true;
@@ -274,8 +289,11 @@
     android-tools # provides adb for ALVR headset setup and USB connections
     smartmontools
     appimage-run
+    ffmpeg
+    aria2
 
     python3
+    bun
     neovim
     git
     fish
@@ -295,7 +313,9 @@
 
     # AI
     llm-agents.pi
+    # llm-agents.agent-browser
     herdr
+    beads
 
     # GUI apps
     (vscode-with-extensions.override {

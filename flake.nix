@@ -2,11 +2,20 @@
   description = "gkzhb's flake";
 
   nixConfig = {
-    extra-substituters = [ "https://cache.numtide.com" ];
+    extra-substituters = [
+      "https://cache.numtide.com"
+      "https://comfyui.cachix.org"
+      "https://nix-community.cachix.org"
+    ];
     extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
   };
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    comfyui-nix = {
+      url = "github:utensils/comfyui-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -64,6 +73,7 @@
       nix-ld,
       vscode-server,
       nixpkgs,
+      comfyui-nix,
       rust-overlay,
       home-manager,
       sops-nix,
@@ -208,6 +218,7 @@
           system = "x86_64-linux";
           modules = [
             nix-ld.nixosModules.nix-ld
+            comfyui-nix.nixosModules.default
             ./hosts/zhb-nixos/configuration.nix
             {
               nixpkgs.overlays = [
