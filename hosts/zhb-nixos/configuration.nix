@@ -312,6 +312,8 @@
     python3
     python314Packages.huggingface-hub
     bun
+    nodejs
+    pnpm
     neovim
     git
     fish
