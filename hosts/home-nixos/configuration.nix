@@ -114,6 +114,12 @@
         group = "influxdb2";
         mode = "0440";
       };
+      "influxdb2/zhb_nixos_token" = {
+        sopsFile = ../../secrets/share.yaml;
+        owner = "influxdb2";
+        group = "influxdb2";
+        mode = "0400";
+      };
       "influxdb2/grafana_token" = {
         owner = "influxdb2";
         group = "influxdb2";
@@ -459,20 +465,30 @@
         initialSetup = {
           organization = "home";
           bucket = "telegraf";
+          retention = 0; # Keep long-term metrics forever.
           username = "admin";
           passwordFile = config.sops.secrets."influxdb2/admin_password".path;
           tokenFile = config.sops.secrets."influxdb2/admin_token".path;
         };
         organizations.home = {
+          buckets.telegraf_short = {
+            description = "High-resolution Telegraf metrics, retained for 15 days";
+            retention = 15 * 24 * 60 * 60;
+          };
           auths = {
+            zhb-nixos = {
+              description = "zhb-nixos write token for all buckets in home";
+              writePermissions = [ "buckets" ];
+              tokenFile = config.sops.secrets."influxdb2/zhb_nixos_token".path;
+            };
             telegraf = {
               description = "Telegraf write token";
-              writeBuckets = [ "telegraf" ];
+              writePermissions = [ "buckets" ];
               tokenFile = config.sops.secrets."influxdb2/telegraf_token".path;
             };
             grafana = {
               description = "Grafana read token";
-              readBuckets = [ "telegraf" ];
+              readPermissions = [ "buckets" ];
               tokenFile = config.sops.secrets."influxdb2/grafana_token".path;
             };
           };
