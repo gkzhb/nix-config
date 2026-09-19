@@ -235,7 +235,7 @@
             #   # Optionally, use home-manager.extraSpecialArgs to pass
             #   # arguments to home.nix
             # }
-            # sops-nix.nixosModules.sops
+            sops-nix.nixosModules.sops
           ];
         };
       };

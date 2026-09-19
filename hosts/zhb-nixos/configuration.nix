@@ -15,6 +15,17 @@
     ./hardware-configuration.nix
   ];
 
+  sops = {
+    age = {
+      keyFile = "/home/zhb/.config/sops/age/keys.txt";
+      generateKey = false;
+    };
+    secrets."influxdb2/zhb_nixos_token" = {
+      sopsFile = ../../secrets/share.yaml;
+      mode = "0400";
+    };
+  };
+
   nix.settings = {
     experimental-features = [
       "nix-command"
