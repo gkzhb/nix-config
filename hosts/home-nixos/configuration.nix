@@ -46,7 +46,7 @@
     impure-env = "GOPROXY=http://localhost:8333,direct";
   };
 
-  # networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "home-nixos"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
@@ -244,6 +244,7 @@
     # Bun 1.3's Linux x64 binary requires AVX. Build Pi in its supported
     # Node.js mode instead, so it works on this machine's pre-AVX CPU.
     (llm-agents.pi.override { useBun = false; })
+    herdr
     # llm-agents.opencode
     # llm-agents.claude-code
     # llm-agents.codex
