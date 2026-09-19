@@ -1,7 +1,6 @@
 keys:
   - &admin age109fkutlg2xal9320rmlyg2pya447wte7sywq8nz6vnq53hy443ysykv53q
-  # TODO: Replace with zhb-nixos's actual age public key and uncomment both lines.
-  # - &zhb_nixos age1REPLACE_WITH_ZHB_NIXOS_PUBLIC_KEY
+  - &zhb_nixos age1j0u835slxc76cq6fjvuhzjqw76eptes86yty4yc5avcczrj564as4cm26y
 creation_rules:
   # First match wins: only share.yaml may be decrypted by zhb-nixos.
   # After enabling its recipient below, run: sops updatekeys secrets/share.yaml
@@ -9,7 +8,11 @@ creation_rules:
     key_groups:
       - age:
           - *admin
-          # - *zhb_nixos
+          - *zhb_nixos
+  - path_regex: ^secrets/zhb_nixos\.yaml$
+    key_groups:
+      - age:
+          - *zhb_nixos
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:

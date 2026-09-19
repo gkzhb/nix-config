@@ -16,6 +16,7 @@
   ];
 
   sops = {
+    defaultSopsFile = ../../secrets/zhb_nixos.yaml;
     age = {
       keyFile = "/home/zhb/.config/sops/age/keys.txt";
       generateKey = false;
@@ -303,7 +304,12 @@
     ffmpeg
     aria2
 
+    # manage secrets
+    age
+    sops
+
     python3
+    python314Packages.huggingface-hub
     bun
     neovim
     git

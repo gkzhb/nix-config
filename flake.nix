@@ -295,9 +295,9 @@
           inherit (pkgs) mmx-cli;
           default = pkgs.mmx-cli;
         }
-        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-          alvr = pkgs.alvr-master;
-        }
+        # // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+        #   alvr = pkgs.alvr-master;
+        # }
       );
 
       darwinConfigurations = {
