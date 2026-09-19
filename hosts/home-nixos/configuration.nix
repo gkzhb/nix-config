@@ -327,8 +327,12 @@
       h.gkzhb.top:53 {
 
         hosts {
+          100.64.0.13 home.h.gkzhb.top
+          100.64.0.13 *.home.h.gkzhb.top
           100.64.0.15 mido.h.gkzhb.top
           100.64.0.15 *.mido.h.gkzhb.top
+          100.64.0.16 zhb.h.gkzhb.top
+          100.64.0.16 *.zhb.h.gkzhb.top
         }
       }
       '';
