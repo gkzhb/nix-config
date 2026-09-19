@@ -20,6 +20,12 @@ let
       collect_cpu_time = false;
       report_active = false;
     };
+    intel_powerstat = {
+      # RAPL package energy deltas yield average CPU package power in watts.
+      # No MSR/per-core metrics or unsupported DRAM domain are requested.
+      package_metrics = [ "current_power_consumption" ];
+      cpu_metrics = [ ];
+    };
     mem = { };
     disk = {
       ignore_fs = [
@@ -42,6 +48,14 @@ let
   };
 in
 {
+  # RAPL energy counters are root-only by default. Grant access only to the
+  # monitoring group, without CAP_SYS_RAWIO or broad DAC-bypass capabilities.
+  systemd.tmpfiles.rules = [
+    "z /sys/devices/virtual/powercap/intel-rapl/intel-rapl:*/energy_uj 0440 root telegraf - -"
+    "z /sys/devices/virtual/powercap/intel-rapl/intel-rapl:*/intel-rapl:*/energy_uj 0440 root telegraf - -"
+  ];
+  systemd.services.telegraf.after = [ "systemd-tmpfiles-setup.service" ];
+
   sops.templates."telegraf-influxdb2.env" = {
     owner = "telegraf";
     group = "telegraf";

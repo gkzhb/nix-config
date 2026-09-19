@@ -14,51 +14,57 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.kernelParams = [
-    # "ahci.mobile_lpm_policy=1"
-    # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
-    "libata.force=6:3.0"
+  boot = {
+    kernelParams = [
+      # "ahci.mobile_lpm_policy=1"
+      # ata6 is the WDC mechanical drive; cap its SATA link at 3.0 Gbps.
+      "libata.force=6:3.0"
 
-    # Reserve the 4 KiB page containing the Memtest error at physical 0x00038d903130.
-    # Excluded range: 0x38d903000-0x38d903fff; takes effect after reboot.
-    "memmap=4K$0x38d903000"
-  ];
-  # Bootloader.
-  boot.loader = {
-    systemd-boot = {
-      enable = false;
-      configurationLimit = 5;
-    };
-    limine = {
-      enable = true;
-      maxGenerations = 5;
-      extraEntries = ''
-        /:Windows 11
-        comment: Windows 11
-        protocol: efi
-        path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
+      # Reserve the 4 KiB page containing the Memtest error at physical 0x00038d903130.
+      # Excluded range: 0x38d903000-0x38d903fff; takes effect after reboot.
+      "memmap=4K$0x38d903000"
+    ];
+    # Bootloader.
+    loader = {
+      systemd-boot = {
+        enable = false;
+        configurationLimit = 5;
+      };
+      limine = {
+        enable = true;
+        maxGenerations = 5;
+        extraEntries = ''
+          /:Windows 11
+          comment: Windows 11
+          protocol: efi
+          path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
 
-        /:Memtest86+
-        comment: Memory diagnostic
-        protocol: efi
-        path: boot():/EFI/memtest86plus/memtest86plus.efi
-      '';
+          /:Memtest86+
+          comment: Memory diagnostic
+          protocol: efi
+          path: boot():/EFI/memtest86plus/memtest86plus.efi
+        '';
+      };
+      efi.canTouchEfiVariables = true;
     };
-    efi.canTouchEfiVariables = true;
-    # grub.configurationLimit = 5;
+
+    initrd = {
+      availableKernelModules = [
+        "xhci_pci"
+        "ahci"
+        "nvme"
+        "usb_storage"
+        "usbhid"
+        "sd_mod"
+      ];
+      kernelModules = [ ];
+    };
+    kernelModules = [
+      "kvm-intel"
+      "intel_rapl_msr"
+    ];
+    extraModulePackages = [ ];
   };
-
-  boot.initrd.availableKernelModules = [
-    "xhci_pci"
-    "ahci"
-    "nvme"
-    "usb_storage"
-    "usbhid"
-    "sd_mod"
-  ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
-  boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/69f6ac99-2549-4106-923e-48efed92df1f";
