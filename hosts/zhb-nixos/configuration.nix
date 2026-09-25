@@ -16,6 +16,9 @@
     ./telegraf.nix
   ];
 
+  # The boot activation decrypts sops secrets using an age key under /home.
+  fileSystems."/home".neededForBoot = true;
+
   sops = {
     defaultSopsFile = ../../secrets/zhb_nixos.yaml;
     age = {
@@ -276,6 +279,8 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  hardware.uinput.enable = true;
+
   # Define user accounts
   users.users."zhb" = {
     isNormalUser = true;
@@ -284,6 +289,7 @@
     extraGroups = [
       "networkmanager"
       "wheel"
+      "uinput"
     ];
     packages = with pkgs; [
       kdePackages.kate
