@@ -117,6 +117,49 @@
     # };
   };
   services = {
+    samba = {
+      enable = true;
+      openFirewall = true;
+      settings = {
+        global = {
+          workgroup = "WORKGROUP";
+          "server string" = "zhb-nixos";
+          "netbios name" = "zhb-nixos";
+          security = "user";
+          "server min protocol" = "SMB2_02";
+          # Anonymous shares are only available to the LAN and localhost.
+          "hosts allow" = "192.168.0.0/16 127.0.0.1 ::1";
+          "hosts deny" = "ALL";
+          "guest account" = "zhb";
+          "map to guest" = "Bad User";
+          "load printers" = "no";
+          "disable spoolss" = "yes";
+        };
+        game-videos = {
+          path = "/mnt/data/Archives/Windows/game-videos";
+          browseable = "yes";
+          "guest ok" = "yes";
+          "guest only" = "yes";
+          "read only" = "yes";
+          # Do not expose targets of symlinks inside the shared directory.
+          "follow symlinks" = "no";
+        };
+        Downloads = {
+          path = "/mnt/data/Windows/Downloads";
+          browseable = "yes";
+          "guest ok" = "yes";
+          "guest only" = "yes";
+          "read only" = "yes";
+          "follow symlinks" = "no";
+        };
+      };
+    };
+    samba-wsdd = {
+      enable = true;
+      openFirewall = true;
+      interface = "wlp4s0";
+    };
+
     comfyui = {
       enable = true;
       gpuSupport = "cuda";
