@@ -422,11 +422,11 @@
   #   enableSSHSupport = true;
   # };
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  # Allow LAN clients to access the proxy ports without opening them globally.
+  networking.firewall.extraCommands = ''
+    iptables -w -A nixos-fw -s 192.168.0.0/16 -p tcp -m multiport --dports 10880,10881 -j nixos-fw-accept
+    iptables -w -A nixos-fw -s 192.168.0.0/16 -p udp -m multiport --dports 10880,10881 -j nixos-fw-accept
+  '';
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
