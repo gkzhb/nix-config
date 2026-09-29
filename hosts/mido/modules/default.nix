@@ -138,28 +138,49 @@ in
           };
         };
 
-        dsh-web = {
-          description = "DeepSeek Harness web service for user";
+        node-red = {
+          description = "Node-RED for user";
           wantedBy = [ "system-manager.target" ];
           wants = [ "network-online.target" ];
           after = [ "network-online.target" ];
+          unitConfig.RequiresMountsFor = "/mnt/sd/apps/node-red";
           serviceConfig = {
             User = "user";
             Group = "user";
-            # A systemd service has no shell to expand ~; WorkingDirectory
-            # provides the requested `cd` before entering the dev shell.
-            WorkingDirectory = "/home/user/gitrep/deepseek-harness";
+            WorkingDirectory = "/mnt/sd/apps/node-red";
             Environment = [
               "HOME=/home/user"
-              servicePath
+              # Snapshot of mido's interactive PATH; systemd does not inherit it.
+              "PATH=/home/user/.pi/agent/bin:/run/current-system/sw/bin:/home/user/.local/share/pnpm/bin:/home/user/scripts:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             ];
-            # `nix develop --command` runs pnpm inside the project's dev-shell
-            # environment without relying on an interactive shell.
-            ExecStart = "${pkgs.nix}/bin/nix develop /home/user/gitrep/deepseek-harness --command pnpm dsh web";
+            ExecStart = "/usr/bin/npm run start";
             Restart = "on-failure";
             RestartSec = "5s";
           };
         };
+
+        # dsh-web = {
+        #   description = "DeepSeek Harness web service for user";
+        #   wantedBy = [ "system-manager.target" ];
+        #   wants = [ "network-online.target" ];
+        #   after = [ "network-online.target" ];
+        #   serviceConfig = {
+        #     User = "user";
+        #     Group = "user";
+        #     # A systemd service has no shell to expand ~; WorkingDirectory
+        #     # provides the requested `cd` before entering the dev shell.
+        #     WorkingDirectory = "/home/user/gitrep/deepseek-harness";
+        #     Environment = [
+        #       "HOME=/home/user"
+        #       servicePath
+        #     ];
+        #     # `nix develop --command` runs pnpm inside the project's dev-shell
+        #     # environment without relying on an interactive shell.
+        #     ExecStart = "${pkgs.nix}/bin/nix develop /home/user/gitrep/deepseek-harness --command pnpm dsh web";
+        #     Restart = "on-failure";
+        #     RestartSec = "5s";
+        #   };
+        # };
 
         # The declaratively managed configuration serves nginx's bundled
         # static site on port 80 and logs errors to journald. Keep nginx in
