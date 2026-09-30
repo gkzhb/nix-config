@@ -127,8 +127,8 @@
           "netbios name" = "zhb-nixos";
           security = "user";
           "server min protocol" = "SMB2_02";
-          # Anonymous shares are only available to the LAN and localhost.
-          "hosts allow" = "192.168.0.0/16 127.0.0.1 ::1";
+          # Anonymous shares are only available to the LAN, Tailscale, and localhost.
+          "hosts allow" = "192.168.0.0/16 100.64.0.0/10 fd7a:115c:a1e0::/48 127.0.0.1 ::1";
           "hosts deny" = "ALL";
           "guest account" = "zhb";
           "map to guest" = "Bad User";
