@@ -18,6 +18,7 @@
     fd
     ripgrep
     television
+    mosh
 
     # devtools
     just
