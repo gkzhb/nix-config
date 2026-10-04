@@ -102,21 +102,6 @@
     };
   };
 
-  systemd.user.services.opencode = {
-    Unit = {
-      Description = "opencode service";
-      After = [ "network.target" ];
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.fish}/bin/fish -l %h/scripts/tmux/vibe.fish";
-      Restart = "on-failure";
-      RestartSec = "10";
-    };
-  };
   systemd.user.services.nodered = {
     Unit = {
       Description = "nodered service";

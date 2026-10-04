@@ -15,21 +15,6 @@ in
   programs.home-manager.enable = true;
 
   systemd.user.services = {
-    opencode = {
-      Unit = {
-        Description = "OpenCode Web UI CodeNomad";
-        After = [ "network.target" ];
-      };
-      Service = {
-        Type = "simple";
-        ExecStart = "${pkgs.fish}/bin/fish -c %h/scripts/services/opencode/run.fish";
-        Restart = "on-failure";
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-    };
-
     web-mcp = {
       Unit = {
         Description = "web mcp server";
