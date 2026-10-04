@@ -49,6 +49,7 @@
 
     # ai related
     herdr
+    llama-cpp
   ];
 
   # Auto upgrade nix package and the daemon service.
