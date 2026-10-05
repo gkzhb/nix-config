@@ -716,8 +716,6 @@
     # push notification service
     ntfy-sh = {
       enable = true;
-      user = "zhb";
-      group = "zhb";
       environmentFile = "/mnt/data/ntfy/.env";
       settings = {
         base-url = "https://ntfy.gkzhb.top";
@@ -884,6 +882,10 @@
     ntfy-sh = {
       serviceConfig = {
         ReadWritePaths = [ "/mnt/data/ntfy" ];
+        # Keep access to the existing zhb-owned data after upstream removed
+        # services.ntfy-sh.user/group in favor of DynamicUser.
+        User = "zhb";
+        Group = "zhb";
         DynamicUser = lib.mkForce false;
       };
     };
@@ -989,6 +991,7 @@
       22 # SSH
       80 # HTTP
       443 # HTTPS
+      9222 # Brave CDP (unauthenticated remote browser control)
     ];
     # Allow Tailscale sources full access
     trustedInterfaces = [ "tailscale0" ];
