@@ -68,6 +68,11 @@
       qbittorrent.serviceConfig = {
         ProtectHome = lib.mkForce false;
         PrivateUsers = lib.mkForce false;
+        # Qt checks /proc/version before validating stale lockfile process names.
+        # ProcSubset=pid hides it and can mistake a reused PID for another instance.
+        ProcSubset = lib.mkForce "all";
+        # Qt's single-instance communication uses a Unix-domain socket.
+        RestrictAddressFamilies = lib.mkAfter [ "AF_UNIX" ];
       };
     };
   };
