@@ -8,6 +8,7 @@
     nix = {
       enable = true;
       package = pkgs.nix;
+      distributedBuilds = true;
       settings = {
         builders = [ "ssh-ng://zg x86_64-linux" ];
         max-jobs = 0;
@@ -57,6 +58,7 @@
       thrift-ls
       timewarrior
       taskwarrior-tui
+      herdr
 
       # server services
       tailscale
