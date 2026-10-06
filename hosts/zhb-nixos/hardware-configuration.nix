@@ -34,11 +34,6 @@
         enable = true;
         maxGenerations = 5;
         extraEntries = ''
-          /:Windows 11
-          comment: Windows 11
-          protocol: efi
-          path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
-
           /:Memtest86+
           comment: Memory diagnostic
           protocol: efi
@@ -67,8 +62,22 @@
   };
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/69f6ac99-2549-4106-923e-48efed92df1f";
-    fsType = "ext4";
+    device = "/dev/disk/by-uuid/6e7870e6-ec07-4e25-859e-7ec1dce923d1";
+    fsType = "btrfs";
+    options = [
+      "subvol=@"
+      "compress=zstd"
+      "noatime"
+    ];
+  };
+  fileSystems."/nix" = {
+    device = "/dev/disk/by-uuid/6e7870e6-ec07-4e25-859e-7ec1dce923d1";
+    fsType = "btrfs";
+    options = [
+      "subvol=@nix"
+      "compress=zstd"
+      "noatime"
+    ];
   };
 
   fileSystems."/boot" = {
@@ -82,7 +91,7 @@
   };
 
   fileSystems."/data" = {
-    device = "/dev/disk/by-uuid/61d849b6-6a04-498f-bcf1-d01e47f3c6c4";
+    device = "/dev/disk/by-uuid/c413f15d-f39b-42b8-bf1a-9311af2d8973";
     fsType = "ext4";
   };
 

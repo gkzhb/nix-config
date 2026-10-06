@@ -7,7 +7,10 @@
       "https://comfyui.cachix.org"
       "https://nix-community.cachix.org"
     ];
-    extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
+    extra-trusted-public-keys = [
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
   };
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -220,6 +223,44 @@
             nix-ld.nixosModules.nix-ld
             comfyui-nix.nixosModules.default
             ./hosts/zhb-nixos/configuration.nix
+            (
+              {
+                config,
+                lib,
+                pkgs,
+                ...
+              }:
+              let
+                # The upstream flake uses its own package set, so a host overlay
+                # would not change the AnyIO used by ComfyUI.
+                comfyPkgs = import nixpkgs {
+                  system = pkgs.stdenv.hostPlatform.system;
+                  config = {
+                    allowUnfree = true;
+                    allowBrokenPredicate = pkg: (pkg.pname or "") == "open-clip-torch";
+                  };
+                };
+                versions = import "${comfyui-nix}/nix/versions.nix";
+                gpuSupport = config.services.comfyui.gpuSupport;
+                upstreamOverrides = import "${comfyui-nix}/nix/python-overrides.nix" {
+                  pkgs = comfyPkgs;
+                  inherit versions gpuSupport;
+                };
+                comfyPackages = import "${comfyui-nix}/nix/packages.nix" {
+                  pkgs = comfyPkgs;
+                  inherit lib versions gpuSupport;
+                  pythonOverrides = lib.composeExtensions upstreamOverrides (
+                    _final: prev: {
+                      # AnyIO 4.14.2's TLS tests fail with Python 3.12.15.
+                      anyio = prev.anyio.overridePythonAttrs { doCheck = false; };
+                    }
+                  );
+                };
+              in
+              {
+                services.comfyui.package = comfyPackages.default;
+              }
+            )
             {
               nixpkgs.overlays = [
                 llm-agents.overlays.shared-nixpkgs

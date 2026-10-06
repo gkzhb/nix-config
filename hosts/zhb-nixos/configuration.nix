@@ -62,6 +62,25 @@
         https_proxy = "http://localhost:10881";
         no_proxy = "localhost,127.0.0.1,192.168.0.0/16,100.64.0.0/10";
       };
+      v2raya = {
+        # Preserve full transparent-proxy support and the existing /etc/v2raya state.
+        # Lite mode can run unprivileged, but is not a drop-in replacement.
+        path = [ pkgs.kmod ];
+        environment.V2RAYA_V2RAY_ASSETSDIR = "/run/v2raya/assets";
+        preStart = ''
+          # Seed writable assets on every start. No boot-time download is needed,
+          # and v2rayA can still update data without trying to write to the store.
+          install -d -m 0755 /run/v2raya/assets
+          install -m 0644 ${pkgs.v2ray-rules-dat}/share/v2ray/{geoip,geosite}.dat /run/v2raya/assets/
+        '';
+        serviceConfig = {
+          RuntimeDirectory = "v2raya";
+          RuntimeDirectoryMode = "0750";
+          # The upstream module logs to a root-only file; use journald instead.
+          Environment = lib.mkForce [ ];
+          RestartSec = "5s";
+        };
+      };
       # The upstream qBittorrent module hardens the service with ProtectHome=yes
       # and PrivateUsers=true. Both prevent a service using zhb's profile in $HOME
       # from accessing that profile and cause qbittorrent-enhanced to abort at startup.
@@ -166,7 +185,9 @@
     };
 
     comfyui = {
-      enable = true;
+      # Temporarily disabled to exclude ComfyUI from the system build.
+      # Set this back to true to restore the service with the settings below.
+      enable = false;
       gpuSupport = "cuda";
       # RTX 2070 (Turing): avoid compiling CUDA dependencies for other GPUs.
       # cudaCapabilities = [ "7.5" ];
@@ -382,6 +403,7 @@
     ripgrep
     television
     wget
+    wl-clipboard # provides wl-copy and wl-paste for Wayland
     just
     optnix
 
@@ -411,7 +433,9 @@
     bitwarden-desktop
     vlc
     mpv
+    eden # Nintendo Switch emulator
     kdePackages.kfind
+    ghidra
     # digikam
 
     nil
