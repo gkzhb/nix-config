@@ -1,3 +1,5 @@
 result
 .alvr-android/
 .pre-commit-config.yaml
+.pi/tasks/
+.planning/
