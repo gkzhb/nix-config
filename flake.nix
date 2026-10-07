@@ -231,10 +231,38 @@
                 ...
               }:
               let
-                # The upstream flake uses its own package set, so a host overlay
-                # would not change the AnyIO used by ComfyUI.
+                # Keep the no-test policy local to ComfyUI's package set;
+                # the upstream flake does not use the host's Python overlay.
+                # Also cover Python-based build tools in this private nixpkgs
+                # instance, not just the Python 3.12 runtime environment.
+                noPythonTests =
+                  _final: prev:
+                  let
+                    withoutTests =
+                      builder:
+                      lib.mirrorFunctionArgs builder (
+                        args:
+                        (builder args).overrideAttrs {
+                          doCheck = false;
+                          doInstallCheck = false;
+                        }
+                      )
+                      // {
+                        override = args: withoutTests (builder.override args);
+                      };
+                  in
+                  {
+                    buildPythonPackage = withoutTests prev.buildPythonPackage;
+                    buildPythonApplication = withoutTests prev.buildPythonApplication;
+                  };
                 comfyPkgs = import nixpkgs {
                   system = pkgs.stdenv.hostPlatform.system;
+                  overlays = [
+                    (_final: prev: {
+                      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [ noPythonTests ];
+
+                    })
+                  ];
                   config = {
                     allowUnfree = true;
                     allowBrokenPredicate = pkg: (pkg.pname or "") == "open-clip-torch";
@@ -249,12 +277,17 @@
                 comfyPackages = import "${comfyui-nix}/nix/packages.nix" {
                   pkgs = comfyPkgs;
                   inherit lib versions gpuSupport;
-                  pythonOverrides = lib.composeExtensions upstreamOverrides (
-                    _final: prev: {
-                      # AnyIO 4.14.2's TLS tests fail with Python 3.12.15.
-                      anyio = prev.anyio.overridePythonAttrs { doCheck = false; };
-                    }
-                  );
+                  pythonOverrides = lib.composeManyExtensions [
+                    upstreamOverrides
+                    noPythonTests
+                    (final: prev: {
+                      # iopath imports Protocol from typing_extensions, but
+                      # the pinned nixpkgs package omits this runtime dependency.
+                      iopath = prev.iopath.overridePythonAttrs (old: {
+                        propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ final.typing-extensions ];
+                      });
+                    })
+                  ];
                 };
               in
               {

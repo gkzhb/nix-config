@@ -185,8 +185,6 @@
     };
 
     comfyui = {
-      # Temporarily disabled to exclude ComfyUI from the system build.
-      # Set this back to true to restore the service with the settings below.
       enable = false;
       gpuSupport = "cuda";
       # RTX 2070 (Turing): avoid compiling CUDA dependencies for other GPUs.
@@ -368,9 +366,14 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  # Explicitly accepted Ventoy's binary-blob security and licensing risks.
+  nixpkgs.config.permittedInsecurePackages = [
+    "ventoy-qt5-1.1.17"
+  ];
 
   environment.systemPackages = with pkgs; [
     ntfs3g
+    (ventoy.override { defaultGuiType = "qt5"; })
     p7zip # provides 7z; supports extracting RAR archives
     pciutils
     usbutils
@@ -409,7 +412,7 @@
 
     # AI
     llm-agents.pi
-    # llm-agents.agent-browser
+    agent-browser
     herdr
     beads
 
