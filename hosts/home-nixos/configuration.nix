@@ -254,10 +254,10 @@
     # llm-agents.opencode
     # llm-agents.claude-code
     # llm-agents.codex
-    # llm-agents.agent-browser
+    agent-browser
 
     # llm-agents.openclaw
-    # llm-agents.mcporter
+    mcporter
 
     # GUI app
     tigervnc
@@ -626,14 +626,14 @@
       # .hermes/config.yaml
       settings = {
         model = {
-          default = "gpt-5.6-terra";
+          default = "gpt-6.1-sol";
           provider = "custom:NewAPI";
           context_length = 500000;
         };
         custom_providers = [
           {
             name = "NewAPI";
-            model = "gpt-5.6-terra";
+            model = "gpt-6.1-sol";
             base_url = "http://localhost:8056";
             key_env = "NEWAPI_API_KEY";
             api_mode = "anthropic_messages";
@@ -991,7 +991,6 @@
       22 # SSH
       80 # HTTP
       443 # HTTPS
-      9222 # Brave CDP (unauthenticated remote browser control)
     ];
     # Allow Tailscale sources full access
     trustedInterfaces = [ "tailscale0" ];
