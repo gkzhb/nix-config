@@ -19,6 +19,7 @@
     ripgrep
     television
     mosh
+    ttyd
 
     # devtools
     just
