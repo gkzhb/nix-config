@@ -60,8 +60,13 @@
       taskwarrior-tui
       herdr
 
+      # Secret management CLI tools
+      sops
+      age
+
       # server services
       tailscale
+      tailscale.derper
       frp
     ];
 

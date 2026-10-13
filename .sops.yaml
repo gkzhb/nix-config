@@ -2,6 +2,7 @@ keys:
   - &admin age109fkutlg2xal9320rmlyg2pya447wte7sywq8nz6vnq53hy443ysykv53q
   - &zhb_nixos age1j0u835slxc76cq6fjvuhzjqw76eptes86yty4yc5avcczrj564as4cm26y
   - &gkzhb_mbp age1998ry47e29yttk370hv7srcs3cum3axwlnankj7nsr6h9jyhndnqqtts47
+  - &gkzhb_vps age1usalx2t4kxrfww352tfph6nvt3vgpmlugcf2n4ra497xurm0ja7qs06grm
 creation_rules:
   # This Mac can decrypt only its dedicated GoDNS configuration.
   - path_regex: ^secrets/godns-mbp\.yaml$
@@ -20,6 +21,11 @@ creation_rules:
     key_groups:
       - age:
           - *zhb_nixos
+  - path_regex: ^secrets/gkzhb-vps-vaultwarden\.json$
+    key_groups:
+      - age:
+          - *admin
+          - *gkzhb_vps
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:

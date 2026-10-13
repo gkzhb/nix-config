@@ -79,31 +79,46 @@ in
       };
     };
 
-    # docker compose stacks under /home/zhb/scripts/docker/<name>/
-    # Managed via Type=oneshot + RemainAfterExit=yes so systemctl stop runs
-    # `docker compose down` for a clean shutdown.
-    docker-derper = {
-      description = "Tailscale DERP server (docker compose)";
+    derper = {
+      description = "Tailscale DERP server";
       wantedBy = [ "system-manager.target" ];
-      wants = [ "docker.service" ];
+      wants = [ "network-online.target" ];
+      requires = [ "tailscaled.service" ];
       after = [
-        "network.target"
-        "docker.service"
+        "network-online.target"
         "tailscaled.service"
       ];
       serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = "yes";
-        WorkingDirectory = "/home/zhb/scripts/docker/derper";
-        ExecStart = "docker compose up --wait --force-recreate";
-        ExecStop = "docker compose down";
-        TimeoutStartSec = "0";
-        TimeoutStopSec = "5min";
+        Type = "simple";
+        # Runtime certificates and the persistent DERP identity stay outside
+        # the Nix store; the existing certificate renewal hook restarts derper.
+        ExecStart = lib.concatStringsSep " " [
+          "${pkgs.tailscale.derper}/bin/derper"
+          "-hostname=derper.gkzhb.top"
+          "-a=:23479"
+          "-http-port=8940"
+          "-stun=true"
+          "-stun-port=3478"
+          "-certmode=manual"
+          "-certdir=/home/zhb/scripts/docker/derper/certs"
+          "-c=/var/lib/derper/derper.key"
+          "-verify-clients=true"
+          "-socket=/run/tailscale/tailscaled.sock"
+        ];
+        StateDirectory = "derper";
+        StateDirectoryMode = "0700";
+        UMask = "0077";
         Restart = "on-failure";
-        RestartSec = "10";
+        RestartSec = "5s";
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = "read-only";
       };
     };
 
+    # Other docker compose stacks under /home/zhb/scripts/docker/<name>/.
+    # Type=oneshot + RemainAfterExit=yes makes stop run `docker compose down`.
     docker-pgsql = {
       description = "PostgreSQL + pgvector (docker compose)";
       wantedBy = [ "system-manager.target" ];
@@ -182,27 +197,6 @@ in
         Type = "oneshot";
         RemainAfterExit = "yes";
         WorkingDirectory = "/home/zhb/scripts/docker/LibreChat";
-        ExecStart = "docker compose up --wait --force-recreate";
-        ExecStop = "docker compose down";
-        TimeoutStartSec = "0";
-        TimeoutStopSec = "5min";
-        Restart = "on-failure";
-        RestartSec = "10";
-      };
-    };
-
-    docker-bitwarden = {
-      description = "Vaultwarden password manager (docker compose)";
-      wantedBy = [ "system-manager.target" ];
-      wants = [ "docker.service" ];
-      after = [
-        "network.target"
-        "docker.service"
-      ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = "yes";
-        WorkingDirectory = "/home/zhb/scripts/docker/bitwarden";
         ExecStart = "docker compose up --wait --force-recreate";
         ExecStop = "docker compose down";
         TimeoutStartSec = "0";

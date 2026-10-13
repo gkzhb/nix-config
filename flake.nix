@@ -328,8 +328,10 @@
         };
         "gkzhb-vps" = system-manager.lib.makeSystemConfig {
           modules = [
+            sops-nix.nixosModules.sops
             ./hosts/gkzhb-vps/modules/default.nix
             ./hosts/gkzhb-vps/modules/systemd.nix
+            ./hosts/gkzhb-vps/modules/vaultwarden.nix
           ];
         };
       };
