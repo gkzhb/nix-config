@@ -29,6 +29,19 @@
       sopsFile = ../../secrets/share.yaml;
       mode = "0400";
     };
+    secrets."rustfs/access_key" = {
+      restartUnits = [ "rustfs.service" ];
+    };
+    secrets."rustfs/secret_key" = {
+      restartUnits = [ "rustfs.service" ];
+    };
+    templates."rustfs.env" = {
+      # Credentials are decrypted at runtime, never copied into the Nix store.
+      content = ''
+        RUSTFS_ACCESS_KEY=${config.sops.placeholder."rustfs/access_key"}
+        RUSTFS_SECRET_KEY=${config.sops.placeholder."rustfs/secret_key"}
+      '';
+    };
   };
 
   nix.settings = {
@@ -55,6 +68,7 @@
     settings.Manager.DefaultTimeoutStopSec = "25s";
     user.settings.Manager.DefaultTimeoutStopSec = "15s";
     services = {
+      rustfs.unitConfig.RequiresMountsFor = [ "/data/rustfs" ];
       # use local athens
       nix-daemon.environment = {
         # GOPROXY = "http://localhost:8333,direct";
@@ -141,6 +155,15 @@
     # };
   };
   services = {
+    rustfs = {
+      # admin console port 9001, s3 api port 9000
+      enable = true;
+      settings = {
+        RUSTFS_VOLUMES = "/data/rustfs/";
+        RUSTFS_CONSOLE_ENABLE = "true";
+      };
+      environmentFile = config.sops.templates."rustfs.env".path;
+    };
     samba = {
       enable = true;
       openFirewall = true;
@@ -374,7 +397,8 @@
   environment.systemPackages = with pkgs; [
     ntfs3g
     (ventoy.override { defaultGuiType = "qt5"; })
-    p7zip # provides 7z; supports extracting RAR archives
+    p7zip # provides 7z
+    unrar # supports extracting RAR archives
     pciutils
     usbutils
     android-tools # provides adb for ALVR headset setup and USB connections
