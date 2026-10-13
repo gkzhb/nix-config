@@ -1,7 +1,14 @@
 keys:
   - &admin age109fkutlg2xal9320rmlyg2pya447wte7sywq8nz6vnq53hy443ysykv53q
   - &zhb_nixos age1j0u835slxc76cq6fjvuhzjqw76eptes86yty4yc5avcczrj564as4cm26y
+  - &gkzhb_mbp age1998ry47e29yttk370hv7srcs3cum3axwlnankj7nsr6h9jyhndnqqtts47
 creation_rules:
+  # This Mac can decrypt only its dedicated GoDNS configuration.
+  - path_regex: ^secrets/godns-mbp\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *gkzhb_mbp
   # First match wins: only share.yaml may be decrypted by zhb-nixos.
   # After enabling its recipient below, run: sops updatekeys secrets/share.yaml
   - path_regex: ^secrets/share\.yaml$

@@ -36,6 +36,10 @@ update:
 update-nix:
   nix flake update nixpkgs nix-ld sops-nix home-manager nix-darwin system-manager
 
+create-age-key:
+  mkdir -p ~/.config/sops/age
+  age-keygen -o ~/.config/sops/age/keys.txt
+
 # update secrets file after adding new hosts in .sops.yaml
 update-secrets:
   sops updatekeys secrets/db.yaml

@@ -384,6 +384,7 @@
               ];
             }
             ./hosts/gkzhb-mbp/configuration.nix
+            sops-nix.darwinModules.sops
             home-manager.darwinModules.home-manager
             {
               home-manager.useGlobalPkgs = true;

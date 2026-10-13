@@ -36,6 +36,10 @@
     optnix
     fmd
 
+    # Encrypted configuration management (GoDNS is installed by godns.nix)
+    sops
+    age
+
     # proxy
     xray
     # v2raya # not supported
@@ -93,5 +97,6 @@
 
   imports = [
     ./services.nix
+    ./godns.nix
   ];
 }
