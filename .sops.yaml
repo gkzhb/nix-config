@@ -21,6 +21,11 @@ creation_rules:
     key_groups:
       - age:
           - *zhb_nixos
+  - path_regex: ^secrets/gkzhb-vps-telegraf\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *gkzhb_vps
   - path_regex: ^secrets/gkzhb-vps-vaultwarden\.json$
     key_groups:
       - age:

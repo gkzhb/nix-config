@@ -120,6 +120,12 @@
         group = "influxdb2";
         mode = "0400";
       };
+      "influxdb2/gkzhb_vps_token" = {
+        sopsFile = ../../secrets/gkzhb-vps-telegraf.yaml;
+        owner = "influxdb2";
+        group = "influxdb2";
+        mode = "0400";
+      };
       "influxdb2/grafana_token" = {
         owner = "influxdb2";
         group = "influxdb2";
@@ -485,6 +491,11 @@
               description = "zhb-nixos write token for all buckets in home";
               writePermissions = [ "buckets" ];
               tokenFile = config.sops.secrets."influxdb2/zhb_nixos_token".path;
+            };
+            gkzhb-vps = {
+              description = "gkzhb-vps Telegraf write token";
+              writeBuckets = [ "telegraf_short" ];
+              tokenFile = config.sops.secrets."influxdb2/gkzhb_vps_token".path;
             };
             telegraf = {
               description = "Telegraf write token";
