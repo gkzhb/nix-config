@@ -40,6 +40,7 @@
       tmux
       just
       tree-sitter
+      btop
       zenith
       fzf
       fd

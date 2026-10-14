@@ -32,6 +32,7 @@ in
       python3
       fish
       tmux
+      btop
       zenith
       just
       tree-sitter

@@ -12,6 +12,7 @@
     fish
     zoxide
     yazi
+    btop
     zenith
     neovim
     fzf

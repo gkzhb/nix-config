@@ -419,6 +419,7 @@
     neovim
     git
     fish
+    btop
     zenith
     tmux
     curl

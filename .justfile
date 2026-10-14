@@ -71,4 +71,4 @@ check-format:
   nix flake check
 
 install-hooks:
-  nix develop
+  nix develop --command true
