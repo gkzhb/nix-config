@@ -465,6 +465,7 @@
     eden # Nintendo Switch emulator
     kdePackages.kfind
     ghidra
+    heroic
     # digikam
 
     nil
