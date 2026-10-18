@@ -23,9 +23,14 @@ Hosts that import this overlay can add `pkgs.knots` and `pkgs.cccc-cli` to
 their package lists. Adding these definitions does not install them on any host.
 
 Both packages were built and tested on `aarch64-darwin`, including installed
-binary version checks. `cccc-cli` passes all 109 tests; `knots` passes 354 tests
-and skips only `tests::rust_fixture_crate_file_ce`, whose fixture is absent
-from the published crate. Linux outputs were evaluated but not built locally.
+binary version checks. `cccc-cli` was also built and tested on `x86_64-linux`:
+all 109 tests, the installed version check, and a Ruby analysis smoke test pass.
+Its `ruby-prism-sys` dependency needs `rustPlatform.bindgenHook`; on Linux,
+target-specific bindgen arguments must also include the libc headers because
+the dependency's vendored build overrides the hook's generic arguments.
+`knots` passes 354 tests and skips only `tests::rust_fixture_crate_file_ce`,
+whose fixture is absent from the published crate; its Linux output was
+only evaluated, not built locally.
 
 # Local ALVR master package
 
