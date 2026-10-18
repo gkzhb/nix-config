@@ -37,6 +37,8 @@
     thrift-ls
     optnix
     fmd
+    knots
+    cccc-cli
 
     # Encrypted configuration management (GoDNS is installed by godns.nix)
     sops

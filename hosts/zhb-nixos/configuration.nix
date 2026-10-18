@@ -434,6 +434,8 @@
     wl-clipboard # provides wl-copy and wl-paste for Wayland
     just
     optnix
+    knots
+    cccc-cli
 
     # AI
     llm-agents.pi

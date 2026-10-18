@@ -1,3 +1,32 @@
+# Local packages
+
+## Rust CLI tools
+
+The local overlay provides pinned crates.io builds (including locked Cargo
+dependencies), equivalent to installing the corresponding crate with Cargo:
+
+| Package | Version | Executable |
+| --- | --- | --- |
+| `knots` | 1.18.0 | `knots` |
+| `cccc-cli` | 1.8.3 | `cccc` |
+
+Build without installing or activating a host configuration (Linux or macOS):
+
+```sh
+nix build .#knots
+./result/bin/knots --version
+nix build .#cccc-cli
+./result/bin/cccc --version
+```
+
+Hosts that import this overlay can add `pkgs.knots` and `pkgs.cccc-cli` to
+their package lists. Adding these definitions does not install them on any host.
+
+Both packages were built and tested on `aarch64-darwin`, including installed
+binary version checks. `cccc-cli` passes all 109 tests; `knots` passes 354 tests
+and skips only `tests::rust_fixture_crate_file_ce`, whose fixture is absent
+from the published crate. Linux outputs were evaluated but not built locally.
+
 # Local ALVR master package
 
 `alvr.nix` builds the Linux streamer from a pinned upstream `master` commit,

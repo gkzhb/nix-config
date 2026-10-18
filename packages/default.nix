@@ -1,4 +1,6 @@
 final: prev: {
+  knots = final.callPackage ./knots.nix { };
+  cccc-cli = final.callPackage ./cccc-cli.nix { };
   alvr-master = final.callPackage ./alvr.nix { alvr = prev.alvr; };
   fmd = final.rustPlatform.buildRustPackage rec {
     pname = "fmd";

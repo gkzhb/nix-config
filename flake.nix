@@ -298,6 +298,7 @@
               nixpkgs.overlays = [
                 llm-agents.overlays.shared-nixpkgs
                 helium-flake.overlays.default
+                local-packages
               ];
             }
             # home-manager.nixosModules.home-manager
@@ -357,7 +358,7 @@
       };
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#gkzhb-MBP-6
-      packages = nixpkgs.lib.genAttrs systems (
+      packages = nixpkgs.lib.genAttrs (systems ++ [ "aarch64-darwin" ]) (
         system:
         let
           pkgs = import nixpkgs {
@@ -369,7 +370,7 @@
           };
         in
         {
-          inherit (pkgs) mmx-cli;
+          inherit (pkgs) mmx-cli knots cccc-cli;
           default = pkgs.mmx-cli;
         }
         # // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
