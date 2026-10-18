@@ -14,6 +14,14 @@ in
   };
   programs.home-manager.enable = true;
 
+  xdg.desktopEntries.steam = {
+    name = "Steam";
+    exec = "steam -pipewire %U";
+    icon = "steam";
+    terminal = false;
+    categories = [ "Game" ];
+  };
+
   systemd.user.services = {
     web-mcp = {
       Unit = {

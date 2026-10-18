@@ -396,7 +396,7 @@
 
   environment.systemPackages = with pkgs; [
     ntfs3g
-    (ventoy.override { defaultGuiType = "qt5"; })
+    # (ventoy.override { defaultGuiType = "qt5"; })
     p7zip # provides 7z
     unrar # supports extracting RAR archives
     pciutils
