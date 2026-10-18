@@ -438,7 +438,7 @@
     cccc-cli
 
     # AI
-    llm-agents.pi
+    pi-coding-agent
     agent-browser
     herdr
     beads
