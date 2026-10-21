@@ -6,6 +6,11 @@ build:
 build-zhb:
     nixos-rebuild switch --flake "/etc/nixos#zhb-nixos"
 
+# Build AOCI-CODE without installing or activating a host configuration.
+# FSL-1.1-MIT is non-free; permission applies only to this invocation.
+build-aoci-code:
+    NIXPKGS_ALLOW_UNFREE=1 nix build --impure .#aoci-code -L
+
 # Build the pinned ALVR master snapshot without activating the system.
 build-alvr:
     nix build .#alvr --cores 4 --max-jobs 1 -L

@@ -39,6 +39,7 @@
     fmd
     knots
     cccc-cli
+    aoci-code
 
     # Encrypted configuration management (GoDNS is installed by godns.nix)
     sops
@@ -91,6 +92,8 @@
 
   # The platform the configuration will be used on.
   nixpkgs.hostPlatform = "aarch64-darwin";
+  # AOCI-CODE is source-available under FSL-1.1-MIT.
+  nixpkgs.config.allowUnfreePredicate = pkg: pkgs.lib.getName pkg == "aoci-code";
 
   security.pam.services.sudo_local.touchIdAuth = true;
 

@@ -370,7 +370,12 @@
           };
         in
         {
-          inherit (pkgs) mmx-cli knots cccc-cli;
+          inherit (pkgs)
+            mmx-cli
+            knots
+            cccc-cli
+            aoci-code
+            ;
           default = pkgs.mmx-cli;
         }
         # // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {

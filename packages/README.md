@@ -1,5 +1,38 @@
 # Local packages
 
+## AOCI-CODE
+
+`aoci-code.nix` packages upstream **0.1.0-rc21** release binaries for x86_64/ARM64
+Linux and ARM64 macOS, with a separate pinned SHA-256 for each archive.
+It is available as `pkgs.aoci-code` in the local overlay and as `.#aoci-code`
+on the flake's exported package systems. The executable is `aoci`; Git is
+provided on its runtime PATH. Adding the package does not install it on any host.
+
+Upstream uses **FSL-1.1-MIT**, a non-free/source-available license with a future
+MIT grant, not a current MIT license. After reviewing its terms, build without
+activating a system configuration:
+
+```sh
+just build-aoci-code
+./result/bin/aoci --version
+./result/bin/aoci --help
+```
+
+The recipe permits unfree software only for that invocation; it does not change
+any host's `allowUnfree` policy. For declarative installation, allow `aoci-code`
+through the host's `nixpkgs.config.allowUnfreePredicate` if necessary.
+
+These are upstream binaries, not source builds: this release requires Go 1.26.9,
+while the locked nixpkgs provides Go 1.26.8. Archive hashes come from the tagged
+release's `SHA256SUMS`. The local build checks the archive hash, installed version
+and help output (upstream's basic verification level); Sigstore signatures and
+provenance attestations have not been independently verified. To update, select
+a release, update `version` and all three archive hashes, review its license and
+archive contents, then rebuild and smoke-test on available platforms.
+
+Validated on `aarch64-darwin`: package build, archive hash, installed `--version`
+and `--help`. Both Linux package outputs were evaluated, but not built locally.
+
 ## Rust CLI tools
 
 The local overlay provides pinned crates.io builds (including locked Cargo
