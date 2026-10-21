@@ -1,19 +1,47 @@
-# Build NixOS config
-# run with sudo perm: sudo just build
-build:
-    nixos-rebuild switch --flake "/etc/nixos#home-nixos"
+# Compatibility default: activate home-nixos (run with sudo as before).
+build: (build-nixos "home-nixos")
 
-build-zhb:
-    nixos-rebuild switch --flake "/etc/nixos#zhb-nixos"
+# Build and activate a NixOS configuration from this repository.
+[positional-arguments]
+build-nixos host:
+    nixos-rebuild switch --flake ".#$1"
 
-# Build AOCI-CODE without installing or activating a host configuration.
+# Build and activate a System Manager configuration.
+[positional-arguments]
+build-system-manager host:
+    system-manager switch --flake ".#$1" --sudo
+
+# Build and activate a standalone Home Manager configuration (user/config key).
+[positional-arguments]
+build-home-manager host:
+    home-manager switch --flake ".#$1"
+
+# Build and activate nix-darwin, including its integrated Home Manager config.
+[positional-arguments]
+build-darwin host="gkzhb-MBP":
+    darwin-rebuild switch --flake ".#$1"
+
+# Build a package/check without activation; optional flags are passed to Nix.
+[positional-arguments]
+build-package target *flags:
+    target="$1"; shift; nix build ".#$target" -L "$@"
+
+build-zhb: (build-nixos "zhb-nixos")
+
+build-devbox: (build-system-manager "devbox")
+
+build-vps: (build-system-manager "gkzhb-vps")
+
+build-mido: (build-system-manager "mido")
+
+build-home user: (build-home-manager user)
+
 # FSL-1.1-MIT is non-free; permission applies only to this invocation.
 build-aoci-code:
-    NIXPKGS_ALLOW_UNFREE=1 nix build --impure .#aoci-code -L
+    NIXPKGS_ALLOW_UNFREE=1 {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} build-package aoci-code --impure
 
 # Build the pinned ALVR master snapshot without activating the system.
-build-alvr:
-    nix build .#alvr --cores 4 --max-jobs 1 -L
+build-alvr: (build-package "alvr" "--cores" "4" "--max-jobs" "1")
 
 # Android SDK licenses are accepted in this dedicated devShell only.
 alvr-android-shell:
@@ -30,50 +58,36 @@ verify-alvr-android:
     nix develop .#alvr-android --command alvr-android verify
 
 # Workspace regression tests; no SDK, device or signing key required.
-test-alvr-android:
-    nix build .#checks.x86_64-linux.alvr-android-workflow --no-link -L
+test-alvr-android: (build-package "checks.x86_64-linux.alvr-android-workflow" "--no-link")
 
 # update flake and package versions
 # need to rebuild after running this
 update:
-  nix flake update
+    nix flake update
 
 update-nix:
-  nix flake update nixpkgs nix-ld sops-nix home-manager nix-darwin system-manager
+    nix flake update nixpkgs nix-ld sops-nix home-manager nix-darwin system-manager
 
 create-age-key:
-  mkdir -p ~/.config/sops/age
-  age-keygen -o ~/.config/sops/age/keys.txt
+    mkdir -p ~/.config/sops/age
+    age-keygen -o ~/.config/sops/age/keys.txt
 
 # update secrets file after adding new hosts in .sops.yaml
 update-secrets:
-  sops updatekeys secrets/db.yaml
+    sops updatekeys secrets/db.yaml
 
 edit-secrets:
-  sops secrets/db.yaml
+    sops secrets/db.yaml
 
-build-devbox:
-  system-manager switch --flake .#devbox --sudo
-
-build-vps:
-  system-manager switch --flake .#gkzhb-vps --sudo
-
-build-mido:
-  system-manager switch --flake .#mido --sudo
-
-# build standalone home-manager config
-build-home user:
-  home-manager switch --flake .#{{user}}
-
-build-darwin:
-  # nix run nix-darwin/master#darwin-rebuild -- switch
-  darwin-rebuild switch --flake .#gkzhb-MBP
+# Test command routing with fake tools; no builds or system activation.
+test-justfile:
+    python3 scripts/tests/test-justfile.py
 
 format:
-  nix fmt
+    nix fmt
 
 check-format:
-  nix flake check
+    nix flake check
 
 install-hooks:
-  nix develop --command true
+    nix develop --command true

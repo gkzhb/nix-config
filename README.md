@@ -42,16 +42,49 @@ This configuration leverages several external Nix flakes:
 
 ## Building
 
-Build the system configuration with Just:
+Use a shared command with a configuration name from `flake.nix`:
 
 ```bash
-just build
+sudo just build-nixos home-nixos
+sudo just build-nixos zhb-nixos
+just build-system-manager devbox
+just build-system-manager gkzhb-vps
+just build-system-manager mido
+just build-home-manager zhanghaibin.zhb
+just build-home-manager zhb
+just build-darwin gkzhb-MBP
 ```
 
-Or directly with Nix:
+Despite the historical `build-*` names, these commands **build and activate**
+with `switch`. System Manager requests sudo itself; NixOS retains the existing
+caller-provided sudo behavior. All commands use this repository as the flake
+source, without requiring a symlink at `/etc/nixos`. Home Manager takes a
+`homeConfigurations` key (usually a user name), not a machine hostname. Darwin
+also updates its integrated Home Manager configuration.
+
+Existing shortcuts remain available and delegate to the shared commands:
+
+| Existing command | Equivalent shared command |
+| --- | --- |
+| `just build` (also the default recipe) | `just build-nixos home-nixos` |
+| `just build-zhb` | `just build-nixos zhb-nixos` |
+| `just build-devbox` | `just build-system-manager devbox` |
+| `just build-vps` | `just build-system-manager gkzhb-vps` |
+| `just build-mido` | `just build-system-manager mido` |
+| `just build-home <user>` | `just build-home-manager <user>` |
+| `just build-darwin` | `just build-darwin gkzhb-MBP` |
+
+For packages or checks **without activation**, use
+`just build-package <target> [flags...]`, for example
+`just build-package knots --no-link`. `build-alvr`,
+`build-aoci-code` and `test-alvr-android` use this shared entry point while keeping
+their special flags and license handling. The Android SDK/devShell workflows
+remain separate.
+
+Run the command-routing regression tests without building or activating systems:
 
 ```bash
-sudo nixos-rebuild switch --flake .#home-nixos
+just test-justfile
 ```
 
 ## Formatting and Git Hooks

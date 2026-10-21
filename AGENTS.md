@@ -7,7 +7,17 @@
 
 经常使用的命令使用 just cli 来运行，配置见 .justfile 文件
 
-例如构建 nixos 配置，使用命令 `just build`
+公共构建入口（沿用 `switch`，会构建并激活配置）：
+
+- NixOS：`sudo just build-nixos <host>`
+- System Manager：`just build-system-manager <host>`
+- standalone Home Manager：`just build-home-manager <配置名>`（参数为 `homeConfigurations` 中的键，通常是用户名）
+- nix-darwin：`just build-darwin <host>`（省略参数默认为 `gkzhb-MBP`）
+- 仅构建软件包、不激活：`just build-package <target> [flags...]`
+
+现有 `just build`、`build-zhb`、`build-devbox`、`build-vps`、`build-mido`、`build-home <user>` 等快捷命令保留，内部调用公共入口。命令均使用当前仓库作为 flake 来源，无需依赖固定路径的软链接。
+
+命令路由回归测试：`just test-justfile`，使用命令替身，不会构建或激活系统。
 
 所有密钥配置，使用 sops-nix 来加密存储，运行时解密使用。
 
