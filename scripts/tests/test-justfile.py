@@ -97,8 +97,14 @@ class JustfileTests(unittest.TestCase):
         for recipes, tool, host in cases:
             with self.subTest(recipes=recipes):
                 args = ["switch", "--flake", f".#{host}"]
-                if tool == "system-manager":
-                    args.append("--sudo")
+                if tool == "nixos-rebuild":
+                    args.append("--accept-flake-config")
+                elif tool == "system-manager":
+                    args.extend(
+                        ["--sudo", "--nix-option", "accept-flake-config", "true"]
+                    )
+                else:
+                    args.extend(["--option", "accept-flake-config", "true"])
                 self.assert_call(recipes, tool, args)
 
     def test_package_wrappers(self):
@@ -123,6 +129,7 @@ class JustfileTests(unittest.TestCase):
         ]
         for recipes, args, unfree in cases:
             with self.subTest(recipes=recipes):
+                args.insert(2, "--accept-flake-config")
                 self.assert_call(recipes, "nix", args, unfree)
 
     def test_arguments_are_passed_literally(self):
@@ -136,13 +143,26 @@ class JustfileTests(unittest.TestCase):
         ]:
             with self.subTest(recipe=recipe):
                 args = ["switch", "--flake", f".#{hostile}"]
-                if tool == "system-manager":
-                    args.append("--sudo")
+                if tool == "nixos-rebuild":
+                    args.append("--accept-flake-config")
+                elif tool == "system-manager":
+                    args.extend(
+                        ["--sudo", "--nix-option", "accept-flake-config", "true"]
+                    )
+                else:
+                    args.extend(["--option", "accept-flake-config", "true"])
                 self.assert_call([recipe, hostile], tool, args)
         self.assert_call(
             ["build-package", hostile, "--out-link", hostile],
             "nix",
-            ["build", f".#{hostile}", "-L", "--out-link", hostile],
+            [
+                "build",
+                f".#{hostile}",
+                "--accept-flake-config",
+                "-L",
+                "--out-link",
+                hostile,
+            ],
         )
         self.assertFalse((self.root / "INJECTED").exists())
 
@@ -173,12 +193,46 @@ class JustfileTests(unittest.TestCase):
         calls = self.run_recipe("build-aoci-code", "build-package", "knots")
         self.assertEqual([call["unfree"] for call in calls], ["1", None])
 
-    def test_android_build_remains_a_devshell_workflow(self):
-        self.assert_call(
-            ["build-alvr-android"],
-            "nix",
-            ["develop", ".#alvr-android", "--command", "alvr-android", "build"],
-        )
+    def test_android_workflows_accept_flake_config(self):
+        for recipe, action in [
+            ("alvr-android-shell", None),
+            ("prepare-alvr-android", "prepare"),
+            ("build-alvr-android", "build"),
+            ("verify-alvr-android", "verify"),
+        ]:
+            with self.subTest(recipe=recipe):
+                args = ["develop", ".#alvr-android", "--accept-flake-config"]
+                if action:
+                    args.extend(["--command", "alvr-android", action])
+                self.assert_call([recipe], "nix", args)
+
+    def test_maintenance_commands_accept_flake_config(self):
+        cases = [
+            ("update", ["flake", "update", "--accept-flake-config"]),
+            (
+                "update-nix",
+                [
+                    "flake",
+                    "update",
+                    "--accept-flake-config",
+                    "nixpkgs",
+                    "nix-ld",
+                    "sops-nix",
+                    "home-manager",
+                    "nix-darwin",
+                    "system-manager",
+                ],
+            ),
+            ("format", ["fmt", "--accept-flake-config"]),
+            ("check-format", ["flake", "check", "--accept-flake-config"]),
+            (
+                "install-hooks",
+                ["develop", "--accept-flake-config", "--command", "true"],
+            ),
+        ]
+        for recipe, args in cases:
+            with self.subTest(recipe=recipe):
+                self.assert_call([recipe], "nix", args)
 
 
 if __name__ == "__main__":

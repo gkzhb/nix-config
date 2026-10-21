@@ -62,6 +62,23 @@ source, without requiring a symlink at `/etc/nixos`. Home Manager takes a
 `homeConfigurations` key (usually a user name), not a machine hostname. Darwin
 also updates its integrated Home Manager configuration.
 
+Flake commands explicitly accept this repository's `nixConfig` (including its
+substituters and trusted public keys) for each invocation. Review `flake.nix`
+before running these commands; no global Nix trust setting is changed. The
+CLI spellings differ, as verified against the locked inputs and installed tools:
+
+| CLI | Supported spelling |
+| --- | --- |
+| `nix` (`build`, `develop`, `flake update/check`, `fmt`) | `--accept-flake-config` |
+| `nixos-rebuild` (locked nixos-rebuild-ng) | `--accept-flake-config` |
+| `home-manager` | `--option accept-flake-config true` |
+| `darwin-rebuild` | `--option accept-flake-config true` |
+| `system-manager` | `--nix-option accept-flake-config true` |
+
+Home Manager, Darwin and System Manager do not directly recognize
+`--accept-flake-config`; their supported options forward the equivalent Nix
+setting. Legacy shortcuts inherit these arguments from the shared commands.
+
 Existing shortcuts remain available and delegate to the shared commands:
 
 | Existing command | Equivalent shared command |

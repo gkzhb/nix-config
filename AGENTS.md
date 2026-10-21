@@ -17,6 +17,8 @@
 
 现有 `just build`、`build-zhb`、`build-devbox`、`build-vps`、`build-mido`、`build-home <user>` 等快捷命令保留，内部调用公共入口。命令均使用当前仓库作为 flake 来源，无需依赖固定路径的软链接。
 
+所有 flake 命令显式接受仓库 `nixConfig`：`nix` 和当前 `nixos-rebuild-ng` 使用 `--accept-flake-config`，Home Manager / nix-darwin 使用 `--option accept-flake-config true`，System Manager 使用 `--nix-option accept-flake-config true`。这是单次调用参数，不修改全局信任设置；运行前应审阅 flake 中的缓存及公钥配置。
+
 命令路由回归测试：`just test-justfile`，使用命令替身，不会构建或激活系统。
 
 所有密钥配置，使用 sops-nix 来加密存储，运行时解密使用。
