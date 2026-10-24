@@ -12,6 +12,7 @@
     fish
     zoxide
     yazi
+    htop
     btop
     zenith
     neovim
@@ -53,12 +54,13 @@
     taskwarrior3
     timewarrior
     taskwarrior-tui
-    beads
     # codebase-memory-mcp.packages.${pkgs.system}.default
 
     # ai related
+    beads
     herdr
-    llama-cpp
+    pi-coding-agent
+    # llama-cpp
   ];
 
   # Auto upgrade nix package and the daemon service.
