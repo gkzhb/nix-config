@@ -62,11 +62,13 @@ in
       nixfmt
       android-tools
 
-      code-server
+      # code-server
       nginx
 
       # ai
       herdr
+      pi-coding-agent
+      deepseek-harness
     ];
 
     environment.variables = {
@@ -119,24 +121,24 @@ in
       # host. LIBC=glibc prevents node-gyp-build from selecting argon2's musl
       # prebuild solely because /etc/alpine-release exists.
       services = {
-        code-server = {
-          description = "code-server for user";
-          wantedBy = [ "system-manager.target" ];
-          after = [ "network.target" ];
-          serviceConfig = {
-            User = "user";
-            Group = "user";
-            WorkingDirectory = "/home/user";
-            Environment = [
-              "HOME=/home/user"
-              "LIBC=glibc"
-              servicePath
-            ];
-            ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry --disable-update-check";
-            Restart = "on-failure";
-            RestartSec = "5s";
-          };
-        };
+        # code-server = {
+        #   description = "code-server for user";
+        #   wantedBy = [ "system-manager.target" ];
+        #   after = [ "network.target" ];
+        #   serviceConfig = {
+        #     User = "user";
+        #     Group = "user";
+        #     WorkingDirectory = "/home/user";
+        #     Environment = [
+        #       "HOME=/home/user"
+        #       "LIBC=glibc"
+        #       servicePath
+        #     ];
+        #     ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry --disable-update-check";
+        #     Restart = "on-failure";
+        #     RestartSec = "5s";
+        #   };
+        # };
 
         node-red = {
           description = "Node-RED for user";
