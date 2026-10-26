@@ -171,22 +171,22 @@
   };
 
   # Code-server 服务配置
-  systemd.user.services.code-server = {
-    Unit = {
-      Description = "VS Code Server";
-      After = [ "network.target" ];
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry";
-      Restart = "on-failure";
-      RestartSec = "10";
-      Environment = [
-        "PATH=${pkgs.git}/bin:${pkgs.nodejs}/bin"
-      ];
-    };
-  };
+  # systemd.user.services.code-server = {
+  #   Unit = {
+  #     Description = "VS Code Server";
+  #     After = [ "network.target" ];
+  #   };
+  #   Install = {
+  #     WantedBy = [ "default.target" ];
+  #   };
+  #   Service = {
+  #     Type = "simple";
+  #     ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry";
+  #     Restart = "on-failure";
+  #     RestartSec = "10";
+  #     Environment = [
+  #       "PATH=${pkgs.git}/bin:${pkgs.nodejs}/bin"
+  #     ];
+  #   };
+  # };
 }

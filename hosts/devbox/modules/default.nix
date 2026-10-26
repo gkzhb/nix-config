@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   vncUser = "zhanghaibin.zhb";
@@ -13,8 +13,14 @@ in
     nixpkgs.hostPlatform = "x86_64-linux";
 
     nix = {
+      enable = true;
       package = pkgs.nix;
+      # Reuse the installer-created nixbld users on this non-NixOS host.
+      nrBuildUsers = 0;
       settings = {
+        build-users-group = "nixbld";
+        max-jobs = 4;
+        sandbox = true;
         experimental-features = [
           "nix-command"
           "flakes"
@@ -48,7 +54,7 @@ in
       ty
       ruff
       bun
-      code-server
+      # code-server
       xray
       taskwarrior3
       nil
@@ -56,12 +62,13 @@ in
       v2raya
       thrift-ls
       chromium
-      llm-agents.claude-code
-      llm-agents.agent-browser
+      agent-browser
       timewarrior
       taskwarrior-tui
       mosh
       herdr
+      pi-coding-agent
+      llm-agents.dsh
 
       # GUI apps
       tigervnc
@@ -99,14 +106,32 @@ in
       ];
     };
 
+    # The Determinate-only socket must not activate the upstream daemon.
+    systemd.maskedUnits = [ "determinate-nixd.socket" ];
+
+    systemd.sockets.nix-daemon = {
+      description = "Nix Daemon Socket";
+      wantedBy = [ "sockets.target" ];
+      before = [ "multi-user.target" ];
+      unitConfig = {
+        RequiresMountsFor = "/nix/store";
+        ConditionPathIsReadWrite = "/nix/var/nix/daemon-socket";
+      };
+      socketConfig = {
+        ListenStream = "/nix/var/nix/daemon-socket/socket";
+        SocketMode = "0666";
+      };
+    };
     systemd.services = {
       nix-daemon = {
-        description = "Nix Daemon, with Determinate Nix superpowers.";
+        description = "Nix Daemon";
         documentation = [
           "man:nix-daemon"
-          "https://determinate.systems"
+          "https://nixos.org/manual/nix/stable/"
         ];
         wantedBy = [ "multi-user.target" ];
+        requires = [ "nix-daemon.socket" ];
+        after = [ "nix-daemon.socket" ];
         unitConfig = {
           RequiresMountsFor = [
             "/nix/store"
@@ -116,7 +141,7 @@ in
           ConditionPathIsReadWrite = "/nix/var/nix/daemon-socket";
         };
         serviceConfig = {
-          ExecStart = "@/usr/local/bin/determinate-nixd determinate-nixd daemon";
+          ExecStart = "@${config.nix.package}/bin/nix-daemon nix-daemon --daemon";
           KillMode = "process";
           LimitNOFILE = 1048576;
           LimitSTACK = "64M";
