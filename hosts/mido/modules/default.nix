@@ -71,7 +71,7 @@ in
       # ai
       herdr
       pi-coding-agent
-      deepseek-harness
+      llm-agents.dsh
     ];
 
     environment.variables = {
@@ -177,8 +177,8 @@ in
               "HOME=/home/user"
               servicePath
             ];
-            # Load the user's login environment and let systemd track dsh directly.
-            ExecStart = "${pkgs.fish}/bin/fish --login -c 'exec dsh web --port 3080 --host 127.0.0.1 --public-url https://mido.h.gkzhb.top/ --trusted-host mido.h.gkzhb.top --no-open'";
+            # Keep the login environment, but pin dsh to the llm-agents package.
+            ExecStart = "${pkgs.fish}/bin/fish --login -c 'exec ${pkgs.llm-agents.dsh}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host mido.h.gkzhb.top --no-open'";
             Restart = "on-failure";
             RestartSec = "5s";
           };

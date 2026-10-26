@@ -318,6 +318,7 @@
       systemConfigs = {
         mido = system-manager.lib.makeSystemConfig {
           modules = [
+            { nixpkgs.overlays = [ llm-agents-overlay ]; }
             ./hosts/mido/modules/default.nix
           ];
         };
