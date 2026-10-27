@@ -379,6 +379,9 @@
             ;
           default = pkgs.mmx-cli;
         }
+        // nixpkgs.lib.optionalAttrs (nixpkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.new-api) {
+          inherit (pkgs) new-api;
+        }
         # // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
         #   alvr = pkgs.alvr-master;
         # }

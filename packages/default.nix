@@ -1,4 +1,5 @@
 final: prev: {
+  new-api = final.callPackage ./new-api.nix { };
   aoci-code = final.callPackage ./aoci-code.nix { };
   knots = final.callPackage ./knots.nix { };
   cccc-cli = final.callPackage ./cccc-cli.nix { };
