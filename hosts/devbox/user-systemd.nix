@@ -4,6 +4,9 @@
   ...
 }:
 
+let
+  new-api = pkgs.callPackage ../../packages/new-api.nix { };
+in
 {
   # systemd.user.services.openclaw-gateway = {
   #   Unit = {
@@ -44,12 +47,12 @@
     };
   };
   systemd.user.services.newapi = {
-    Unit.Description = "newapi script service";
+    Unit.Description = "New API LLM gateway";
     Install.WantedBy = [ "default.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.fish}/bin/fish -l %h/scripts/services/newapi.fish";
-      WorkingDirectory = "%h";
+      ExecStart = "${new-api}/bin/new-api";
+      WorkingDirectory = "%h/scripts/services/newapi";
       Restart = "on-failure";
       RestartSec = "5s";
     };
