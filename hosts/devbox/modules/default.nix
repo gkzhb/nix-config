@@ -54,7 +54,7 @@ in
       ty
       ruff
       bun
-      # code-server
+      code-server
       xray
       taskwarrior3
       nil

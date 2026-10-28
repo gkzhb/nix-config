@@ -8,32 +8,6 @@ let
   new-api = pkgs.callPackage ../../packages/new-api.nix { };
 in
 {
-  # systemd.user.services.openclaw-gateway = {
-  #   Unit = {
-  #     Description = "OpenClaw Gateway";
-  #     After = [ "network-online.target" ];
-  #     Wants = [ "network-online.target" ];
-  #   };
-  #   Install = {
-  #     WantedBy = [ "default.target" ];
-  #   };
-  #   Service = {
-  #     Type = "simple";
-  #     ExecStart = "${pkgs.fish}/bin/fish -l %h/openclaw/run.fish";
-  #     Restart = "always";
-  #     RestartSec = "5";
-  #     KillMode = "process";
-  #     Environment = [
-  #       "HOME=%h"
-  #       "TMPDIR=/tmp"
-  #       "OPENCLAW_GATEWAY_PORT=18789"
-  #       "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
-  #       "OPENCLAW_SERVICE_MARKER=openclaw"
-  #       "OPENCLAW_SERVICE_KIND=gateway"
-  #       "OPENCLAW_SERVICE_VERSION=2026.3.2"
-  #     ];
-  #   };
-  # };
   systemd.user.services.dsh-web = {
     Unit = {
       Description = "DeepSeek Harness web service";
@@ -181,22 +155,22 @@ in
   };
 
   # Code-server 服务配置
-  # systemd.user.services.code-server = {
-  #   Unit = {
-  #     Description = "VS Code Server";
-  #     After = [ "network.target" ];
-  #   };
-  #   Install = {
-  #     WantedBy = [ "default.target" ];
-  #   };
-  #   Service = {
-  #     Type = "simple";
-  #     ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry";
-  #     Restart = "on-failure";
-  #     RestartSec = "10";
-  #     Environment = [
-  #       "PATH=${pkgs.git}/bin:${pkgs.nodejs}/bin"
-  #     ];
-  #   };
-  # };
+  systemd.user.services.code-server = {
+    Unit = {
+      Description = "VS Code Server";
+      After = [ "network.target" ];
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.code-server}/bin/code-server --disable-telemetry";
+      Restart = "on-failure";
+      RestartSec = "10";
+      Environment = [
+        "PATH=${pkgs.git}/bin:${pkgs.nodejs}/bin"
+      ];
+    };
+  };
 }
