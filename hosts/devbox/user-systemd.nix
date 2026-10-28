@@ -34,13 +34,20 @@ in
   #     ];
   #   };
   # };
-  systemd.user.services.dsh = {
-    Unit.Description = "dsh script service";
+  systemd.user.services.dsh-web = {
+    Unit = {
+      Description = "DeepSeek Harness web service";
+      # Stop the legacy launcher before taking over its listener.
+      Conflicts = [ "dsh.service" ];
+      After = [
+        "network.target"
+        "dsh.service"
+      ];
+    };
     Install.WantedBy = [ "default.target" ];
     Service = {
       Type = "simple";
-      # Load interactive Fish initialization (e.g. nvm), not just login config.
-      ExecStart = "${pkgs.fish}/bin/fish -i -l %h/scripts/services/dsh.fish";
+      ExecStart = "${pkgs.llm-agents.dsh}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host dsh.byte.gkzhb.top --no-open";
       WorkingDirectory = "%h";
       Restart = "on-failure";
       RestartSec = "5s";

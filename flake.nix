@@ -346,7 +346,10 @@
           extraSpecialArgs = {
             inherit inputs;
           };
-          modules = [ ./hosts/devbox/user.nix ];
+          modules = [
+            { nixpkgs.overlays = [ llm-agents-overlay ]; }
+            ./hosts/devbox/user.nix
+          ];
         };
 
         "zhb" = home-manager.lib.homeManagerConfiguration {

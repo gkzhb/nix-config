@@ -177,8 +177,7 @@ in
               "HOME=/home/user"
               servicePath
             ];
-            # Keep the login environment, but pin dsh to the llm-agents package.
-            ExecStart = "${pkgs.fish}/bin/fish --login -c 'exec ${pkgs.llm-agents.dsh}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host mido.h.gkzhb.top --no-open'";
+            ExecStart = "${pkgs.llm-agents.dsh}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host mido.h.gkzhb.top --no-open";
             Restart = "on-failure";
             RestartSec = "5s";
           };
