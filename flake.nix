@@ -137,6 +137,10 @@
       };
       # Local package overlay
       local-packages = import ./packages;
+      # Limit devbox to this package; unrelated local overlays need not be evaluated.
+      browseros-overlay = final: prev: {
+        inherit (local-packages final prev) browseros-neo;
+      };
     in
     {
       formatter = forAllFormatterSystems (system: treefmtEval.${system}.config.build.wrapper);
@@ -323,6 +327,7 @@
           ];
         };
         devbox = system-manager.lib.makeSystemConfig {
+          overlays = [ browseros-overlay ];
           modules = [
             { nixpkgs.overlays = [ llm-agents-overlay ]; }
             ./hosts/devbox/modules/default.nix
@@ -367,6 +372,7 @@
         let
           pkgs = import nixpkgs {
             inherit system;
+            config.allowUnfreePredicate = pkg: nixpkgs.lib.getName pkg == "browseros-neo";
             overlays = [
               llm-agents-overlay
               local-packages
@@ -384,6 +390,9 @@
         }
         // nixpkgs.lib.optionalAttrs (nixpkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.new-api) {
           inherit (pkgs) new-api;
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          inherit (pkgs) browseros-neo;
         }
         # // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
         #   alvr = pkgs.alvr-master;

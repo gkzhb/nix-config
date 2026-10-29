@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   vncUser = "zhanghaibin.zhb";
@@ -11,6 +16,7 @@ in
   config = {
     system-manager.allowAnyDistro = true;
     nixpkgs.hostPlatform = "x86_64-linux";
+    nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "browseros-neo";
 
     nix = {
       enable = true;
@@ -71,6 +77,7 @@ in
       llm-agents.dsh
 
       # GUI apps
+      browseros-neo
       tigervnc
       xfce4-session
       xfconf
@@ -151,6 +158,45 @@ in
             "https_proxy=http://localhost:10881"
             "no_proxy=localhost,127.0.0.1"
           ];
+        };
+      };
+      browseros-neo = {
+        description = "BrowserOS neo in the TigerVNC desktop";
+        wantedBy = [ "system-manager.target" ];
+        requires = [ "tigervnc.service" ];
+        after = [ "tigervnc.service" ];
+        partOf = [ "tigervnc.service" ];
+        environment = {
+          HOME = vncHome;
+          DISPLAY = ":1";
+          XAUTHORITY = "${vncHome}/.Xauthority";
+          XDG_RUNTIME_DIR = "${vncConfigDir}/run";
+          XDG_SESSION_TYPE = "x11";
+        };
+        serviceConfig = {
+          Type = "simple";
+          User = vncUser;
+          Group = vncUser;
+          WorkingDirectory = vncHome;
+          UMask = "0077";
+          Restart = "on-failure";
+          RestartSec = "10s";
+          TimeoutStartSec = "90s";
+          TimeoutStopSec = "30s";
+          # TigerVNC is Type=simple; wait for authenticated X11, not just its PID.
+          ExecStartPre = pkgs.writeShellScript "wait-browseros-vnc" ''
+            set -e
+            for attempt in $(${pkgs.coreutils}/bin/seq 1 60); do
+              if ${pkgs.xdpyinfo}/bin/xdpyinfo >/dev/null 2>&1; then
+                exit 0
+              fi
+              ${pkgs.coreutils}/bin/sleep 1
+            done
+            echo "TigerVNC DISPLAY=:1 is not accessible" >&2
+            exit 1
+          '';
+          # Keep a persistent, separate VNC profile; do not disable Chromium's sandbox.
+          ExecStart = "${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon --config-file=${pkgs.dbus}/share/dbus-1/session.conf -- ${pkgs.browseros-neo}/bin/browseros-neo --ozone-platform=x11 --user-data-dir=${vncHome}/.config/browseros-neo-vnc";
         };
       };
       tigervnc = {

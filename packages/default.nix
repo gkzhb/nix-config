@@ -1,4 +1,5 @@
 final: prev: {
+  browseros-neo = final.callPackage ./browseros-neo.nix { };
   new-api = final.callPackage ./new-api.nix { };
   aoci-code = final.callPackage ./aoci-code.nix { };
   knots = final.callPackage ./knots.nix { };
