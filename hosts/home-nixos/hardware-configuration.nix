@@ -15,6 +15,7 @@
   ];
 
   boot.initrd.availableKernelModules = [
+    "ahci"
     "ehci_pci"
     "ata_piix"
     "usbhid"

@@ -38,40 +38,40 @@ in
       };
     };
 
-    brave-browser = {
-      Unit = {
-        Description = "Brave remote debugging service";
-        After = [ "network.target" ];
-      };
-      Service = {
-        Type = "simple";
-        ExecStartPre = "${pkgs.bash}/bin/bash -c 'until [ -S /tmp/.X11-unix/X1 ]; do sleep 1; done'";
-        ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9223 --user-data-dir=%h/.local/share/brave-mcp";
-        Restart = "on-failure";
-        RestartSec = "10";
-        Environment = [
-          "DISPLAY=:1"
-          "XAUTHORITY=%h/.Xauthority"
-        ];
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-    };
+    # brave-browser = {
+    #   Unit = {
+    #     Description = "Brave remote debugging service";
+    #     After = [ "network.target" ];
+    #   };
+    #   Service = {
+    #     Type = "simple";
+    #     ExecStartPre = "${pkgs.bash}/bin/bash -c 'until [ -S /tmp/.X11-unix/X1 ]; do sleep 1; done'";
+    #     ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9223 --user-data-dir=%h/.local/share/brave-mcp";
+    #     Restart = "on-failure";
+    #     RestartSec = "10";
+    #     Environment = [
+    #       "DISPLAY=:1"
+    #       "XAUTHORITY=%h/.Xauthority"
+    #     ];
+    #   };
+    #   Install = {
+    #     WantedBy = [ "default.target" ];
+    #   };
+    # };
 
     # Brave binds CDP to loopback even with --remote-debugging-address.
     # Expose the original port through a socket-activated TCP proxy instead.
-    brave-cdp-proxy = {
-      Unit = {
-        Description = "Brave remote debugging TCP proxy";
-        Requires = [ "brave-browser.service" ];
-        After = [ "brave-browser.service" ];
-      };
-      Service = {
-        ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd 127.0.0.1:9223";
-        Restart = "on-failure";
-      };
-    };
+    # brave-cdp-proxy = {
+    #   Unit = {
+    #     Description = "Brave remote debugging TCP proxy";
+    #     Requires = [ "brave-browser.service" ];
+    #     After = [ "brave-browser.service" ];
+    #   };
+    #   Service = {
+    #     ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd 127.0.0.1:9223";
+    #     Restart = "on-failure";
+    #   };
+    # };
 
     cleanup-backups = {
       Unit = {

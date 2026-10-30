@@ -24,6 +24,7 @@
       builtins.elem (lib.getName pkg) [
         "steam"
         "steam-unwrapped"
+        "browseros-neo"
       ];
   };
 
@@ -211,6 +212,8 @@
     lsof
     steam-run
     nix-your-shell # use fish inside `niv develop`
+    pciutils
+    dmidecode
 
     fzf
     fd
@@ -219,8 +222,6 @@
     zenith
     tree-sitter
     pnpm
-    # opencode
-    # bun # requires AVX CPU instructions
     gcc
     just
     age
@@ -239,7 +240,6 @@
     tmux
     zoxide
     docker-compose
-    qbittorrent-cli
     taskwarrior3
     taskwarrior-tui
     timewarrior
@@ -254,19 +254,16 @@
     # playwright-driver.browsers
     mcp-grafana
 
-    # Bun 1.3's Linux x64 binary requires AVX. Build Pi in its supported
-    # Node.js mode instead, so it works on this machine's pre-AVX CPU.
-    (llm-agents.pi.override { useBun = false; })
+    pi-coding-agent
     herdr
-    # llm-agents.opencode
-    # llm-agents.claude-code
-    # llm-agents.codex
+    beads
     agent-browser
 
     # llm-agents.openclaw
     mcporter
 
     # GUI app
+    browseros-neo
     tigervnc
     xfce4-session
     xfconf
@@ -324,6 +321,7 @@
   services = {
     vscode-server.enable = true;
 
+    fwupd.enable = true;
     envfs = {
       enable = true;
     };
@@ -798,7 +796,55 @@
     # };
   };
 
+  # Dedicated cache for New API; never expose unauthenticated Redis to the LAN.
+  services.redis.servers.new-api = {
+    enable = true;
+    bind = "127.0.0.1";
+    port = 6379;
+    openFirewall = false;
+  };
+
   systemd.services = {
+    new-api = {
+      description = "New API LLM gateway";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
+      after = [
+        "network-online.target"
+        "redis-new-api.service"
+      ];
+      requires = [ "redis-new-api.service" ];
+      unitConfig.RequiresMountsFor = [ "/home/zhb/scripts/services/new-api" ];
+      environment = {
+        HOME = "/home/zhb";
+        SQLITE_PATH = "/home/zhb/scripts/services/new-api/data/one-api.db?_busy_timeout=30000";
+        REDIS_CONN_STRING = "redis://127.0.0.1:6379";
+        TZ = "Asia/Shanghai";
+        ERROR_LOG_ENABLED = "true";
+        BATCH_UPDATE_ENABLED = "true";
+        NODE_NAME = "new-api-node-1";
+        FRONTEND_BASE_URL = "https://newapi.gkzhb.top";
+      };
+      serviceConfig = {
+        Type = "simple";
+        User = "zhb";
+        Group = "zhb";
+        WorkingDirectory = "/home/zhb/scripts/services/new-api";
+        ExecStart = "${
+          pkgs.callPackage ../../packages/new-api.nix { }
+        }/bin/new-api --port 8056 --log-dir /home/zhb/scripts/services/new-api/logs";
+        Restart = "always";
+        RestartSec = "5s";
+        UMask = "0077";
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectHome = "read-only";
+        ProtectSystem = "strict";
+        ReadWritePaths = [ "/home/zhb/scripts/services/new-api" ];
+        RestrictSUIDSGID = true;
+      };
+    };
+
     # use local athens
     nix-daemon.environment = {
       GOPROXY = "http://localhost:8333,direct";
@@ -909,6 +955,50 @@
     minifluxng = {
       environment = {
         FETCHER_ALLOW_PRIVATE_NETWORKS = "1";
+      };
+    };
+    browseros-neo = {
+      description = "BrowserOS neo in zhb's TigerVNC desktop";
+      wantedBy = [
+        "multi-user.target"
+        "tigervnc-zhb.service"
+      ];
+      bindsTo = [ "tigervnc-zhb.service" ];
+      after = [ "tigervnc-zhb.service" ];
+      partOf = [ "tigervnc-zhb.service" ];
+      environment = {
+        HOME = "/home/zhb";
+        DISPLAY = ":1";
+        XAUTHORITY = "/home/zhb/.Xauthority";
+        XDG_RUNTIME_DIR = "/run/tigervnc-zhb";
+        XDG_SESSION_TYPE = "x11";
+        XDG_CURRENT_DESKTOP = "XFCE";
+      };
+      serviceConfig = {
+        Type = "simple";
+        User = "zhb";
+        Group = "zhb";
+        WorkingDirectory = "/home/zhb";
+        UMask = "0077";
+        Restart = "on-failure";
+        RestartSec = "10s";
+        TimeoutStartSec = "90s";
+        TimeoutStopSec = "30s";
+        # Type=simple only guarantees VNC's process exists, not X11 readiness.
+        ExecStartPre = pkgs.writeShellScript "wait-browseros-vnc" ''
+          set -e
+          for attempt in $(${pkgs.coreutils}/bin/seq 1 60); do
+            if ${pkgs.xdpyinfo}/bin/xdpyinfo >/dev/null 2>&1; then
+              exit 0
+            fi
+            ${pkgs.coreutils}/bin/sleep 1
+          done
+          echo "TigerVNC DISPLAY=:1 is not accessible" >&2
+          exit 1
+        '';
+        # A separate persistent profile avoids forwarding into another session.
+        # Keep Chromium's sandbox enabled; isolate this service's session bus.
+        ExecStart = "${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon --config-file=${pkgs.dbus}/share/dbus-1/session.conf -- ${pkgs.browseros-neo}/bin/browseros-neo --ozone-platform=x11 --user-data-dir=/home/zhb/.config/browseros-neo-vnc";
       };
     };
     tigervnc-zhb = {
