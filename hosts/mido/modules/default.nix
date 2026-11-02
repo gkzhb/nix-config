@@ -70,6 +70,7 @@ in
 
       # ai
       herdr
+      tuios
       pi-coding-agent
       llm-agents.dsh
     ];

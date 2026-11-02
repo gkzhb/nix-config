@@ -441,6 +441,7 @@
     pi-coding-agent
     agent-browser
     herdr
+    tuios
     beads
 
     # GUI apps

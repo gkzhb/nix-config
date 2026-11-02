@@ -60,6 +60,7 @@
       timewarrior
       taskwarrior-tui
       herdr
+      tuios
 
       # Secret management CLI tools
       sops

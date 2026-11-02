@@ -256,6 +256,7 @@
 
     pi-coding-agent
     herdr
+    tuios
     beads
     agent-browser
 

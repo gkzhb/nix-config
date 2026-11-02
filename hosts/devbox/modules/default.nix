@@ -73,6 +73,7 @@ in
       taskwarrior-tui
       mosh
       herdr
+      tuios
       pi-coding-agent
       llm-agents.dsh
 
