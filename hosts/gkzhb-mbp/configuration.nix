@@ -21,7 +21,7 @@
     ripgrep
     television
     mosh
-    ttyd
+    tuios
 
     # devtools
     just
@@ -29,6 +29,7 @@
     nil
     nixfmt
     git
+    git-lfs
     uv
     # ty
     ruff
