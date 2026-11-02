@@ -255,6 +255,7 @@
     mcp-grafana
 
     pi-coding-agent
+    deepseek-harness
     herdr
     tuios
     beads
@@ -820,7 +821,7 @@
         HOME = "/home/zhb";
         SQLITE_PATH = "/home/zhb/scripts/services/new-api/data/one-api.db?_busy_timeout=30000";
         REDIS_CONN_STRING = "redis://127.0.0.1:6379";
-        CRITICAL_RATE_LIMIT_ENABLE = "true";
+        CRITICAL_RATE_LIMIT_ENABLE = "false";
         CRITICAL_RATE_LIMIT = "120";
         CRITICAL_RATE_LIMIT_DURATION = "1200";
         TZ = "Asia/Shanghai";
