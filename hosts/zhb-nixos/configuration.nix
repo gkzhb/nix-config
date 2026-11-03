@@ -148,11 +148,6 @@
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
     };
-    # alvr = {
-    #   enable = true;
-    #   package = pkgs.callPackage ../../packages/alvr.nix { };
-    #   openFirewall = true;
-    # };
   };
   services = {
     rustfs = {
@@ -401,7 +396,7 @@
     unrar # supports extracting RAR archives
     pciutils
     usbutils
-    android-tools # provides adb for ALVR headset setup and USB connections
+    android-tools # provides adb for Android device debugging and USB connections
     smartmontools
     appimage-run
     ffmpeg

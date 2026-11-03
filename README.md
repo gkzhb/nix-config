@@ -1,24 +1,43 @@
 # gkzhb's Nix Configuration
 
-This repository contains gkzhb's personal NixOS system configuration managed as a Nix Flake.
+This repository contains gkzhb's multi-host Nix configuration, organized with
+[flake-parts](https://flake.parts/).
 
 ## Overview
 
-This configuration provides a declarative and reproducible NixOS system setup for a personal workstation named `home-nixos`.
+The flake manages NixOS, nix-darwin, System Manager and standalone Home Manager
+configurations, alongside packages, development shells and checks.
 
 ## Structure
 
 ```
 .
-├── flake.nix                    # Main flake definition
+├── flake.nix                    # Inputs, cache settings and mkFlake entry point
+├── flake/
+│   ├── default.nix              # Module imports and target platforms
+│   ├── development.nix          # perSystem formatter, checks, devShells and hooks
+│   ├── packages.nix             # perSystem exported packages and support matrix
+│   ├── overlays.nix             # Existing, deliberately distinct overlay policies
+│   └── hosts/                   # Top-level NixOS / System Manager / HM / Darwin outputs
 ├── .justfile                    # Just command runner tasks
-├── hosts/
-│   └── home-nixos/
-│       ├── configuration.nix    # System configuration
-│       ├── hardware-configuration.nix  # Hardware-specific config
-│       └── user.nix             # Home-manager user configuration
+├── hosts/                       # Per-host system and user configuration
+├── packages/                    # Local package definitions
 └── secrets/                     # Encrypted secrets managed by sops-nix
 ```
+
+Host outputs remain top-level (`nixosConfigurations`, `systemConfigs`,
+`homeConfigurations`, `darwinConfigurations`); they are not generated once per
+platform. Shared development outputs use flake-parts `perSystem` for both Linux
+architectures and both macOS architectures. Exported packages retain the narrower
+matrix: `x86_64-linux`, `aarch64-linux`, `aarch64-darwin`. BrowserOS remains
+`x86_64-linux` only.
+
+To add an exported package, edit `flake/packages.nix`; to change development tools
+or checks, edit `flake/development.nix`. Host module lists live in `flake/hosts/`,
+while actual host settings stay in `hosts/`. Imports are explicit; package helpers
+and host modules are not recursively auto-imported. Development tools continue to
+use unmodified `legacyPackages`, separate from the exported packages' overlay and
+license policy.
 
 ## External Flakes
 
@@ -27,6 +46,7 @@ This configuration leverages several external Nix flakes:
 | Flake | Purpose |
 |-------|---------|
 | [nixpkgs](https://github.com/NixOS/nixpkgs) | Main Nix package repository |
+| [flake-parts](https://flake.parts/) | Modular flake outputs and per-platform development configuration |
 | [home-manager](https://github.com/nix-community/home-manager) | User environment management |
 | [sops-nix](https://github.com/Mic92/sops-nix) | Secret management with SOPS |
 | [nix-ld](https://github.com/Mic92/nix-ld) | Run unpatched dynamic binaries |
@@ -93,15 +113,21 @@ Existing shortcuts remain available and delegate to the shared commands:
 
 For packages or checks **without activation**, use
 `just build-package <target> [flags...]`, for example
-`just build-package knots --no-link`. `build-alvr`,
-`build-aoci-code` and `test-alvr-android` use this shared entry point while keeping
-their special flags and license handling. The Android SDK/devShell workflows
-remain separate.
+`just build-package knots --no-link`. `build-aoci-code` uses this shared entry
+point while keeping its invocation-local license permission.
 
 Run the command-routing regression tests without building or activating systems:
 
 ```bash
 just test-justfile
+```
+
+Check host names and the per-platform output support matrix without building or
+activating systems:
+
+```bash
+nix eval --accept-flake-config --impure --json --expr \
+  'import ./scripts/tests/flake-output-shape.nix { flakeRef = toString ./.; }'
 ```
 
 ## Formatting and Git Hooks

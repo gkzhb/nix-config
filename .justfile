@@ -40,26 +40,6 @@ build-home user: (build-home-manager user)
 build-aoci-code:
     NIXPKGS_ALLOW_UNFREE=1 {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} build-package aoci-code --impure
 
-# Build the pinned ALVR master snapshot without activating the system.
-build-alvr: (build-package "alvr" "--cores" "4" "--max-jobs" "1")
-
-# Android SDK licenses are accepted in this dedicated devShell only.
-alvr-android-shell:
-    nix develop .#alvr-android --accept-flake-config
-
-prepare-alvr-android:
-    nix develop .#alvr-android --accept-flake-config --command alvr-android prepare
-
-# Compile and verify the Quest 2 APK; never install it or activate the system.
-build-alvr-android:
-    nix develop .#alvr-android --accept-flake-config --command alvr-android build
-
-verify-alvr-android:
-    nix develop .#alvr-android --accept-flake-config --command alvr-android verify
-
-# Workspace regression tests; no SDK, device or signing key required.
-test-alvr-android: (build-package "checks.x86_64-linux.alvr-android-workflow" "--no-link")
-
 # update flake and package versions
 # need to rebuild after running this
 update:

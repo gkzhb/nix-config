@@ -4,7 +4,6 @@ final: prev: {
   aoci-code = final.callPackage ./aoci-code.nix { };
   knots = final.callPackage ./knots.nix { };
   cccc-cli = final.callPackage ./cccc-cli.nix { };
-  alvr-master = final.callPackage ./alvr.nix { alvr = prev.alvr; };
   fmd = final.rustPlatform.buildRustPackage rec {
     pname = "fmd";
     version = "0.1.1";

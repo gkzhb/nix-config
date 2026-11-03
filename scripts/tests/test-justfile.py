@@ -110,22 +110,7 @@ class JustfileTests(unittest.TestCase):
     def test_package_wrappers(self):
         cases = [
             (["build-package", "knots"], ["build", ".#knots", "-L"], None),
-            (
-                ["build-alvr"],
-                ["build", ".#alvr", "-L", "--cores", "4", "--max-jobs", "1"],
-                None,
-            ),
             (["build-aoci-code"], ["build", ".#aoci-code", "-L", "--impure"], "1"),
-            (
-                ["test-alvr-android"],
-                [
-                    "build",
-                    ".#checks.x86_64-linux.alvr-android-workflow",
-                    "-L",
-                    "--no-link",
-                ],
-                None,
-            ),
         ]
         for recipes, args, unfree in cases:
             with self.subTest(recipes=recipes):
@@ -183,7 +168,6 @@ class JustfileTests(unittest.TestCase):
             "build",
             "build-devbox",
             "build-darwin",
-            "build-alvr",
             "build-aoci-code",
         ):
             with self.subTest(recipe=recipe):
@@ -193,18 +177,13 @@ class JustfileTests(unittest.TestCase):
         calls = self.run_recipe("build-aoci-code", "build-package", "knots")
         self.assertEqual([call["unfree"] for call in calls], ["1", None])
 
-    def test_android_workflows_accept_flake_config(self):
-        for recipe, action in [
-            ("alvr-android-shell", None),
-            ("prepare-alvr-android", "prepare"),
-            ("build-alvr-android", "build"),
-            ("verify-alvr-android", "verify"),
-        ]:
+    def test_removed_workflows_are_unavailable(self):
+        for recipe in (
+            "build-alvr", "alvr-android-shell", "prepare-alvr-android",
+            "build-alvr-android", "verify-alvr-android", "test-alvr-android",
+        ):
             with self.subTest(recipe=recipe):
-                args = ["develop", ".#alvr-android", "--accept-flake-config"]
-                if action:
-                    args.extend(["--command", "alvr-android", action])
-                self.assert_call([recipe], "nix", args)
+                self.assertEqual(self.run_recipe(recipe, success=False), [])
 
     def test_maintenance_commands_accept_flake_config(self):
         cases = [

@@ -1,4 +1,5 @@
 result
+# Keep retired local Android build workspaces out of source snapshots.
 .alvr-android/
 .pre-commit-config.yaml
 .pi/tasks/
