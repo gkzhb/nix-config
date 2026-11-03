@@ -30,8 +30,12 @@ in
     tuios-web = {
       serviceConfig = {
         ProgramArguments = [ "${startTuiosWeb}" ];
-        # tuios-web starts tuios by name; launchd does not inherit the login shell's PATH.
-        EnvironmentVariables.PATH = "${lib.makeBinPath [ pkgs.tuios ]}:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        # launchd does not inherit the login shell's environment.
+        EnvironmentVariables = {
+          # tuios-web starts tuios by name.
+          PATH = "${lib.makeBinPath [ pkgs.tuios ]}:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          XDG_CONFIG_HOME = "${home}/.config";
+        };
         WorkingDirectory = home;
         RunAtLoad = true;
         KeepAlive = true;

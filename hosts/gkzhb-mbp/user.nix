@@ -1,10 +1,16 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  darwinConfig,
+  ...
+}:
 
 {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home = {
     username = "bytedance";
+    sessionVariables.XDG_CONFIG_HOME = "${config.home.homeDirectory}/.config";
 
     # This value determines the Home Manager release that your
     # configuration is compatible with. This helps avoid breakage
@@ -20,6 +26,11 @@
   # Let Home Manager install and manage itself.
   programs = {
     home-manager.enable = true;
+
+    fish = {
+      enable = true;
+      package = darwinConfig.programs.fish.package;
+    };
 
     neovim = {
       enable = false;
