@@ -18,6 +18,29 @@ in
     nixpkgs.hostPlatform = "x86_64-linux";
     nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "browseros-neo";
 
+    # Identity metadata for Home Manager, not an account managed by userborn.
+    # The host owns this existing user's password, shell and supplementary groups.
+    users.users.${vncUser} = {
+      enable = false;
+      isNormalUser = true;
+      uid = 1001;
+      group = vncUser;
+      home = vncHome;
+      createHome = false;
+    };
+    # Match the existing primary group; mutable userborn preserves its members.
+    users.groups.${vncUser}.gid = 1001;
+
+    home-manager = {
+      useGlobalPkgs = true;
+      # Keep the existing ~/.nix-profile and Home Manager generation profile.
+      useUserPackages = false;
+      enableLegacyProfileManagement = true;
+      # Activate as the user from a system unit during System Manager switch.
+      startAsUserService = false;
+      users.${vncUser} = ../user.nix;
+    };
+
     nix = {
       enable = true;
       package = pkgs.nix;

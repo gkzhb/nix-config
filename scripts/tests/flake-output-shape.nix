@@ -45,10 +45,7 @@ let
       "gkzhb-vps"
       "mido"
     ];
-    homeConfigurations = [
-      "zhanghaibin.zhb"
-      "zhb"
-    ];
+    homeConfigurations = [ "zhb" ];
     packages = builtins.listToAttrs (
       map (system: {
         name = system;

@@ -49,15 +49,17 @@ in optionsList'
 evaluator = "nix eval .#darwinConfigurations.gkzhb-MBP.config.{{ .Option }}"
 
 [scopes.home-devbox]
-description = "Home Manager configuration zhanghaibin.zhb for devbox"
+description = "Home Manager configuration for devbox (integrated into systemConfigs.devbox)"
 options-list-cmd = '''
-nix eval '.#homeConfigurations."zhanghaibin.zhb"' --json --apply 'input: let
-  inherit (input) options pkgs;
+nix eval .#systemConfigs.devbox --json --apply 'input: let
+  pkgs = input.config.nixpkgs.pkgs;
+  prefix = "home-manager.users.<name>.";
+  subOptions = input.options.home-manager.users.type.getSubOptions [ "home-manager" "users" ];
   optionsList = builtins.filter (v: v.visible && !v.internal)
-    (pkgs.lib.optionAttrSetToDocList options);
-in optionsList'
+    (pkgs.lib.optionAttrSetToDocList subOptions);
+in map (v: v // { name = pkgs.lib.removePrefix prefix v.name; }) optionsList'
 '''
-evaluator = "nix eval '.#homeConfigurations.\"zhanghaibin.zhb\".config.{{ .Option }}'"
+evaluator = "nix eval '.#systemConfigs.devbox.config.home-manager.users.\"zhanghaibin.zhb\".{{ .Option }}'"
 
 [scopes.home-vps]
 description = "Home Manager configuration zhb for gkzhb-vps"

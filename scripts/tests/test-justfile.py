@@ -89,7 +89,7 @@ class JustfileTests(unittest.TestCase):
                 "system-manager",
                 "other-system",
             ),
-            (["build-home", "zhanghaibin.zhb"], "home-manager", "zhanghaibin.zhb"),
+            (["build-home", "other.user"], "home-manager", "other.user"),
             (["build-home-manager", "zhb"], "home-manager", "zhb"),
             (["build-darwin"], "darwin-rebuild", "gkzhb-MBP"),
             (["build-darwin", "other-mac"], "darwin-rebuild", "other-mac"),

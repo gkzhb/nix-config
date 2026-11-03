@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  inherit (inputs) system-manager sops-nix;
+  inherit (inputs) system-manager sops-nix home-manager;
   inherit (import ../overlays.nix { inherit inputs; })
     edge-overlay
     llm-agents-overlay
@@ -25,6 +25,8 @@ in
       ];
       modules = [
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
+        home-manager.nixosModules.home-manager
+        { home-manager.extraSpecialArgs = { inherit inputs; }; }
         ../../hosts/devbox/modules/default.nix
       ];
     };

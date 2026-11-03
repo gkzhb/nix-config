@@ -39,9 +39,11 @@
 
 在 devbox 上，此仓库被软链接到 `$HOME/.config/system-manager`
 
-使用 system-manager 管理安装系统包，使用 `just build-devbox` 来构建 system-manager 配置。
+使用 system-manager 管理系统包，并通过原生 Home Manager 模块管理 `zhanghaibin.zhb` 的用户配置和用户服务。运行 `just build-devbox` 会一起构建并激活两者，无需再单独执行 Home Manager。
 
-使用 standalone home-manager 管理用户包，使用 `just build-home zhanghaibin.zhb` 构建 home-manager 配置。
+用户配置仍在 `hosts/devbox/user.nix`，复用系统的 nixpkgs 和 overlays；用户包和 Home Manager generation 保留原有 profile 路径。已有账号由宿主管理，配置中的 `users.users."zhanghaibin.zhb".enable = false` 仅提供 Home Manager 所需的身份信息，不让 userborn 接管该账号。
+
+`just build-devbox` 会一起构建并激活两者。激活后检查 `systemctl status home-manager-zhanghaibin.zhb.service` 和用户服务状态；不要仅凭 System Manager 退出成功判断 Home Manager 激活成功。
 
 ### mido
 

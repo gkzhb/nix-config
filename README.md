@@ -70,7 +70,6 @@ sudo just build-nixos zhb-nixos
 just build-system-manager devbox
 just build-system-manager gkzhb-vps
 just build-system-manager mido
-just build-home-manager zhanghaibin.zhb
 just build-home-manager zhb
 just build-darwin gkzhb-MBP
 ```
@@ -79,8 +78,10 @@ Despite the historical `build-*` names, these commands **build and activate**
 with `switch`. System Manager requests sudo itself; NixOS retains the existing
 caller-provided sudo behavior. All commands use this repository as the flake
 source, without requiring a symlink at `/etc/nixos`. Home Manager takes a
-`homeConfigurations` key (usually a user name), not a machine hostname. Darwin
-also updates its integrated Home Manager configuration.
+`homeConfigurations` key (usually a user name), not a machine hostname. The
+devbox user's Home Manager configuration is integrated into its System Manager
+configuration, so use `just build-devbox` rather than a standalone Home Manager
+command. Darwin also updates its integrated Home Manager configuration.
 
 Flake commands explicitly accept this repository's `nixConfig` (including its
 substituters and trusted public keys) for each invocation. Review `flake.nix`
