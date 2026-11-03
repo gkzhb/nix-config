@@ -16,7 +16,7 @@ let
         exit 1
       fi
     done
-    exec ${pkgs.tuios}/bin/tuios-web \
+    exec ${pkgs.edge.tuios}/bin/tuios-web \
       --host 0.0.0.0 --port 7682 \
       --cert ${lib.escapeShellArg certPath} --key ${lib.escapeShellArg keyPath} \
       --password-file ${lib.escapeShellArg passwordPath}
@@ -33,7 +33,9 @@ in
         # launchd does not inherit the login shell's environment.
         EnvironmentVariables = {
           # tuios-web starts tuios by name.
-          PATH = "${lib.makeBinPath [ pkgs.tuios ]}:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          PATH = "${
+            lib.makeBinPath [ pkgs.edge.tuios ]
+          }:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
           XDG_CONFIG_HOME = "${home}/.config";
         };
         WorkingDirectory = home;

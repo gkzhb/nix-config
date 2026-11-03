@@ -1,24 +1,35 @@
 { inputs, ... }:
 let
   inherit (inputs) system-manager sops-nix;
-  inherit (import ../overlays.nix { inherit inputs; }) llm-agents-overlay browseros-overlay;
+  inherit (import ../overlays.nix { inherit inputs; })
+    edge-overlay
+    llm-agents-overlay
+    browseros-overlay
+    ;
 in
 {
   flake.systemConfigs = {
     mido = system-manager.lib.makeSystemConfig {
+      # Pass full package-set overlays directly: this avoids the recursive
+      # `listOf anything` merge used by System Manager's nixpkgs.overlays option.
+      overlays = [ edge-overlay ];
       modules = [
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
         ../../hosts/mido/modules/default.nix
       ];
     };
     devbox = system-manager.lib.makeSystemConfig {
-      overlays = [ browseros-overlay ];
+      overlays = [
+        browseros-overlay
+        edge-overlay
+      ];
       modules = [
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
         ../../hosts/devbox/modules/default.nix
       ];
     };
     "gkzhb-vps" = system-manager.lib.makeSystemConfig {
+      overlays = [ edge-overlay ];
       modules = [
         sops-nix.nixosModules.sops
         ../../hosts/gkzhb-vps/modules/default.nix

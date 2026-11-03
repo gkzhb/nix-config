@@ -433,10 +433,10 @@
     cccc-cli
 
     # AI
-    pi-coding-agent
+    edge.pi-coding-agent
     agent-browser
     herdr
-    tuios
+    edge.tuios
     beads
 
     # GUI apps

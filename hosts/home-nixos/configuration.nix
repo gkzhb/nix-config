@@ -254,10 +254,10 @@
     # playwright-driver.browsers
     mcp-grafana
 
-    pi-coding-agent
-    deepseek-harness
+    edge.pi-coding-agent
+    edge.deepseek-harness
     herdr
-    tuios
+    edge.tuios
     beads
     agent-browser
 

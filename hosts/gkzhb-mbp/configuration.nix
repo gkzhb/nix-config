@@ -21,7 +21,7 @@
     ripgrep
     television
     mosh
-    tuios
+    edge.tuios
 
     # devtools
     just
@@ -60,7 +60,7 @@
     # ai related
     beads
     herdr
-    pi-coding-agent
+    edge.pi-coding-agent
     # llama-cpp
   ];
 

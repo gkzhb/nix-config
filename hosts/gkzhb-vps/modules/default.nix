@@ -60,7 +60,7 @@
       timewarrior
       taskwarrior-tui
       herdr
-      tuios
+      edge.tuios
 
       # Secret management CLI tools
       sops

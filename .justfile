@@ -45,6 +45,10 @@ build-aoci-code:
 update:
     nix flake update --accept-flake-config
 
+# Update only the independently locked fast-moving package channel.
+update-edge:
+    nix flake update --accept-flake-config nixpkgs-edge
+
 update-nix:
     nix flake update --accept-flake-config nixpkgs nix-ld sops-nix home-manager nix-darwin system-manager
 

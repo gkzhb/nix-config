@@ -73,9 +73,9 @@ in
       taskwarrior-tui
       mosh
       herdr
-      tuios
-      pi-coding-agent
-      llm-agents.dsh
+      edge.tuios
+      edge.pi-coding-agent
+      edge.deepseek-harness
 
       # GUI apps
       browseros-neo

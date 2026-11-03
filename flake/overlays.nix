@@ -7,6 +7,15 @@ in
 {
   inherit local-packages;
 
+  # Keep fast-moving tools isolated from the host package set and its overlays.
+  # Reuse the host license policy, not a blanket allowUnfree exception.
+  edge-overlay = _final: prev: {
+    edge = import inputs.nixpkgs-edge {
+      system = prev.stdenv.hostPlatform.system;
+      inherit (prev) config;
+    };
+  };
+
   llm-agents-overlay = _final: prev: {
     llm-agents = inputs.llm-agents.packages.${prev.stdenv.hostPlatform.system} or { };
   };

@@ -130,6 +130,56 @@ nix eval --accept-flake-config --impure --json --expr \
   'import ./scripts/tests/flake-output-shape.nix { flakeRef = toString ./.; }'
 ```
 
+## Independent Update Channels
+
+The main `nixpkgs` input supplies the system and ordinary software. The separately
+locked `nixpkgs-edge` input supplies fast-moving tools through `pkgs.edge`:
+
+```nix
+environment.systemPackages = with pkgs; [
+  git                    # Main nixpkgs
+  edge.tuios             # Independently updated nixpkgs-edge
+  edge.pi-coding-agent
+  edge.deepseek-harness
+];
+```
+
+Both inputs track `nixos-unstable`, but their revisions in `flake.lock` are
+independent. `edge` describes an update policy, not an automatically updated or
+guaranteed newest version. It uses the host platform and license policy, without
+applying the host overlays to the separate package set. Only explicitly selected
+`edge.*` packages (and their dependencies) use this channel. Existing installations
+of these tools and their Nix-managed service references use the edge channel;
+this does not install all three tools on hosts that did not previously use them.
+The devbox/mido `dsh` package and services now use `edge.deepseek-harness` rather
+than `llm-agents.dsh`. Other `llm-agents` packages retain their existing policy.
+
+```bash
+just update-edge # Update only nixpkgs-edge
+just update-nix  # Update the main nixpkgs and related system modules
+just update      # Update ALL inputs, including both channels
+```
+
+Verify package provenance and Nix-managed service references without activation
+(run with each section: `nixos`, `system-manager`, `darwin`, `home`):
+
+```bash
+nix eval --accept-flake-config --impure --json --expr \
+  'import ./scripts/tests/edge-packages.nix { flakeRef = toString ./.; section = "nixos"; }'
+```
+
+Updating the lock does not activate anything. Afterwards, use the appropriate
+`build-*` command above to build and activate the changed configuration. Commit
+`flake.lock` to preserve the chosen versions; update channels are a manual policy,
+not a scheduled updater. Separate channels may download additional runtime
+libraries and consume more disk space.
+
+For new host configurations, reuse `edge-overlay` from `flake/overlays.nix`.
+NixOS, nix-darwin and standalone Home Manager use `nixpkgs.overlays`; System
+Manager must pass it through `makeSystemConfig { overlays = [ edge-overlay ]; }`.
+Its module-level overlay option recursively merges function results, which is
+not suitable for an overlay exposing a complete second nixpkgs package set.
+
 ## Formatting and Git Hooks
 
 Nix files are formatted with `treefmt-nix` using `nixfmt`.

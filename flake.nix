@@ -15,6 +15,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # Independently locked, frequently updated CLI tools; never follows nixpkgs.
+    nixpkgs-edge.url = "github:nixos/nixpkgs/nixos-unstable";
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";

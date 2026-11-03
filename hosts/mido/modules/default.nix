@@ -70,9 +70,9 @@ in
 
       # ai
       herdr
-      tuios
-      pi-coding-agent
-      llm-agents.dsh
+      edge.tuios
+      edge.pi-coding-agent
+      edge.deepseek-harness
     ];
 
     environment.variables = {
@@ -178,7 +178,7 @@ in
               "HOME=/home/user"
               servicePath
             ];
-            ExecStart = "${pkgs.llm-agents.dsh}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host mido.h.gkzhb.top --no-open";
+            ExecStart = "${pkgs.edge.deepseek-harness}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host mido.h.gkzhb.top --no-open";
             Restart = "on-failure";
             RestartSec = "5s";
           };

@@ -12,7 +12,7 @@ let
     hermes-agent
     helium-flake
     ;
-  inherit (import ../overlays.nix { inherit inputs; }) local-packages;
+  inherit (import ../overlays.nix { inherit inputs; }) edge-overlay local-packages;
 in
 {
   flake.nixosConfigurations = {
@@ -25,6 +25,7 @@ in
         {
           nixpkgs.overlays = [
             llm-agents.overlays.shared-nixpkgs
+            edge-overlay
             local-packages
           ];
         }
@@ -124,6 +125,7 @@ in
           nixpkgs.overlays = [
             llm-agents.overlays.shared-nixpkgs
             helium-flake.overlays.default
+            edge-overlay
             local-packages
           ];
         }

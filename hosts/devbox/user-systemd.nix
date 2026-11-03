@@ -21,7 +21,7 @@ in
     Install.WantedBy = [ "default.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.llm-agents.dsh}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host dsh.byte.gkzhb.top --no-open";
+      ExecStart = "${pkgs.edge.deepseek-harness}/bin/dsh web --port 3080 --host 127.0.0.1 --trusted-host dsh.byte.gkzhb.top --no-open";
       WorkingDirectory = "%h";
       Restart = "on-failure";
       RestartSec = "5s";

@@ -1,7 +1,11 @@
 { inputs, self, ... }:
 let
   inherit (inputs) nix-darwin home-manager sops-nix;
-  inherit (import ../overlays.nix { inherit inputs; }) llm-agents-overlay local-packages;
+  inherit (import ../overlays.nix { inherit inputs; })
+    edge-overlay
+    llm-agents-overlay
+    local-packages
+    ;
 in
 {
   flake.darwinConfigurations = {
@@ -10,6 +14,7 @@ in
         {
           nixpkgs.overlays = [
             llm-agents-overlay
+            edge-overlay
             local-packages
           ];
         }

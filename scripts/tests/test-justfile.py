@@ -189,6 +189,10 @@ class JustfileTests(unittest.TestCase):
         cases = [
             ("update", ["flake", "update", "--accept-flake-config"]),
             (
+                "update-edge",
+                ["flake", "update", "--accept-flake-config", "nixpkgs-edge"],
+            ),
+            (
                 "update-nix",
                 [
                     "flake",

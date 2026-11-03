@@ -1,7 +1,7 @@
 { inputs, ... }:
 let
   inherit (inputs) nixpkgs home-manager;
-  inherit (import ../overlays.nix { inherit inputs; }) llm-agents-overlay;
+  inherit (import ../overlays.nix { inherit inputs; }) edge-overlay llm-agents-overlay;
 in
 {
   flake.homeConfigurations = {
@@ -12,7 +12,12 @@ in
         inherit inputs;
       };
       modules = [
-        { nixpkgs.overlays = [ llm-agents-overlay ]; }
+        {
+          nixpkgs.overlays = [
+            llm-agents-overlay
+            edge-overlay
+          ];
+        }
         ../../hosts/devbox/user.nix
       ];
     };
