@@ -3,4 +3,11 @@ result
 .alvr-android/
 .pre-commit-config.yaml
 .pi/tasks/
-.planning/
+# agent planning files
+/.planning/
+/task_plan.md
+/findings.md
+/progress.md
+
+# Independent, editable dotfiles checkout (not a flake input).
+/dotfiles/

@@ -180,6 +180,17 @@ Manager must pass it through `makeSystemConfig { overlays = [ edge-overlay ]; }`
 Its module-level overlay option recursively merges function results, which is
 not suitable for an overlay exposing a complete second nixpkgs package set.
 
+## Editable Dotfiles
+
+`dotfiles/` is an independent checkout of `git@github.com:gkzhb/dotfiles.git`,
+ignored by this repository. Home Manager uses `mkOutOfStoreSymlink` to link
+software configurations to that working tree, so edits do not require a rebuild.
+The shared module is enabled on the current Mac; other hosts can opt in.
+
+See [the dotfiles guide](docs/dotfiles.md) for cloning, path overrides, mappings,
+first-activation backups, and separate Git workflows. Existing HOME files are
+not overwritten automatically.
+
 ## Formatting and Git Hooks
 
 Nix files are formatted with `treefmt-nix` using `nixfmt`.

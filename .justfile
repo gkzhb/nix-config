@@ -40,6 +40,19 @@ build-home user: (build-home-manager user)
 build-aoci-code:
     NIXPKGS_ALLOW_UNFREE=1 {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} build-package aoci-code --impure
 
+# Clone the editable dotfiles checkout, or fast-forward its current branch.
+update-dotfiles:
+    #!/bin/sh
+    set -eu
+    if [ ! -e dotfiles ] && [ ! -L dotfiles ]; then
+        git clone git@github.com:gkzhb/dotfiles.git dotfiles
+    elif [ -d dotfiles ] && { [ -d dotfiles/.git ] || [ -f dotfiles/.git ]; }; then
+        git -C dotfiles pull --ff-only
+    else
+        echo "dotfiles exists but is not a Git checkout; refusing to overwrite it." >&2
+        exit 1
+    fi
+
 # update flake and package versions
 # need to rebuild after running this
 update:

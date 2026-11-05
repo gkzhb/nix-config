@@ -12,7 +12,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 JUST = shutil.which("just")
-TOOLS = ("nixos-rebuild", "system-manager", "home-manager", "darwin-rebuild", "nix")
+TOOLS = ("nixos-rebuild", "system-manager", "home-manager", "darwin-rebuild", "nix", "git")
 
 
 @unittest.skipUnless(JUST, "just is required")
@@ -184,6 +184,50 @@ class JustfileTests(unittest.TestCase):
         ):
             with self.subTest(recipe=recipe):
                 self.assertEqual(self.run_recipe(recipe, success=False), [])
+
+    def test_dotfiles_clone_when_absent(self):
+        self.assert_call(
+            ["update-dotfiles"],
+            "git",
+            ["clone", "git@github.com:gkzhb/dotfiles.git", "dotfiles"],
+        )
+
+    def test_dotfiles_pull_existing_checkout(self):
+        dotfiles = self.root / "dotfiles"
+        dotfiles.mkdir()
+        for worktree in (False, True):
+            with self.subTest(worktree=worktree):
+                marker = dotfiles / ".git"
+                if worktree:
+                    marker.write_text("gitdir: /some/worktree\n")
+                else:
+                    marker.mkdir()
+                self.assert_call(
+                    ["update-dotfiles"], "git", ["-C", "dotfiles", "pull", "--ff-only"]
+                )
+                if worktree:
+                    marker.unlink()
+                else:
+                    marker.rmdir()
+
+    def test_dotfiles_reject_existing_non_checkout(self):
+        dotfiles = self.root / "dotfiles"
+        dotfiles.mkdir()
+        self.assertEqual(self.run_recipe("update-dotfiles", success=False), [])
+        dotfiles.rmdir()
+        dotfiles.write_text("preserve me")
+        self.assertEqual(self.run_recipe("update-dotfiles", success=False), [])
+        self.assertEqual(dotfiles.read_text(), "preserve me")
+        dotfiles.unlink()
+        dotfiles.symlink_to(self.root / "missing")
+        self.assertEqual(self.run_recipe("update-dotfiles", success=False), [])
+        self.assertTrue(dotfiles.is_symlink())
+
+    def test_dotfiles_git_failures_propagate(self):
+        self.env["ROUTING_EXIT"] = "42"
+        self.assertEqual(len(self.run_recipe("update-dotfiles", success=False)), 1)
+        (self.root / "dotfiles/.git").mkdir(parents=True)
+        self.assertEqual(len(self.run_recipe("update-dotfiles", success=False)), 1)
 
     def test_maintenance_commands_accept_flake_config(self):
         cases = [

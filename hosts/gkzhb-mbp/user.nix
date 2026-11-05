@@ -6,6 +6,13 @@
 }:
 
 {
+  imports = [ ../../modules/home-manager/dotfiles.nix ];
+
+  dotfiles = {
+    enable = true;
+    root = "${config.home.homeDirectory}/nix-config/dotfiles";
+  };
+
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home = {
