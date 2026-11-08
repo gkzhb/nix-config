@@ -380,6 +380,42 @@
         };
       };
     };
+    # Expose only MCP, and only on this host's Tailscale IPv4 address.
+    # tailscale0 is already trusted by the firewall; do not open a global port.
+    nginx = {
+      enable = true;
+      virtualHosts."browseros-mcp" = {
+        default = true;
+        listen = [
+          {
+            addr = "100.64.0.13";
+            port = 9200;
+          }
+        ];
+        locations."= /mcp" = {
+          # Bypass neo's public proxy (9010); keep its remote-access flag off.
+          proxyPass = "http://127.0.0.1:9210";
+          recommendedProxySettings = false;
+          extraConfig = ''
+            proxy_http_version 1.1;
+            proxy_set_header Host 127.0.0.1:9210;
+            proxy_set_header Connection "";
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            # Preserve MCP session/protocol headers and Origin validation.
+            # Streamable HTTP uses POST/GET/DELETE, not WebSockets.
+            proxy_buffering off;
+            proxy_request_buffering off;
+            proxy_cache off;
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+            gzip off;
+          '';
+        };
+        locations."/".return = "404";
+      };
+    };
     tailscale = {
       enable = true;
       openFirewall = true;
@@ -961,6 +997,13 @@
       environment = {
         FETCHER_ALLOW_PRIVATE_NETWORKS = "1";
       };
+    };
+    nginx = {
+      wants = [ "tailscaled.service" ];
+      after = [ "tailscaled.service" ];
+      # tailscaled being started does not guarantee its address exists yet.
+      # Let nginx's normal restart policy retry binding after a delayed login.
+      startLimitIntervalSec = lib.mkForce 0;
     };
     browseros-neo = {
       description = "BrowserOS neo in zhb's TigerVNC desktop";
