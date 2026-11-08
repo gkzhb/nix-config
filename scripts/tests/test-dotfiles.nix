@@ -57,6 +57,8 @@ let
       darwin.config.xdg.configFile."fish/config.fish".source != null
       && !(links.configLinks ? "fish/config.fish");
     fishFileLinked = links.configLinks."fish/conf.d/common.fish" == ".config/fish/conf.d/common.fish";
+    fishWorktreeFunction =
+      links.configLinks."fish/functions/tv-worktree.fish" == ".config/fish/functions/tv-worktree.fish";
     darwinOnly =
       !(linux.config.dotfiles.configLinks ? aerospace)
       && links.configLinks.aerospace == ".config/aerospace";

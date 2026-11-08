@@ -17,6 +17,7 @@ let
     "fish_plugins"
     "completions/pnpm.fish"
     "functions/y.fish"
+    "functions/tv-worktree.fish"
     "conf.d/brew.fish"
     "conf.d/claude.fish"
     "conf.d/common.fish"
