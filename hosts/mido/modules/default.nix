@@ -12,6 +12,9 @@ in
     # limited to the global Nix package environment below.
     system-manager.allowAnyDistro = true;
     nixpkgs.hostPlatform = "aarch64-linux";
+    # Explicitly accept libolm's known security risks for edge.picoclaw.
+    # The edge package set inherits this host-specific nixpkgs.config.
+    nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" ];
 
     nix = {
       enable = true;
@@ -69,7 +72,7 @@ in
       nginx
 
       # ai
-      herdr
+      edge.picoclaw
       edge.tuios
       edge.pi-coding-agent
       edge.deepseek-harness
@@ -78,6 +81,19 @@ in
     environment.variables = {
       EDITOR = "nvim";
       VISUAL = "nvim";
+    };
+
+    # Configure the host-provided journald without managing its service.
+    # Persistent and runtime journal storage each have their own 100 MiB cap.
+    environment.etc."systemd/journald.conf.d/size.conf" = {
+      text = ''
+        [Journal]
+        SystemMaxUse=100M
+        SystemMaxFileSize=10M
+        RuntimeMaxUse=100M
+        RuntimeMaxFileSize=10M
+      '';
+      replaceExisting = true;
     };
 
     # This replaces the apk sample configuration. It listens on every
@@ -162,6 +178,29 @@ in
             ExecStart = "/usr/bin/npm run start";
             Restart = "on-failure";
             RestartSec = "5s";
+          };
+        };
+
+        # Keep the existing runtime config and WeChat credentials outside the
+        # Nix store; onboarding and channel login update them in place.
+        picoclaw-gateway = {
+          description = "PicoClaw gateway for user";
+          wantedBy = [ "system-manager.target" ];
+          wants = [ "network-online.target" ];
+          after = [ "network-online.target" ];
+          unitConfig.ConditionPathExists = "/home/user/.picoclaw/config.json";
+          serviceConfig = {
+            User = "user";
+            Group = "user";
+            WorkingDirectory = "/home/user";
+            Environment = [
+              "HOME=/home/user"
+              servicePath
+            ];
+            ExecStart = "${pkgs.edge.picoclaw}/bin/picoclaw gateway --host 127.0.0.1";
+            Restart = "on-failure";
+            RestartSec = "5s";
+            UMask = "0077";
           };
         };
 
