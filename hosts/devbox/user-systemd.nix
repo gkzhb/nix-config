@@ -69,6 +69,22 @@ in
       RestartSec = "10";
     };
   };
+  systemd.user.services.figma-mcp = {
+    Unit = {
+      Description = "Figma MCP service";
+      After = [ "network.target" ];
+    };
+    Install.WantedBy = [ "default.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.fish}/bin/fish -l %h/scripts/services/figma/figma-mcp.fish";
+      WorkingDirectory = "%h/scripts/services/figma";
+      Environment = [ "PATH=${pkgs.nodejs}/bin:/run/system-manager/sw/bin:/usr/bin:/bin" ];
+      Restart = "on-failure";
+      RestartSec = "10s";
+    };
+  };
+
   systemd.user.services.graphiti-mcp = {
     Unit = {
       Description = "graphiti-mcp service";
