@@ -58,14 +58,13 @@
       ruff
       bun
       xray
-      taskwarrior3
       nil
       nixfmt
       thrift-ls
-      timewarrior
-      taskwarrior-tui
-      herdr
+
+      # ai related
       edge.tuios
+      edge.pi-coding-agent
 
       # Secret management CLI tools
       sops
