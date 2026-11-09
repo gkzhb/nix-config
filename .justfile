@@ -80,6 +80,10 @@ edit-secrets:
 test-justfile:
     python3 scripts/tests/test-justfile.py
 
+# Evaluate the shared GC module and timer; no activation or garbage collection.
+test-system-manager-gc:
+    nix eval --accept-flake-config --impure --json --file scripts/tests/test-system-manager-gc.nix
+
 format:
     nix fmt --accept-flake-config
 

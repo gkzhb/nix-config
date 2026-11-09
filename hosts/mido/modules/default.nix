@@ -11,6 +11,7 @@ in
     # by system-manager, but its system integration remains intentionally
     # limited to the global Nix package environment below.
     system-manager.allowAnyDistro = true;
+    services.system-manager-gc.enable = true;
     nixpkgs.hostPlatform = "aarch64-linux";
     # Explicitly accept libolm's known security risks for edge.picoclaw.
     # The edge package set inherits this host-specific nixpkgs.config.

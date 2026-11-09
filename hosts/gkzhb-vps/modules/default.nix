@@ -3,6 +3,7 @@
 {
   config = {
     system-manager.allowAnyDistro = true;
+    services.system-manager-gc.enable = true;
     nixpkgs.hostPlatform = "x86_64-linux";
 
     nix = {

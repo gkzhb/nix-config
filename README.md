@@ -131,6 +131,12 @@ nix eval --accept-flake-config --impure --json --expr \
   'import ./scripts/tests/flake-output-shape.nix { flakeRef = toString ./.; }'
 ```
 
+## System Manager Garbage Collection
+
+System Manager hosts (`gkzhb-vps`, `devbox`, `mido`) use a shared weekly cleanup
+module that retains five generations before running Nix garbage collection.
+See [configuration, activation and verification](docs/system-manager-gc.md).
+
 ## Independent Update Channels
 
 The main `nixpkgs` input supplies the system and ordinary software. The separately

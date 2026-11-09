@@ -19,6 +19,7 @@ in
       ];
       modules = [
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
+        ../../modules/system-manager/garbage-collection.nix
         ../../hosts/mido/modules/default.nix
       ];
     };
@@ -31,6 +32,7 @@ in
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
         home-manager.nixosModules.home-manager
         { home-manager.extraSpecialArgs = { inherit inputs; }; }
+        ../../modules/system-manager/garbage-collection.nix
         ../../hosts/devbox/modules/default.nix
       ];
     };
@@ -38,6 +40,7 @@ in
       overlays = [ edge-overlay ];
       modules = [
         sops-nix.nixosModules.sops
+        ../../modules/system-manager/garbage-collection.nix
         ../../hosts/gkzhb-vps/modules/default.nix
         ../../hosts/gkzhb-vps/modules/systemd.nix
         ../../hosts/gkzhb-vps/modules/vaultwarden.nix
