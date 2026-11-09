@@ -37,12 +37,20 @@ let
     common
     { dotfiles.enable = lib.mkForce false; }
   ];
+  devbox = flake.systemConfigs.devbox.config;
+  devboxHome = devbox.home-manager.users."zhanghaibin.zhb";
   links = darwin.config.dotfiles;
   roots = builtins.mapAttrs (system: home: {
     config = home.config.dotfiles.configLinks;
     home = home.config.dotfiles.homeLinks;
   }) { inherit darwin linux; };
   checks = {
+    devboxIntegrated =
+      devboxHome.dotfiles.enable
+      && devboxHome.dotfiles.root == "/home/zhanghaibin.zhb/nix-config/dotfiles"
+      && devboxHome.programs.fish.enable
+      && devbox.home-manager.useGlobalPkgs
+      && !devbox.users.users."zhanghaibin.zhb".enable;
     directoryNotRecursive = !darwin.config.xdg.configFile.nvim.recursive;
     noForcedOverwrite = !darwin.config.xdg.configFile.nvim.force;
     fishKeepsGeneratedConfig =

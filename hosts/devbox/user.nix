@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  dotfiles = {
+    enable = true;
+    root = "${config.home.homeDirectory}/nix-config/dotfiles";
+  };
+
   home = {
     username = "zhanghaibin.zhb";
     homeDirectory = "/home/zhanghaibin.zhb";
@@ -11,6 +16,7 @@
     ];
   };
   programs.home-manager.enable = true;
+  programs.fish.enable = true;
   # programs.neovim = {
   #   enable = true;
   #   defaultEditor = true;
@@ -25,6 +31,7 @@
   #     ];
   # };
   imports = [
+    ../../modules/home-manager/dotfiles.nix
     ./user-systemd.nix
   ];
 }
