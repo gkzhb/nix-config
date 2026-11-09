@@ -10,20 +10,20 @@
 }:
 
 let
-  version = "1.0.0-rc.47";
-  # Hashes from the tagged release's checksums-linux.txt/checksums-macos.txt.
+  version = "1.0.0-rc.49";
+  # SHA-256 digests published with the tagged GitHub release assets.
   releases = {
     x86_64-linux = {
       filename = "new-api-v${version}";
-      hash = "sha256-mGLety6VZ/rZQ9DvrcIgZ/SLNsML+TU2h0wJdkZ8U0w=";
+      hash = "sha256-eYQ4FAK8eOBgzXJDvWy8YEzOeuhLmezoXeNyQHOnSp8=";
     };
     aarch64-linux = {
       filename = "new-api-arm64-v${version}";
-      hash = "sha256-z2Z7a4LUBa34xRrlsLPBel+wyZQ/vFPN/RaFtRfCqYw=";
+      hash = "sha256-hcS13RI3ACpu5s7phEChX8VlqJBYaYWRk9eVaVKgXks=";
     };
     aarch64-darwin = {
       filename = "new-api-macos-v${version}";
-      hash = "sha256-9YWaihjQexPX/dexdUFuIh5z1JQFbddkOZm6MKhG85E=";
+      hash = "sha256-Yj2uZBEk0c/FH8s10AiiuJjAzmKHyJGW1NqkgReK9lE=";
     };
   };
   release = releases.${stdenvNoCC.hostPlatform.system};
@@ -40,7 +40,7 @@ stdenvNoCC.mkDerivation {
   # The upstream release binary already embeds the built frontend.
   src = fetchurl {
     url = "https://github.com/QuantumNous/new-api/archive/refs/tags/v${version}.tar.gz";
-    hash = "sha256-bnGAUcpcdTAFvpN4QlUXUjxJ/k1jRbVy76giok3+o5E=";
+    hash = "sha256-hO7tIIX7yQJm90iYtgG0MDcHGA2N3nlE1eYTQsOjsw0=";
   };
 
   # Despite upstream's static-link flags, Linux releases have a glibc interpreter

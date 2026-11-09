@@ -855,7 +855,9 @@
       unitConfig.RequiresMountsFor = [ "/home/zhb/scripts/services/new-api" ];
       environment = {
         HOME = "/home/zhb";
-        SQLITE_PATH = "/home/zhb/scripts/services/new-api/data/one-api.db?_busy_timeout=30000";
+        # glebarez/go-sqlite uses repeated _pragma parameters, not _busy_timeout.
+        # Match upstream concurrency defaults, including early writer locking.
+        SQLITE_PATH = "/home/zhb/scripts/services/new-api/data/one-api.db?_pragma=busy_timeout(30000)&_pragma=journal_mode(WAL)&_txlock=immediate";
         REDIS_CONN_STRING = "redis://127.0.0.1:6379";
         CRITICAL_RATE_LIMIT_ENABLE = "false";
         CRITICAL_RATE_LIMIT = "120";

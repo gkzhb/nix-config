@@ -31,15 +31,26 @@ def main():
         [binary, "--help"], env=env, text=True
     )
 
+    # Exercise both upstream defaults and the exact DSN used by home-nixos.
+    for sqlite_query in ("", "?_pragma=busy_timeout(30000)&_pragma=journal_mode(WAL)&_txlock=immediate"):
+        smoke_server(binary, version, env.copy(), sqlite_query)
+
+
+def smoke_server(binary, version, env, sqlite_query):
     with tempfile.TemporaryDirectory(prefix="new-api-smoke-") as directory:
         root = Path(directory)
         env.update(
             HOME=directory,
-            SQLITE_PATH=str(root / "new-api.db"),
+            SQLITE_PATH=str(root / "new-api.db") + sqlite_query,
             SESSION_SECRET="new-api-build-sandbox-test-only-secret",
             CRYPTO_SECRET="new-api-build-sandbox-test-only-crypto-secret",
             TRUSTED_PROXIES="none",
         )
+        # Start with an existing rollback-journal database, as on this host.
+        with sqlite3.connect(root / "new-api.db") as database:
+            database.execute("CREATE TABLE smoke_seed (value INTEGER)")
+            database.execute("INSERT INTO smoke_seed VALUES (42)")
+            assert database.execute("PRAGMA journal_mode").fetchone()[0] == "delete"
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))
             port = sock.getsockname()[1]
@@ -78,14 +89,23 @@ def main():
                     assert response.status == 200
                     assert len(response.read()) > 100, "frontend JavaScript missing"
 
-                with sqlite3.connect(root / "new-api.db") as database:
+                # Read without changing PRAGMAs: the application must enable WAL.
+                with sqlite3.connect(
+                    f"file:{root / 'new-api.db'}?mode=ro", uri=True
+                ) as database:
+                    assert database.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
+                    assert database.execute("SELECT value FROM smoke_seed").fetchone()[0] == 42
                     tables = {
                         row[0] for row in database.execute(
                             "SELECT name FROM sqlite_master WHERE type='table'"
                         )
                     }
                 assert {"users", "channels", "tokens"} <= tables, tables
-                print(f"new-api v{version}: version, help, API, frontend and SQLite passed")
+                assert (root / "new-api.db-wal").exists(), "WAL sidecar missing"
+                print(
+                    f"new-api v{version}: API, frontend, existing SQLite and WAL passed "
+                    f"({'explicit DSN' if sqlite_query else 'plain path'})"
+                )
             except BaseException:
                 log.flush()
                 log.seek(0)
