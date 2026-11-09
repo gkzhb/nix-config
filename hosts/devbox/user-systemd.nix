@@ -117,42 +117,42 @@ in
       RestartSec = "10";
     };
   };
-  systemd.user.services.brave = {
-    Unit = {
-      Description = "brave browser service";
-      After = [ "network.target" ];
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      Type = "simple";
-      ExecStartPre = "${pkgs.bash}/bin/bash -c 'until [ -S /tmp/.X11-unix/X1 ]; do sleep 1; done'";
-      ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9222 --user-data-dir=%h/.local/share/brave-mcp";
-      Environment = [
-        "DISPLAY=:1"
-        "XAUTHORITY=%h/.Xauthority"
-      ];
-      Restart = "on-failure";
-      RestartSec = "10";
-    };
-  };
-  systemd.user.services.quartz = {
-    Unit = {
-      Description = "quartz service";
-      After = [ "network.target" ];
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.fish}/bin/fish -l %h/gitrep/quartz/run.fish";
-      WorkingDirectory = "%h/gitrep/quartz";
-      Restart = "on-failure";
-      RestartSec = "10";
-    };
-  };
+  # systemd.user.services.brave = {
+  #   Unit = {
+  #     Description = "brave browser service";
+  #     After = [ "network.target" ];
+  #   };
+  #   Install = {
+  #     WantedBy = [ "default.target" ];
+  #   };
+  #   Service = {
+  #     Type = "simple";
+  #     ExecStartPre = "${pkgs.bash}/bin/bash -c 'until [ -S /tmp/.X11-unix/X1 ]; do sleep 1; done'";
+  #     ExecStart = "${pkgs.brave}/bin/brave --remote-debugging-port=9222 --user-data-dir=%h/.local/share/brave-mcp";
+  #     Environment = [
+  #       "DISPLAY=:1"
+  #       "XAUTHORITY=%h/.Xauthority"
+  #     ];
+  #     Restart = "on-failure";
+  #     RestartSec = "10";
+  #   };
+  # };
+  # systemd.user.services.quartz = {
+  #   Unit = {
+  #     Description = "quartz service";
+  #     After = [ "network.target" ];
+  #   };
+  #   Install = {
+  #     WantedBy = [ "default.target" ];
+  #   };
+  #   Service = {
+  #     Type = "simple";
+  #     ExecStart = "${pkgs.fish}/bin/fish -l %h/gitrep/quartz/run.fish";
+  #     WorkingDirectory = "%h/gitrep/quartz";
+  #     Restart = "on-failure";
+  #     RestartSec = "10";
+  #   };
+  # };
 
   # Code-server 服务配置
   systemd.user.services.code-server = {

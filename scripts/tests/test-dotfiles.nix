@@ -56,10 +56,21 @@ let
     noAgentState = !(links.homeLinks ? ".pi") && !(links.homeLinks ? ".claude");
     noOpenCode =
       !(lib.any (name: lib.hasPrefix "opencode" name) (builtins.attrNames links.configLinks));
-    tuiosWindowManager =
-      links.configLinks."tuios/window-manager.py" == ".config/tuios/window-manager.py"
-      && !(links.configLinks ? "tuios/television")
-      && links.configLinks.television == ".config/television";
+    tuiosDirectory =
+      lib.all
+        (
+          home:
+          home.config.dotfiles.configLinks.tuios == ".config/tuios"
+          && !home.config.xdg.configFile.tuios.recursive
+          && !home.config.xdg.configFile.tuios.force
+          && !(lib.any (name: lib.hasPrefix "tuios/" name) (
+            builtins.attrNames home.config.dotfiles.configLinks
+          ))
+        )
+        [
+          darwin
+          linux
+        ];
     televisionDirectory =
       !darwin.config.xdg.configFile.television.recursive
       && !darwin.config.xdg.configFile.television.force

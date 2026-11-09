@@ -77,6 +77,7 @@ in
         "nvim"
         "pip"
         "television"
+        "tuios"
         "uv"
         "wezterm"
         "yazi"
@@ -84,9 +85,6 @@ in
       // lib.genAttrs (map (name: "fish/${name}") fishFiles) (name: ".config/${name}")
       // {
         "herdr/config.toml" = ".config/herdr/config.toml";
-        "tuios/config.toml" = ".config/tuios/config.toml";
-        "tuios/pi-popup.fish" = ".config/tuios/pi-popup.fish";
-        "tuios/window-manager.py" = ".config/tuios/window-manager.py";
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         aerospace = ".config/aerospace";
