@@ -31,6 +31,7 @@ let
     {
       dotfiles.configLinks.kitty = lib.mkForce null;
       dotfiles.configLinks.nvim = ".config/custom-nvim";
+      dotfiles.homeLinks.".pi/agent/settings.json" = lib.mkForce null;
     }
   ];
   disabled = mkHome "aarch64-darwin" [
@@ -63,7 +64,38 @@ let
       !(linux.config.dotfiles.configLinks ? aerospace)
       && links.configLinks.aerospace == ".config/aerospace";
     hammerspoonLocation = links.homeLinks.".hammerspoon" == ".config/hammerspoon";
-    noAgentState = !(links.homeLinks ? ".pi") && !(links.homeLinks ? ".claude");
+    noAgentState =
+      !(links.homeLinks ? ".pi") && !(links.homeLinks ? ".pi/agent") && !(links.homeLinks ? ".claude");
+    piConfigEntries = lib.all (name: links.homeLinks.${name} == name) [
+      ".pi/agent/settings.json"
+      ".pi/agent/models.json"
+      ".pi/agent/pi-stamp.json"
+      ".pi/agent/extensions"
+      ".pi/agent/system-prompts"
+      ".pi/agent/shepherdr"
+    ];
+    piOnlyImmediateChildren =
+      let
+        names = lib.filter (name: lib.hasPrefix ".pi/" name) (builtins.attrNames links.homeLinks);
+      in
+      builtins.length names == 6 && lib.all (name: builtins.match "[.]pi/agent/[^/]+" name != null) names;
+    piEntriesNotForcedOrRecursive = lib.all (
+      name:
+      let
+        file = darwin.config.home.file.${name};
+      in
+      !file.force && !file.recursive
+    ) (lib.filter (name: lib.hasPrefix ".pi/" name) (builtins.attrNames links.homeLinks));
+    piLinuxConfig =
+      linux.config.dotfiles.homeLinks.".pi/agent/settings.json" == ".pi/agent/settings.json";
+    piOutOfStoreSource =
+      lib.hasInfix "/tmp/editable-dotfiles/.pi/agent/settings.json"
+        darwin.config.home.file.".pi/agent/settings.json".source.buildCommand;
+    piDirectoryOutOfStoreSource =
+      lib.hasInfix "/tmp/editable-dotfiles/.pi/agent/extensions"
+        darwin.config.home.file.".pi/agent/extensions".source.buildCommand;
+    piMappingCanBeDisabled = !(overridden.config.home.file ? ".pi/agent/settings.json");
+    piDisabledHasNoLinks = !(disabled.config.home.file ? ".pi/agent/settings.json");
     noOpenCode =
       !(lib.any (name: lib.hasPrefix "opencode" name) (builtins.attrNames links.configLinks));
     tuiosDirectory =
@@ -76,11 +108,13 @@ let
           && !(lib.any (name: lib.hasPrefix "tuios/" name) (
             builtins.attrNames home.config.dotfiles.configLinks
           ))
+          && lib.hasInfix "/tmp/editable-dotfiles/.config/tuios" home.config.xdg.configFile.tuios.source.buildCommand
         )
         [
           darwin
           linux
         ];
+    tuiosDisabledHasNoLinks = !(disabled.config.xdg.configFile ? tuios);
     televisionDirectory =
       !darwin.config.xdg.configFile.television.recursive
       && !darwin.config.xdg.configFile.television.force

@@ -34,6 +34,16 @@ let
     "conf.d/notification.mac.fish"
     "conf.d/yabai.mac.fish"
   ];
+  # Keep credentials, sessions and installed packages local. Link only selected
+  # immediate children of the Pi agent directory, without splitting directories.
+  piEntries = [
+    "settings.json"
+    "models.json"
+    "pi-stamp.json"
+    "extensions"
+    "system-prompts"
+    "shepherdr"
+  ];
   linkOption = description: {
     inherit description;
     type = lib.types.attrsOf (lib.types.nullOr lib.types.str);
@@ -100,6 +110,7 @@ in
         ".tmux/vim-tmux-navigator.conf" = ".tmux/vim-tmux-navigator.conf";
         "scripts/lf" = "scripts/lf";
       }
+      // lib.genAttrs (map (name: ".pi/agent/${name}") piEntries) (name: name)
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         ".hammerspoon" = ".config/hammerspoon";
         ".skhdrc" = ".skhdrc";
