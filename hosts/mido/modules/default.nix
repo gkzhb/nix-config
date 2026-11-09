@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   # Keep system services' non-interactive PATH aligned with user tooling.
@@ -15,6 +15,9 @@ in
     # Explicitly accept libolm's known security risks for edge.picoclaw.
     # The edge package set inherits this host-specific nixpkgs.config.
     nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" ];
+
+    # AOCI-CODE is source-available under FSL-1.1-MIT.
+    nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "aoci-code";
 
     nix = {
       enable = true;
@@ -51,6 +54,7 @@ in
       yazi
       zoxide
       beads
+      aoci-code
       mosquitto
       zenith
       htop

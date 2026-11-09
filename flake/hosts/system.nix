@@ -5,6 +5,7 @@ let
     edge-overlay
     llm-agents-overlay
     browseros-overlay
+    aoci-code-overlay
     ;
 in
 {
@@ -12,7 +13,10 @@ in
     mido = system-manager.lib.makeSystemConfig {
       # Pass full package-set overlays directly: this avoids the recursive
       # `listOf anything` merge used by System Manager's nixpkgs.overlays option.
-      overlays = [ edge-overlay ];
+      overlays = [
+        edge-overlay
+        aoci-code-overlay
+      ];
       modules = [
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
         ../../hosts/mido/modules/default.nix

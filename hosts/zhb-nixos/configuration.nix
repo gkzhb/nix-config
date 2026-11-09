@@ -438,6 +438,7 @@
     herdr
     edge.tuios
     beads
+    aoci-code
 
     # GUI apps
     (vscode-with-extensions.override {

@@ -20,6 +20,12 @@ in
     llm-agents = inputs.llm-agents.packages.${prev.stdenv.hostPlatform.system} or { };
   };
 
+  # Limit mido to this local package rather than the full local overlay set.
+  # Pass via makeSystemConfig.overlays to avoid the recursive option merge.
+  aoci-code-overlay = final: _prev: {
+    aoci-code = final.callPackage ../packages/aoci-code.nix { };
+  };
+
   # Limit devbox to this package; unrelated local overlays need not be evaluated.
   browseros-overlay = final: prev: {
     inherit (local-packages final prev) browseros-neo;
