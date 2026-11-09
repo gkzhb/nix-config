@@ -218,6 +218,16 @@
     };
 
     tailscale.enable = true;
+    fail2ban = {
+      enable = true;
+      jails.sshd.settings = {
+        # Count failed public-key authentication attempts across connections.
+        filter = "sshd[publickey=any]";
+        findtime = "10m";
+        maxretry = 5;
+        bantime = "10m";
+      };
+    };
     openssh = {
       enable = true;
       settings = {
@@ -226,8 +236,9 @@
         KbdInteractiveAuthentication = false;
         PubkeyAuthentication = true;
         AuthenticationMethods = "publickey";
-        MaxAuthTries = 3;
-        PerSourcePenalties = "crash:3600s authfail:3600s max:86400s";
+        MaxAuthTries = 5;
+        # Let fail2ban enforce the rolling window without earlier sshd penalties.
+        PerSourcePenalties = "no";
         AllowUsers = [ "zhb" ];
       };
     };
@@ -431,6 +442,7 @@
     optnix
     knots
     cccc-cli
+    croc
 
     # AI
     edge.pi-coding-agent
@@ -458,7 +470,7 @@
     helium
     kitty
     bitwarden-desktop
-    calibre
+    # calibre
     vlc
     mpv
     eden # Nintendo Switch emulator
