@@ -45,6 +45,7 @@ in
         ../../hosts/gkzhb-vps/modules/systemd.nix
         ../../hosts/gkzhb-vps/modules/vaultwarden.nix
         ../../hosts/gkzhb-vps/modules/telegraf.nix
+        ../../hosts/gkzhb-vps/modules/croc-relay.nix
       ];
     };
   };
