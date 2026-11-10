@@ -28,14 +28,23 @@ in
     };
   };
   systemd.user.services.newapi = {
+    # Redis is a system service: user-unit After/Wants cannot order it.
+    # Its startup PING and Restart=on-failure retry if Redis is not ready.
     Unit.Description = "New API LLM gateway";
     Install.WantedBy = [ "default.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "${new-api}/bin/new-api";
+      ExecStart = "${new-api}/bin/new-api --port 3000 --log-dir ./logs";
       WorkingDirectory = "%h/scripts/services/newapi";
+      Environment = [
+        "REDIS_CONN_STRING=redis://127.0.0.1:6379/0"
+        "SQLITE_PATH=one-api.db?_pragma=busy_timeout(30000)&_pragma=journal_mode(WAL)&_txlock=immediate"
+      ];
       Restart = "on-failure";
       RestartSec = "5s";
+      UMask = "0077";
+      NoNewPrivileges = true;
+      RestrictSUIDSGID = true;
     };
   };
 

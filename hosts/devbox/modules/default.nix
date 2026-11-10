@@ -13,6 +13,8 @@ let
 in
 
 {
+  imports = [ ./redis.nix ];
+
   config = {
     system-manager.allowAnyDistro = true;
     services.system-manager-gc.enable = true;
