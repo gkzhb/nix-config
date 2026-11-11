@@ -3,7 +3,13 @@ keys:
   - &zhb_nixos age1j0u835slxc76cq6fjvuhzjqw76eptes86yty4yc5avcczrj564as4cm26y
   - &gkzhb_mbp age1998ry47e29yttk370hv7srcs3cum3axwlnankj7nsr6h9jyhndnqqtts47
   - &gkzhb_vps age1usalx2t4kxrfww352tfph6nvt3vgpmlugcf2n4ra497xurm0ja7qs06grm
+  - &devbox age19j3qcjsflalh0dc0yx878h4v4nxnhd5x25nfq668a95yafxz35rsvxknjf
 creation_rules:
+  - path_regex: ^secrets/devbox-dolt\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *devbox
   # This Mac can decrypt only its dedicated GoDNS configuration.
   - path_regex: ^secrets/godns-mbp\.yaml$
     key_groups:

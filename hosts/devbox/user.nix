@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   dotfiles = {
@@ -10,11 +15,20 @@
     username = "zhanghaibin.zhb";
     homeDirectory = "/home/zhanghaibin.zhb";
     stateVersion = "25.11";
-    packages = with pkgs; [ ];
+    packages = with pkgs; [ dolt ];
     sessionPath = [
       "$HOME/.nix-profile/bin"
     ];
   };
+  sops = {
+    defaultSopsFile = ../../secrets/devbox-dolt.yaml;
+    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    age.generateKey = false;
+    age.sshKeyPaths = [ ];
+    gnupg.sshKeyPaths = [ ];
+    secrets.dolt-root-password.mode = "0400";
+  };
+
   programs.home-manager.enable = true;
   programs.fish.enable = true;
   # programs.neovim = {
@@ -31,6 +45,7 @@
   #     ];
   # };
   imports = [
+    inputs.sops-nix.homeManagerModules.sops
     ../../modules/home-manager/dotfiles.nix
     ./user-systemd.nix
   ];

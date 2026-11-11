@@ -8,6 +8,38 @@ let
   new-api = pkgs.callPackage ../../packages/new-api.nix { };
 in
 {
+  # Create the data root before systemd enters WorkingDirectory, including on first login.
+  systemd.user.tmpfiles.rules = [ "d %h/scripts/services/dolt 0700 - - -" ];
+
+  systemd.user.services.dolt = {
+    Unit = {
+      Description = "Dolt SQL Server for Beads";
+      After = [
+        "systemd-tmpfiles-setup.service"
+        "sops-nix.service"
+      ];
+      Requires = [
+        "systemd-tmpfiles-setup.service"
+        "sops-nix.service"
+      ];
+    };
+    Install.WantedBy = [ "default.target" ];
+    Service = {
+      Type = "simple";
+      # Provision both new and existing root accounts before opening TCP.
+      LoadCredential = [ "root-password:${config.sops.secrets.dolt-root-password.path}" ];
+      ExecStartPre = "${pkgs.python3}/bin/python3 ${../../scripts/dolt-prepare-root.py} ${pkgs.dolt}/bin/dolt";
+      ExecStart = "${pkgs.dolt}/bin/dolt sql-server --host 0.0.0.0 --port 3307 --data-dir . --doltcfg-dir .doltcfg --socket %t/dolt.sock --skip-root-user-initialization";
+      WorkingDirectory = "%h/scripts/services/dolt";
+      Restart = "on-failure";
+      RestartSec = "5s";
+      TimeoutStopSec = "60s";
+      UMask = "0077";
+      NoNewPrivileges = true;
+      RestrictSUIDSGID = true;
+    };
+  };
+
   systemd.user.services.dsh-web = {
     Unit = {
       Description = "DeepSeek Harness web service";
