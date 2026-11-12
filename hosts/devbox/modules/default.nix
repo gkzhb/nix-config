@@ -107,6 +107,7 @@ in
       taskwarrior-tui
       mosh
       herdr
+      (callPackage ../../../packages/cccc-cli.nix { })
       edge.tuios
       edge.pi-coding-agent
       edge.deepseek-harness
