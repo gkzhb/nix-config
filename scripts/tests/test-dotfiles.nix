@@ -60,6 +60,22 @@ let
     fishFileLinked = links.configLinks."fish/conf.d/common.fish" == ".config/fish/conf.d/common.fish";
     fishWorktreeFunction =
       links.configLinks."fish/functions/tv-worktree.fish" == ".config/fish/functions/tv-worktree.fish";
+    fishTvnFunction =
+      lib.all
+        (
+          home:
+          home.dotfiles.configLinks."fish/functions/tvn.fish" == ".config/fish/functions/tvn.fish"
+          &&
+            lib.hasInfix "${home.dotfiles.root}/.config/fish/functions/tvn.fish"
+              home.xdg.configFile."fish/functions/tvn.fish".source.buildCommand
+          && !home.xdg.configFile."fish/functions/tvn.fish".force
+          && !home.xdg.configFile."fish/functions/tvn.fish".recursive
+        )
+        [
+          darwin.config
+          linux.config
+          devboxHome
+        ];
     darwinOnly =
       !(linux.config.dotfiles.configLinks ? aerospace)
       && links.configLinks.aerospace == ".config/aerospace";

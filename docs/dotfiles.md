@@ -52,6 +52,14 @@ just update-dotfiles
 - 缓存、登录凭据、运行状态和安装产物不应作为公共配置同步。目录链接下的软件写入也会进入工作区，需要配合 `.gitignore` 和提交前审查。
 - 密钥使用 sops-nix 加密管理，不将明文凭据提交到 dotfiles。
 
+## Fish worktree 导航
+
+- `tv-worktree`：用 Television 选择当前仓库 worktree，只改变当前 shell 目录。
+- `tvn [仓库目录]`：默认当前仓库，用同一 picker 选择已有 worktree；按完整路径复用 tuios session，没有则创建。在 tuios 内切换客户端，在外部 attach，不改变当前 shell 目录，不创建/删除 Git worktree。
+- `tvn.fish` 逐文件映射；辅助脚本随 `tuios` 整目录映射。新增映射需激活，临时使用可 `source dotfiles/.config/fish/functions/tvn.fish`（已有 Television/tuios 目录映射时）。
+
+完整语义与隔离测试见 `dotfiles/.config/tuios/worktree-session.md`。
+
 ## 首次迁移与激活
 
 1. 备份现有配置，比较差异，将需要保留的内容合并到 `dotfiles/`，不要盲目覆盖。
