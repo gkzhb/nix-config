@@ -69,7 +69,7 @@ let
     piConfigEntries = lib.all (name: links.homeLinks.${name} == name) [
       ".pi/agent/settings.json"
       ".pi/agent/models.json"
-      ".pi/agent/pi-stamp.json"
+      ".pi/agent/hud-footer.json"
       ".pi/agent/extensions"
       ".pi/agent/system-prompts"
       ".pi/agent/shepherdr"
@@ -79,6 +79,35 @@ let
         names = lib.filter (name: lib.hasPrefix ".pi/" name) (builtins.attrNames links.homeLinks);
       in
       builtins.length names == 6 && lib.all (name: builtins.match "[.]pi/agent/[^/]+" name != null) names;
+    piHudFooterLinked =
+      lib.all
+        (
+          home:
+          home.dotfiles.homeLinks.".pi/agent/hud-footer.json" == ".pi/agent/hud-footer.json"
+          &&
+            lib.hasInfix "${home.dotfiles.root}/.pi/agent/hud-footer.json"
+              home.home.file.".pi/agent/hud-footer.json".source.buildCommand
+          && !home.home.file.".pi/agent/hud-footer.json".force
+          && !home.home.file.".pi/agent/hud-footer.json".recursive
+        )
+        [
+          darwin.config
+          linux.config
+          devboxHome
+        ];
+    piStampUnmanaged =
+      lib.all
+        (
+          home:
+          !(home.dotfiles.homeLinks ? ".pi/agent/pi-stamp.json")
+          && !(home.home.file ? ".pi/agent/pi-stamp.json")
+          && !(lib.hasInfix "pi-stamp.json" home.home.activation.checkDotfiles.data)
+        )
+        [
+          darwin.config
+          linux.config
+          devboxHome
+        ];
     piEntriesNotForcedOrRecursive = lib.all (
       name:
       let

@@ -46,6 +46,7 @@ just update-dotfiles
 
 - **目录映射**适合独立配置目录，新增文件即可生效；保持 `recursive = false`，避免拆成逐文件链接。
 - **文件映射**适合与 Home Manager 生成文件、插件或本地状态共享的目录。
+- Pi 默认链接 `settings.json`、`models.json`、`hud-footer.json` 和 `extensions`、`system-prompts`、`shepherdr` 三个目录；不管理 `pi-stamp.json`，因为 pi-stamp 0.53.0 拒绝配置文件软链接。需要自定义时通过 `/stamp` 创建本机普通文件。
 - 每个目标只保留一个配置所有者，避免软链接映射与 `programs.*` 同时生成同一文件。
 - 本机特有配置优先使用软件原生的 include、配置片段或覆盖机制，独立于共享配置保存；确认加载顺序和优先级。
 - 缓存、登录凭据、运行状态和安装产物不应作为公共配置同步。目录链接下的软件写入也会进入工作区，需要配合 `.gitignore` 和提交前审查。
@@ -60,6 +61,8 @@ just update-dotfiles
 5. 用 `realpath <配置路径>` 检查最终来源是否位于本地工作区。
 
 迁移原路径后、激活之前，软件可能暂时无法读取配置，应缩短这一间隔并保留可恢复的备份。
+
+`hud-footer.json` 已纳入映射。若 HOME 中仍是普通文件，激活前先比较它与 `dotfiles/.pi/agent/hud-footer.json`，将普通文件备份移走后再激活；模块不会强制覆盖。pi-hud-footer 0.8.0 支持经软链接读取和保存配置，菜单修改也会写入 dotfiles 工作区。
 
 ## 日常维护与验证
 

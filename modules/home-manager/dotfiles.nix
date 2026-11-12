@@ -36,10 +36,11 @@ let
   ];
   # Keep credentials, sessions and installed packages local. Link only selected
   # immediate children of the Pi agent directory, without splitting directories.
+  # pi-stamp rejects symlinked settings; leave its optional config local.
   piEntries = [
     "settings.json"
     "models.json"
-    "pi-stamp.json"
+    "hud-footer.json"
     "extensions"
     "system-prompts"
     "shepherdr"
