@@ -30,6 +30,7 @@ in
       ];
       modules = [
         { nixpkgs.overlays = [ llm-agents-overlay ]; }
+        sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         { home-manager.extraSpecialArgs = { inherit inputs; }; }
         ../../modules/system-manager/garbage-collection.nix

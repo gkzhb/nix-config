@@ -13,7 +13,10 @@ let
 in
 
 {
-  imports = [ ./redis.nix ];
+  imports = [
+    ./redis.nix
+    ./dolt.nix
+  ];
 
   config = {
     system-manager.allowAnyDistro = true;
@@ -66,6 +69,11 @@ in
 
     environment.systemPackages = with pkgs; [
       system-manager
+      # Secret management and local TLS certificate tooling.
+      sops
+      age
+      mkcert
+      openssl
       git
       python3
       fish

@@ -1,107 +1,140 @@
-# devbox: authenticated Beads Dolt SQL Server
+# devbox: system Dolt SQL Server with authenticated TLS
 
-`hosts/devbox/user-systemd.nix` declares `dolt.service` as a Home Manager
-user service; `hosts/devbox/user.nix` installs Dolt and imports Home Manager's
-sops-nix module.
+`hosts/devbox/modules/dolt.nix` defines `dolt.service` as a **System Manager
+system service**, running as the existing `zhanghaibin.zhb` account (not root).
+Home Manager no longer owns Dolt or its secret service. Global CLI packages
+include Dolt, sops, age, mkcert and openssl.
 
-- TCP: **0.0.0.0:3307** (all IPv4 interfaces, not IPv6).
-- Unix socket: `$XDG_RUNTIME_DIR/dolt.sock`.
-- Persistent databases: `~/scripts/services/dolt/<database>/`.
-- Privilege state: `~/scripts/services/dolt/.doltcfg/privileges.db`.
-- Home Manager tmpfiles creates the data root with mode `0700`; umask is `0077`.
-- This remains a user service; the devbox user currently has linger enabled.
+- TCP: **0.0.0.0:3307**, all IPv4 interfaces, **TLS required**.
+- Client endpoint: **dolt.byte.gkzhb.top:3307**.
+- Unix socket: **/run/dolt/dolt.sock**, under a 0700 user-owned runtime directory.
+- Persistent databases: `~/scripts/services/dolt/<database>/` (unchanged).
+- Privilege state: `~/scripts/services/dolt/.doltcfg/privileges.db` (unchanged).
+- A preparation oneshot creates the data root 0700 before WorkingDirectory is
+  entered, including first activation. system tmpfiles also defines its owner.
+- The service starts with `system-manager.target`; user linger is no longer
+  required for Dolt.
 
-## SOPS root password and safe startup
+## Root password and system SOPS
 
-The random root password is encrypted in `secrets/devbox-dolt.yaml` under
-`dolt-root-password`, to the dedicated devbox age recipient and the admin key.
-The devbox private identity is `~/.config/sops/age/keys.txt` (mode 0600); it is
-**not in Git or the Nix store**. Back it up securely before reinstalling the
-host. `.sops.yaml` grants that identity access only to this dedicated secret.
-Do not replace the identity without re-encrypting to its new recipient.
+`secrets/devbox-dolt.yaml` contains **only** the encrypted `dolt-root-password`,
+with the original password preserved. System sops-nix decrypts it as a root-only
+0400 runtime secret at `/run/secrets/dolt-root-password`. The age identity
+remains `~/.config/sops/age/keys.txt` (0600), outside Git/store; the system
+activation process reads it. Securely back it up before reinstalling.
 
-The user unit requires and follows **user** `sops-nix.service`, loads the
-0400 decrypted secret via systemd `LoadCredential`, then runs
-`scripts/dolt-prepare-root.py` in `ExecStartPre`. That helper performs **offline**
-SQL under the existing data root, creates/updates `root@%` plus existing root
-host variants, and grants root privileges. Missing, empty or short secrets and
-SQL errors prevent startup. SQL containing passwords goes through a subprocess
-stdin, not argv, a generated store file, persistent SQL file or journal.
+The system unit waits for `sops-install-secrets.service`, loads the secret with
+`LoadCredential`, then runs `scripts/dolt-prepare-root.py` in `ExecStartPre`.
+That helper provisions root credentials through **offline SQL before opening
+TCP**, including existing root host variants. Missing/weak passwords and SQL
+failures prevent startup. Passwords are not placed in argv, store files,
+persistent SQL files or the journal. Root changes apply on each service start;
+sops-nix requests a system service restart on root secret changes.
 
-Dolt's `DOLT_ROOT_PASSWORD` alone is insufficient: it only works on first
-initialization and is ignored when `privileges.db` already exists. Offline
-provisioning therefore runs on **every service start**, supporting existing
-passwordless state and password rotation while preserving databases and other
-users. The main server uses `--skip-root-user-initialization`, so it cannot
-silently create a passwordless default root. Other pre-existing accounts retain
-their permissions/passwords: audit them before enabling remote access.
+The main process uses `--skip-root-user-initialization`. The data-directory
+owner retains offline superuser access by Dolt design. Other pre-existing SQL
+accounts are not changed: audit them before allowing remote access, and use
+least-privilege application accounts rather than root.
 
-Root can authenticate remotely (`root@%`) as requested. This is not a
-least-privilege application account: create restricted users for applications.
-The data-directory owner still has offline superuser access by Dolt design.
+## Original Nginx TLS files
 
-**Networking:** no host/upstream firewall rules are opened by this configuration.
-Passwords do not encrypt SQL traffic; this configuration does not enable TLS.
-Use an authenticated VPN/SSH tunnel or configure Dolt TLS before permitting
-untrusted-network access. Restrict allowed client IPs rather than exposing
-3307 generally to the Internet.
+Systemd reads the original, root-protected Nginx certificate sources:
 
-## Rotate, activate and inspect
+- `/etc/letsencrypt/live/byte.gkzhb.top/fullchain.pem`
+- `/etc/letsencrypt/live/byte.gkzhb.top/privkey.pem`
 
-Edit the encrypted secret, without putting passwords in shell arguments:
+The system manager passes private runtime credential snapshots to the unprivileged
+Dolt process. **No source permissions are relaxed, no TLS key/cert is copied
+into sops or the Nix store.** Invalid/missing credentials prevent startup.
+`listener.require_secure_transport: true` rejects plaintext TCP. The local
+Unix socket stays on this machine and is not TLS.
+
+The Let's Encrypt certificate covers `byte.gkzhb.top` and `*.byte.gkzhb.top`.
+Clients with current public roots do not need a private CA import. Connect via
+**dolt.byte.gkzhb.top**, not localhost, `127.0.0.1` or bare host IP, which are not
+in its SANs. Do not use `--no-tls` or skip certificate verification. No system
+or browser trust-store changes are made. mkcert is available as a tool but is
+not the certificate used by Dolt.
+
+**Renewal:** the original certificate inspected during development expires
+2026-11-19 11:52:03 UTC. Certbot renews its `live/` symlinks; the next Dolt restart
+reads the renewed originals automatically, with **no re-encryption or Nix
+rebuild required**. But Dolt and systemd credentials do not live-reload files.
+After successful renewal run:
 
 ```sh
-sops secrets/devbox-dolt.yaml
-just build-devbox
-systemctl status home-manager-zhanghaibin.zhb.service --no-pager
-systemctl --user restart dolt.service
-systemctl --user status sops-nix.service dolt.service --no-pager
-journalctl --user -u dolt.service -n 50 --no-pager
-# --user root prompts for the password; do not pass it via --password on argv.
-dolt --host 127.0.0.1 --port 3307 --user root --no-tls --use-db mysql sql -q "SHOW DATABASES"
+sudo systemctl restart dolt.service
 ```
 
-Before changing credentials on existing data, stop the service and make a
-consistent backup of the entire data root, including `.doltcfg`. Stop any
-independently launched server using that same data root. The new password is
-applied at service start; restarting only sops-nix does not rotate an already
-running server. On the first run, activation decrypts SOPS before starting Dolt.
-For subsequent secret edits, explicitly restart Dolt after successful Home
-Manager activation, as above. Do not bypass the startup helper or use a bare
-`dolt sql-server` with an old passwordless privilege file.
+A Certbot deploy hook can automate that restart if desired; none is installed
+by this change. Do not stop database service in a failed-renewal hook. Reusing
+Nginx's wildcard key means the Dolt process user can access its runtime copy;
+a dedicated publicly issued certificate reduces that cross-service exposure.
+
+TLS encrypts TCP SQL queries/results, but does not justify general Internet
+exposure of root. No firewall rules are opened here. Restrict source IPs/VPN
+peers and keep root/admin credentials separate from application accounts.
+
+## Migrate and activate
+
+The system service is ordered after successful Home Manager activation, which
+removes the legacy user unit. Before first activation explicitly stop/disable
+the old service and consistently back up the entire data root if it exists:
+
+```sh
+systemctl --user disable --now dolt.service
+# Back up ~/scripts/services/dolt and .doltcfg while all servers using it are stopped.
+just build-devbox
+systemctl status home-manager-zhanghaibin.zhb.service sops-install-secrets.service dolt.service --no-pager
+journalctl -u dolt.service -n 50 --no-pager
+# Prompts for root password, normal public CA + hostname validation:
+dolt --host dolt.byte.gkzhb.top --port 3307 --user root --use-db mysql sql -q "SHOW DATABASES"
+```
+
+Do not judge success solely by System Manager exit status. Verify Home Manager
+succeeded and no legacy `systemctl --user` Dolt process is still running. If
+Home Manager activation fails, the system Dolt dependency fails closed rather
+than running concurrently against the same data root.
+
+Rotate only the SOPS root password with `sops secrets/devbox-dolt.yaml`, then
+reactivate and check system service status. Do not manually delete the privilege
+DB or bypass offline preparation.
 
 ## Use with Beads
 
-For a **new, uninitialized** workspace, read the runtime secret into the current
-process environment without displaying it, then initialize:
+For a new workspace, provide the password via Beads' supported environment or
+credential mechanism and enable TLS. Root runtime secrets are no longer
+user-readable at the former Home Manager path. Read only the specific password
+with sudo into the current process without printing it, or use a separately
+provisioned least-privilege account. Bash example (disable shell tracing):
 
 ```sh
-BEADS_DOLT_PASSWORD="$(< "$HOME/.config/sops-nix/secrets/dolt-root-password")" \
-  bd init --server --external --server-host 127.0.0.1 --server-port 3307 \
-  --server-user root --non-interactive
+BEADS_DOLT_SERVER_TLS=1 \
+BEADS_DOLT_PASSWORD="$(sudo cat /run/secrets/dolt-root-password)" \
+  bd init --server --external --server-host dolt.byte.gkzhb.top --server-port 3307 \
+  --server-tls --server-user root --non-interactive
 ```
 
-This example uses Bash; other shells can read the secret file equivalently.
-Prefer a least-privilege account for ongoing application use. Subsequent Beads
-commands also need the password through their supported environment/credentials
-mechanism; never copy it into Git. Existing Beads databases are not migrated or
-reinitialized automatically. Distinct workspaces need distinct database names.
+`--server-tls` during initialization is not persisted by Beads; keep TLS enabled
+for later invocations. Existing Beads databases are not automatically migrated
+or reinitialized. Distinct workspaces need distinct DB names.
 
 ## Validate without activation
 
 ```sh
 nix eval --accept-flake-config --impure --json --file scripts/tests/test-dolt-service.nix
-# Pass the built binary and absolute helper path:
+just build-package systemConfigs.devbox.config.build.toplevel --no-link
 python3 -B scripts/tests/test-dolt-auth.py /path/to/dolt "$PWD/scripts/dolt-prepare-root.py"
 ```
 
-The runtime regression uses temporary directories and loopback-only random
-ports: it rejects missing/weak passwords, verifies correct/incorrect/empty
-password behavior, rotates credentials, and checks database data survives.
-No live host database or external listener is touched.
+`test-dolt-tls.py` takes `<dolt> <generated YAML> <temporary credential dir>
+<CA-or-dash> <hostname>` (`-` for public roots). It creates temporary state,
+rewrites only listener/data/socket locations for the test, and uses an actual
+MySQL TLS client to verify encrypted queries/results, plaintext/empty/wrong
+password denial, CA validation and wrong-hostname rejection. Never use a live
+production data root for regression tests.
 
-Validated on x86_64-linux with pinned Dolt 2.5.0: the full devbox configuration
-built, all 11 HM/SOPS wiring checks passed, generated user units verified,
-authentication/rotation/data-preservation checks passed, and a separately
-created legacy passwordless `root@localhost` was secured before restart.
-These checks did not activate or open the external listener.
+Validated on x86_64-linux: full devbox build, 15 configuration assertions,
+system-level original cert/key credential access for the ordinary service user,
+and TLSv1.3 encrypted SQL/results with plaintext/bad-password rejection and
+CA/hostname verification. These checks did not activate the production service.
