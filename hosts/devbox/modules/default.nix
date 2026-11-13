@@ -83,6 +83,7 @@ in
       just
       tree-sitter
       fzf
+      jq
       fd
       television
       neovim
