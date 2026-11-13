@@ -107,6 +107,7 @@
 
   imports = [
     ./services.nix
+    ./garbage-collection.nix
     ./godns.nix
   ];
 }

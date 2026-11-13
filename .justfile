@@ -80,6 +80,10 @@ edit-secrets:
 test-justfile:
     python3 scripts/tests/test-justfile.py
 
+# Test Darwin GC ordering with fake tools; never touches real profiles.
+test-nix-darwin-gc:
+    python3 scripts/tests/test-nix-darwin-gc.py
+
 # Evaluate the shared GC module and timer; no activation or garbage collection.
 test-system-manager-gc:
     nix eval --accept-flake-config --impure --json --file scripts/tests/test-system-manager-gc.nix
