@@ -37,6 +37,9 @@
     fish = {
       enable = true;
       package = darwinConfig.programs.fish.package;
+      shellInit = ''
+        set -gx LESSCHARSET utf-8
+      '';
     };
 
     neovim = {
