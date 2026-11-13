@@ -40,12 +40,29 @@ let
   ];
   devbox = flake.systemConfigs.devbox.config;
   devboxHome = devbox.home-manager.users."zhanghaibin.zhb";
+  zhbNixos = flake.nixosConfigurations.zhb-nixos.config;
+  zhbHome = zhbNixos.home-manager.users.zhb;
   links = darwin.config.dotfiles;
   roots = builtins.mapAttrs (system: home: {
     config = home.config.dotfiles.configLinks;
     home = home.config.dotfiles.homeLinks;
   }) { inherit darwin linux; };
   checks = {
+    zhbNixosIntegrated =
+      zhbHome.dotfiles.enable
+      && zhbHome.dotfiles.root == "/home/zhb/nix-config/dotfiles"
+      && zhbHome.home.homeDirectory == "/home/zhb"
+      && zhbHome.home.stateVersion == "26.11"
+      && zhbHome.programs.fish.enable
+      && zhbNixos.home-manager.useGlobalPkgs
+      && zhbNixos.home-manager.useUserPackages
+      && zhbNixos.home-manager.backupFileExtension == "before-home-manager";
+    zhbCocStateUnmanaged =
+      zhbHome.dotfiles.configLinks.coc == null
+      && !(zhbHome.xdg.configFile ? coc)
+      && zhbHome.dotfiles.configLinks."coc/ultisnips" == ".config/coc/ultisnips"
+      && !zhbHome.xdg.configFile."coc/ultisnips".force;
+    zhbNoUnrelatedServices = builtins.attrNames zhbHome.systemd.user.services == [ ];
     devboxIntegrated =
       devboxHome.dotfiles.enable
       && devboxHome.dotfiles.root == "/home/zhanghaibin.zhb/nix-config/dotfiles"

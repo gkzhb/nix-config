@@ -129,15 +129,15 @@ in
             local-packages
           ];
         }
-        # home-manager.nixosModules.home-manager
-        # {
-        #   home-manager.useGlobalPkgs = true;
-        #   home-manager.useUserPackages = true;
-        #   home-manager.users.zhb = ../../hosts/home-nixos/user.nix;
-        #
-        #   # Optionally, use home-manager.extraSpecialArgs to pass
-        #   # arguments to home.nix
-        # }
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          # Preserve existing files/directories on the first dotfiles activation.
+          # Home Manager refuses to overwrite an existing backup with this suffix.
+          home-manager.backupFileExtension = "before-home-manager";
+          home-manager.users.zhb = ../../hosts/zhb-nixos/user.nix;
+        }
         sops-nix.nixosModules.sops
       ];
     };

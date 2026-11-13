@@ -72,6 +72,28 @@ just update-dotfiles
 
 `hud-footer.json` 已纳入映射。若 HOME 中仍是普通文件，激活前先比较它与 `dotfiles/.pi/agent/hud-footer.json`，将普通文件备份移走后再激活；模块不会强制覆盖。pi-hud-footer 0.8.0 支持经软链接读取和保存配置，菜单修改也会写入 dotfiles 工作区。
 
+## zhb-nixos 首次迁移
+
+这台主机使用 `hosts/zhb-nixos/user.nix`，通过 NixOS 集成 Home Manager；不要使用指向 VPS 配置的 `just build-home zhb`。日常激活入口为：
+
+```sh
+sudo just build-zhb
+systemctl status home-manager-zhb.service
+journalctl -u home-manager-zhb.service -b --no-pager
+realpath ~/.config/nvim ~/.pi/agent/settings.json
+fish -ic 'functions cfg; functions dv'
+```
+
+只有 Home Manager 服务成功且配置路径最终指向 `~/nix-config/dotfiles/`，才算迁移完成。首次激活会将冲突的普通文件或目录保留为同路径的 `*.before-home-manager`；如果备份已存在会拒绝覆盖，先检查并另行归档，不要直接删除。NixOS 构建或其他服务失败时也应检查 Home Manager 是否已运行，不要假定激活是事务性的。
+
+迁移准备阶段保留 HOME 原路径不动，并在 `~/.local/state/dotfiles-migration/<时间>/` 保存选定配置及旧 `~/.dotfiles` 元数据的归档和清单。`dotfiles/` 从旧库本地克隆，origin 仍为 GitHub；本机的 Kitty 附加配置、Neovim lockfile、Yazi 插件及 Pi 本地扩展/提示词已复制到新工作区，并仅在 `.git/info/exclude` 中忽略。后续新增本地配置仍需遵守提交前审查原则。
+
+CoC 在本机只映射 `coc/ultisnips`，安装扩展及运行状态继续留在 `~/.config/coc/`。Fish 仍按文件映射，本机 `*.local.fish`、`fish_variables` 和插件保持原位；Pi 的登录凭据、会话、npm 包、skills 及 `pi-stamp.json` 不迁移。
+
+旧 `~/.dotfiles` 暂留作恢复，不要再用旧的 `git --git-dir=~/.dotfiles --work-tree=~` 工作流提交：它会把 Home Manager 链接误认为配置内容变更。激活后开启新 Fish，`cfg`/`dv` 会指向新工作区；激活前可显式使用 `git -C ~/nix-config/dotfiles`。
+
+若要恢复旧方案，先从 NixOS 配置禁用本主机的 dotfiles 接入并重新激活，确认不再由 Home Manager 管理目标，再按清单逐一恢复对应备份；不要将归档直接解压覆盖仍被管理的链接，也不要仅回滚 NixOS generation 就认为所有 HOME 备份会自动还原。
+
 ## 日常维护与验证
 
 已有映射中的配置内容可以直接在工作区或软件配置路径编辑，无需 Nix rebuild；软件是否需要 reload/restart 取决于其自身。新增映射或改变工作区路径后，需要重新激活。
