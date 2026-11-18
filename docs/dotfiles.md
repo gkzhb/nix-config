@@ -46,11 +46,52 @@ just update-dotfiles
 
 - **目录映射**适合独立配置目录，新增文件即可生效；保持 `recursive = false`，避免拆成逐文件链接。
 - **文件映射**适合与 Home Manager 生成文件、插件或本地状态共享的目录。
-- Pi 默认链接 `settings.json`、`models.json`、`hud-footer.json` 和 `extensions`、`system-prompts`、`shepherdr` 三个目录；不管理 `pi-stamp.json`，因为 pi-stamp 0.53.0 拒绝配置文件软链接。需要自定义时通过 `/stamp` 创建本机普通文件。
+- Pi 的旧映射默认链接 `settings.json`、`models.json`、`hud-footer.json` 和 `extensions`、`system-prompts`、`shepherdr` 三个目录。主机启用 `dotfiles.pi` 后，`settings.json` 改为本机普通文件，`models.json` 链接到所选 profile。两种模式都不管理 `pi-stamp.json`，因为 pi-stamp 0.53.0 拒绝将配置文件软链接；需要自定义时通过 `/stamp` 创建本机普通文件。
 - 每个目标只保留一个配置所有者，避免软链接映射与 `programs.*` 同时生成同一文件。
 - 本机特有配置优先使用软件原生的 include、配置片段或覆盖机制，独立于共享配置保存；确认加载顺序和优先级。
 - 缓存、登录凭据、运行状态和安装产物不应作为公共配置同步。目录链接下的软件写入也会进入工作区，需要配合 `.gitignore` 和提交前审查。
 - 密钥使用 sops-nix 加密管理，不将明文凭据提交到 dotfiles。
+
+## Pi 模型 profile 和本机设置
+
+`dotfiles/.pi/agent/settings.shared.json` 是公共基线；主题、工具、软件包等在这里维护。`dotfiles/.pi/agent/model-profiles/<profile>.json` 是完整的 Pi 模型目录，不是 Pi 会自动合并的片段。按模型和端点组合命名，新增或修改某个目录时，按需更新包含同一 provider 的其他 profile。
+
+在主机的 Home Manager `user.nix` 中选择 profile 和启动模型，例如：
+
+```nix
+dotfiles.pi = {
+  enable = true;
+  modelProfile = "newapi";
+  defaultProvider = "newapi";
+  defaultModel = "gpt-6.1-sol";
+  enabledModels = [ "newapi/**" ];
+};
+```
+
+当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`devbox` 和 `zhb-nixos` 使用 `newapi`。`mixed` 同时包含两个供应商，目前没有主机选用。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
+
+**首次迁移**（以下 Shell 命令用 Bash 或 sh 执行）：
+
+1. 停止 Pi 或退出会写设置的会话。在激活前备份两个 JSON 的**实际内容**；如果文件不存在，跳过该文件。不需要解除或重建其他 Pi 链接。
+
+   ```sh
+   backup="$(mktemp -d "$HOME/.pi-config-backup.XXXXXX")"
+   chmod 700 "$backup"
+   for f in settings.json models.json; do
+     if [ -f "$HOME/.pi/agent/$f" ]; then
+       cp -L "$HOME/.pi/agent/$f" "$backup/$f"
+     fi
+   done
+   printf 'Pi backup: %s\n' "$backup"
+   ```
+
+2. 先提交/分发 **dotfiles 仓库**里的新基线和 profile，再更新目标机的 checkout（`just update-dotfiles`）。在 **nix-config 仓库**中，确保 `scripts/pi-sync-settings.py` 已被 Git 跟踪，flake 才能看到它。保留旧的 `settings.json`/`models.json` 源文件供尚未迁移的主机使用；不要继续在那里维护已迁移的配置。若目标原来是 Home Manager 管理的链接，直接激活即可；如果 `models.json` 是手工管理的普通文件或链接，先备份移走，避免目标冲突。
+3. 使用对应的 `just build-darwin` / `just build-devbox` / `sudo just build-zhb` 激活新 Nix 配置，无需再手动同步。Home Manager 会先检查 JSON，确认旧 `settings.json` 链接是否属于上一代，再移除该链接并以旧内容为基础生成本机文件。已有普通文件会直接参与合并。若设置路径是手工链接，先备份实际内容，再把链接移开并用备份恢复为普通文件；激活会拒绝沿手工链接写入。
+4. 验证 `test -f ~/.pi/agent/settings.json && test ! -L ~/.pi/agent/settings.json`、`realpath ~/.pi/agent/models.json`；在非项目目录新开 Pi 会话检查启动模型（恢复旧会话会使用会话记录中的模型）。
+
+**日常同步**：每次 Home Manager **激活**都会自动同步；仅构建或 dry-run 不会写入。只改了公共基线时，也可以手动运行 `pi-sync-settings`，不必重建；修改主机默认值或 profile 后，重新激活即可。同步按「本机设置 → 公共基线 → 主机默认值」递归合并对象，同名数组整项替换；未被覆盖的本机字段保留。删除基线中的字段不会自动删除本机字段。Pi 的修改只写本机，下次激活或手动同步时会重新应用有声明的字段。不要在 Pi 正写设置时激活或同步。凭据、会话、已安装的包和扩展运行状态仍不纳入此同步。该机制只针对默认的 `~/.pi/agent`，不管理其他 `PI_CODING_AGENT_DIR`。
+
+**回到旧映射**：备份移走本机普通 `settings.json`，然后禁用主机的 `dotfiles.pi` 并重新激活。不要把备份写回仍指向 checkout 的路径。
 
 ## Fish worktree 导航
 
@@ -80,11 +121,11 @@ just update-dotfiles
 sudo just build-zhb
 systemctl status home-manager-zhb.service
 journalctl -u home-manager-zhb.service -b --no-pager
-realpath ~/.config/nvim ~/.pi/agent/settings.json
+realpath ~/.config/nvim ~/.pi/agent/models.json
 fish -ic 'functions cfg; functions dv'
 ```
 
-只有 Home Manager 服务成功且配置路径最终指向 `~/nix-config/dotfiles/`，才算迁移完成。首次激活会将冲突的普通文件或目录保留为同路径的 `*.before-home-manager`；如果备份已存在会拒绝覆盖，先检查并另行归档，不要直接删除。NixOS 构建或其他服务失败时也应检查 Home Manager 是否已运行，不要假定激活是事务性的。
+只有 Home Manager 服务成功且软链接最终指向 `~/nix-config/dotfiles/`，才算链接迁移完成；同时确认 Pi 的本机 `settings.json` 是普通文件。首次激活会将冲突的普通文件或目录保留为同路径的 `*.before-home-manager`；如果备份已存在会拒绝覆盖，先检查并另行归档，不要直接删除。NixOS 构建或其他服务失败时也应检查 Home Manager 是否已运行，不要假定激活是事务性的。
 
 迁移准备阶段保留 HOME 原路径不动，并在 `~/.local/state/dotfiles-migration/<时间>/` 保存选定配置及旧 `~/.dotfiles` 元数据的归档和清单。`dotfiles/` 从旧库本地克隆，origin 仍为 GitHub；本机的 Kitty 附加配置、Neovim lockfile、Yazi 插件及 Pi 本地扩展/提示词已复制到新工作区，并仅在 `.git/info/exclude` 中忽略。后续新增本地配置仍需遵守提交前审查原则。
 

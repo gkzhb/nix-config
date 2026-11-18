@@ -80,6 +80,10 @@ edit-secrets:
 test-justfile:
     python3 scripts/tests/test-justfile.py
 
+# Test Pi settings sync in temporary agent directories; no activation.
+test-pi-settings:
+    python3 scripts/tests/test-pi-sync-settings.py
+
 # Test Darwin GC ordering with fake tools; never touches real profiles.
 test-nix-darwin-gc:
     python3 scripts/tests/test-nix-darwin-gc.py

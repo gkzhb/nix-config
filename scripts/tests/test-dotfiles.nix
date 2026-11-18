@@ -42,6 +42,45 @@ let
   devboxHome = devbox.home-manager.users."zhanghaibin.zhb";
   zhbNixos = flake.nixosConfigurations.zhb-nixos.config;
   zhbHome = zhbNixos.home-manager.users.zhb;
+  mac = mkHome "aarch64-darwin" [
+    ../../hosts/gkzhb-mbp/user.nix
+    ({ pkgs, ... }: {
+      home.homeDirectory = "/Users/bytedance";
+      _module.args.darwinConfig.programs.fish.package = pkgs.fish;
+    })
+  ];
+  profiled = mkHome "aarch64-darwin" [
+    common
+    {
+      dotfiles.pi = {
+        enable = true;
+        modelProfile = "magpie";
+        defaultProvider = "magpie";
+        defaultModel = "auto/gpt-6.1-sol";
+      };
+    }
+  ];
+  syncPackages = home: lib.filter (package: package.name == "pi-sync-settings") home.home.packages;
+  profiledHomes = [
+    {
+      home = mac.config;
+      profile = "magpie";
+      provider = "magpie";
+      model = "auto/gpt-6.1-sol";
+    }
+    {
+      home = devboxHome;
+      profile = "newapi";
+      provider = "newapi";
+      model = "gpt-6.1-sol";
+    }
+    {
+      home = zhbHome;
+      profile = "newapi";
+      provider = "newapi";
+      model = "gpt-6.1-sol";
+    }
+  ];
   links = darwin.config.dotfiles;
   roots = builtins.mapAttrs (system: home: {
     config = home.config.dotfiles.configLinks;
@@ -157,6 +196,42 @@ let
       lib.hasInfix "/tmp/editable-dotfiles/.pi/agent/extensions"
         darwin.config.home.file.".pi/agent/extensions".source.buildCommand;
     piMappingCanBeDisabled = !(overridden.config.home.file ? ".pi/agent/settings.json");
+    piHostProfiles = lib.all (
+      {
+        home,
+        profile,
+        provider,
+        model,
+      }:
+      let
+        source = ".pi/agent/model-profiles/${profile}.json";
+        activation = home.home.activation.checkDotfiles.data;
+        target = home.home.file.".pi/agent/models.json";
+        inherit (home.home.activation) checkPiSettings syncPiSettings;
+      in
+      home.dotfiles.pi.enable
+      && home.dotfiles.pi.modelProfile == profile
+      && home.dotfiles.pi.defaultProvider == provider
+      && home.dotfiles.pi.defaultModel == model
+      && home.dotfiles.pi.enabledModels == [ "${provider}/**" ]
+      && home.dotfiles.homeLinks.".pi/agent/models.json" == source
+      && lib.hasInfix "${home.dotfiles.root}/${source}" target.source.buildCommand
+      && !target.force
+      && home.dotfiles.homeLinks.".pi/agent/settings.json" == null
+      && !(home.home.file ? ".pi/agent/settings.json")
+      && lib.hasInfix ".pi/agent/settings.shared.json" activation
+      && lib.hasInfix source activation
+      && checkPiSettings.before == [ "writeBoundary" ]
+      && checkPiSettings.after == [ "checkDotfiles" ]
+      && lib.hasInfix " --check " checkPiSettings.data
+      && syncPiSettings.after == [ "linkGeneration" ]
+      && lib.hasInfix "run " syncPiSettings.data
+      && lib.hasInfix "/bin/pi-sync-settings " syncPiSettings.data
+    ) profiledHomes;
+    piLegacyDoesNotSync = !(darwin.config.home.activation ? syncPiSettings);
+    piSyncInstalled = builtins.length (syncPackages profiled.config) == 1;
+    piSyncNotInstalledInLegacyConfig = syncPackages darwin.config == [ ];
+    piEmptyDefaultScope = profiled.config.dotfiles.pi.enabledModels == [ ];
     piDisabledHasNoLinks = !(disabled.config.home.file ? ".pi/agent/settings.json");
     noOpenCode =
       !(lib.any (name: lib.hasPrefix "opencode" name) (builtins.attrNames links.configLinks));
@@ -197,6 +272,8 @@ assert lib.assertMsg (
   inherit checks roots;
   # Forcing the activation derivation checks Home Manager assertions as well.
   activationDrv = darwin.activationPackage.drvPath;
+  profiledActivationDrv = profiled.activationPackage.drvPath;
+  syncSettingsDrv = (builtins.head (syncPackages profiled.config)).drvPath;
   symlink = {
     drvPath = darwin.config.xdg.configFile.nvim.source.drvPath;
     target = darwin.config.xdg.configFile.nvim.source.target or null;

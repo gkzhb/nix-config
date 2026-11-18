@@ -6,6 +6,19 @@
 }:
 let
   cfg = config.dotfiles;
+  pi = cfg.pi;
+  piSharedSettings = ".pi/agent/settings.shared.json";
+  piSettings = ".pi/agent/settings.json";
+  piSettingsPath = lib.escapeShellArg "${config.home.homeDirectory}/${piSettings}";
+  piSyncSettings = pkgs.writeShellScriptBin "pi-sync-settings" ''
+    exec ${lib.getExe pkgs.python3} ${../../scripts/pi-sync-settings.py} \
+      --settings ${piSettingsPath} \
+      --shared ${lib.escapeShellArg "${cfg.root}/${piSharedSettings}"} \
+      --overrides ${
+        lib.escapeShellArg (builtins.toJSON { inherit (pi) defaultProvider defaultModel enabledModels; })
+      } \
+      "$@"
+  '';
   activeLinks = lib.filterAttrs (_: source: source != null);
   mkLinks = lib.mapAttrs (
     _: source: {
@@ -52,7 +65,9 @@ let
     default = { };
   };
   allSources = lib.unique (
-    builtins.attrValues (activeLinks cfg.configLinks) ++ builtins.attrValues (activeLinks cfg.homeLinks)
+    builtins.attrValues (activeLinks cfg.configLinks)
+    ++ builtins.attrValues (activeLinks cfg.homeLinks)
+    ++ lib.optional pi.enable piSharedSettings
   );
 in
 {
@@ -69,6 +84,26 @@ in
     homeLinks = lib.mkOption (
       linkOption "HOME target to checkout-relative source; null disables a mapping."
     );
+    pi = {
+      enable = lib.mkEnableOption "Pi model profiles and activation-time sync of writable local settings";
+      modelProfile = lib.mkOption {
+        type = lib.types.strMatching "[A-Za-z0-9][A-Za-z0-9_-]*";
+        description = "Name of a complete JSON model catalog in .pi/agent/model-profiles in the checkout.";
+      };
+      defaultProvider = lib.mkOption {
+        type = lib.types.nonEmptyStr;
+        description = "Default Pi provider applied by pi-sync-settings.";
+      };
+      defaultModel = lib.mkOption {
+        type = lib.types.nonEmptyStr;
+        description = "Default Pi model ID within the provider, applied by pi-sync-settings.";
+      };
+      enabledModels = lib.mkOption {
+        type = lib.types.listOf lib.types.nonEmptyStr;
+        default = [ ];
+        description = "Pi startup and cycling model patterns applied by pi-sync-settings; empty means no scope.";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -77,7 +112,13 @@ in
         assertion = lib.hasPrefix "/" cfg.root && !(lib.hasPrefix builtins.storeDir cfg.root);
         message = "dotfiles.root must be an absolute path outside the Nix store.";
       }
-    ];
+    ]
+    ++ lib.optional pi.enable {
+      assertion = !(config.home.file ? ${piSettings});
+      message = "dotfiles.pi requires settings.json to be a writable local file, not managed by home.file.";
+    };
+
+    home.packages = lib.optional pi.enable piSyncSettings;
 
     dotfiles.configLinks = lib.mapAttrs (_: lib.mkDefault) (
       lib.genAttrs [
@@ -104,22 +145,27 @@ in
       }
     );
 
-    dotfiles.homeLinks = lib.mapAttrs (_: lib.mkDefault) (
-      {
-        ".gitconfig" = ".gitconfig";
-        ".tmux.conf" = ".tmux.conf";
-        ".tmux/onedark.conf" = ".tmux/onedark.conf";
-        ".tmux/vim-tmux-navigator.conf" = ".tmux/vim-tmux-navigator.conf";
-        "scripts/lf" = "scripts/lf";
-      }
-      // lib.genAttrs (map (name: ".pi/agent/${name}") piEntries) (name: name)
-      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-        ".hammerspoon" = ".config/hammerspoon";
-        ".skhdrc" = ".skhdrc";
-        ".yabairc" = ".yabairc";
-        "scripts/yabai" = "scripts/yabai";
-      }
-    );
+    dotfiles.homeLinks =
+      lib.mapAttrs (_: lib.mkDefault) (
+        {
+          ".gitconfig" = ".gitconfig";
+          ".tmux.conf" = ".tmux.conf";
+          ".tmux/onedark.conf" = ".tmux/onedark.conf";
+          ".tmux/vim-tmux-navigator.conf" = ".tmux/vim-tmux-navigator.conf";
+          "scripts/lf" = "scripts/lf";
+        }
+        // lib.genAttrs (map (name: ".pi/agent/${name}") piEntries) (name: name)
+        // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+          ".hammerspoon" = ".config/hammerspoon";
+          ".skhdrc" = ".skhdrc";
+          ".yabairc" = ".yabairc";
+          "scripts/yabai" = "scripts/yabai";
+        }
+      )
+      // lib.optionalAttrs pi.enable {
+        ${piSettings} = null;
+        ".pi/agent/models.json" = ".pi/agent/model-profiles/${pi.modelProfile}.json";
+      };
 
     xdg.configFile = mkLinks (activeLinks cfg.configLinks);
     home.file = mkLinks (activeLinks cfg.homeLinks);
@@ -134,6 +180,26 @@ in
         fi
       '') allSources}
     '';
+
+    # The previous generation's source remains readable after linkGeneration
+    # removes the old HOME symlink. Never adopt an unrelated symlink.
+    home.activation.checkPiSettings = lib.mkIf pi.enable (
+      lib.hm.dag.entryBetween [ "writeBoundary" ] [ "checkDotfiles" ] ''
+        piSettingsSeed=()
+        if [[ -L ${piSettingsPath} && -v oldGenPath && -d "$oldGenPath/home-files" ]]; then
+          piOldSettings="$(readlink -e "$oldGenPath/home-files")/${piSettings}"
+          if [[ "$(readlink -- ${piSettingsPath})" == "$piOldSettings" ]]; then
+            piSettingsSeed=(--from "$piOldSettings")
+          fi
+        fi
+        ${lib.getExe piSyncSettings} --check "''${piSettingsSeed[@]}"
+      ''
+    );
+    home.activation.syncPiSettings = lib.mkIf pi.enable (
+      lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+        run ${lib.getExe piSyncSettings} "''${piSettingsSeed[@]}"
+      ''
+    );
 
     # Override the old bare-repository aliases after conf.d has been sourced.
     programs.fish.interactiveShellInit = lib.mkAfter ''

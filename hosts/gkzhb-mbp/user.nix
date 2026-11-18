@@ -11,6 +11,13 @@
   dotfiles = {
     enable = true;
     root = "${config.home.homeDirectory}/nix-config/dotfiles";
+    pi = {
+      enable = true;
+      modelProfile = "magpie";
+      defaultProvider = "magpie";
+      defaultModel = "auto/gpt-6.1-sol";
+      enabledModels = [ "magpie/**" ];
+    };
   };
 
   # Home Manager needs a bit of information about you and the
