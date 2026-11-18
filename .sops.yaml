@@ -5,6 +5,11 @@ keys:
   - &gkzhb_vps age1usalx2t4kxrfww352tfph6nvt3vgpmlugcf2n4ra497xurm0ja7qs06grm
   - &devbox age19j3qcjsflalh0dc0yx878h4v4nxnhd5x25nfq668a95yafxz35rsvxknjf
 creation_rules:
+  - path_regex: ^secrets/devbox-uv\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *devbox
   - path_regex: ^secrets/devbox-dolt\.yaml$
     key_groups:
       - age:

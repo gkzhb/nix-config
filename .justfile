@@ -47,7 +47,7 @@ update-dotfiles:
     if [ ! -e dotfiles ] && [ ! -L dotfiles ]; then
         git clone git@github.com:gkzhb/dotfiles.git dotfiles
     elif [ -d dotfiles ] && { [ -d dotfiles/.git ] || [ -f dotfiles/.git ]; }; then
-        git -C dotfiles pull --ff-only
+        git -C dotfiles pull --ff-only --no-rebase
     else
         echo "dotfiles exists but is not a Git checkout; refusing to overwrite it." >&2
         exit 1
@@ -83,6 +83,10 @@ test-justfile:
 # Test Pi settings sync in temporary agent directories; no activation.
 test-pi-settings:
     python3 scripts/tests/test-pi-sync-settings.py
+
+# Evaluate encrypted uv config wiring without decrypting or activating.
+test-uv-config:
+    nix eval --accept-flake-config --impure --json --file scripts/tests/test-uv-config.nix
 
 # Test Darwin GC ordering with fake tools; never touches real profiles.
 test-nix-darwin-gc:

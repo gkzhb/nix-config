@@ -10,10 +10,14 @@
     root = "${config.home.homeDirectory}/nix-config/dotfiles";
     pi = {
       enable = true;
-      modelProfile = "newapi";
-      defaultProvider = "newapi";
+      modelProfile = "byte";
+      defaultProvider = "byte";
       defaultModel = "gpt-6.1-sol";
-      enabledModels = [ "newapi/**" ];
+      enabledModels = [
+        "newapi/**"
+        "magpie/**"
+        "byte/**"
+      ];
     };
   };
 

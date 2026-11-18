@@ -67,18 +67,25 @@ let
       profile = "magpie";
       provider = "magpie";
       model = "auto/gpt-6.1-sol";
+      scope = [ "magpie/**" ];
     }
     {
       home = devboxHome;
-      profile = "newapi";
-      provider = "newapi";
+      profile = "byte";
+      provider = "byte";
       model = "gpt-6.1-sol";
+      scope = [
+        "newapi/**"
+        "magpie/**"
+        "byte/**"
+      ];
     }
     {
       home = zhbHome;
       profile = "newapi";
       provider = "newapi";
       model = "gpt-6.2-sol";
+      scope = [ "newapi/**" ];
     }
   ];
   links = darwin.config.dotfiles;
@@ -202,6 +209,7 @@ let
         profile,
         provider,
         model,
+        scope,
       }:
       let
         source = ".pi/agent/model-profiles/${profile}.json";
@@ -213,7 +221,7 @@ let
       && home.dotfiles.pi.modelProfile == profile
       && home.dotfiles.pi.defaultProvider == provider
       && home.dotfiles.pi.defaultModel == model
-      && home.dotfiles.pi.enabledModels == [ "${provider}/**" ]
+      && home.dotfiles.pi.enabledModels == scope
       && home.dotfiles.homeLinks.".pi/agent/models.json" == source
       && lib.hasInfix "${home.dotfiles.root}/${source}" target.source.buildCommand
       && !target.force

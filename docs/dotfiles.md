@@ -12,7 +12,7 @@
 just update-dotfiles
 ```
 
-目录不存在时 clone，存在时执行 `git pull --ff-only`。命令不会覆盖非 Git 路径，也不会自动 stash、reset 或丢弃本地修改。不要与裸仓库直接管理 HOME 的方案混用。
+目录不存在时 clone，存在时执行 `git pull --ff-only --no-rebase`（不受全局 `pull.rebase` 影响）。命令不会覆盖非 Git 路径，也不会自动 stash、reset 或丢弃本地修改。不要与裸仓库直接管理 HOME 的方案混用。
 
 ## 启用与映射
 
@@ -52,6 +52,10 @@ just update-dotfiles
 - 缓存、登录凭据、运行状态和安装产物不应作为公共配置同步。目录链接下的软件写入也会进入工作区，需要配合 `.gitignore` 和提交前审查。
 - 密钥使用 sops-nix 加密管理，不将明文凭据提交到 dotfiles。
 
+## devbox uv 加密配置
+
+devbox 的完整 `uv.toml` 已迁入独立的 `secrets/devbox-uv.yaml`，运行时解密后通过单文件链接提供；不再使用 `dotfiles/.config/uv` 的整目录映射。首次激活须先处理旧目录链接，详见 [devbox uv 加密与迁移](devbox-uv.md)。其他主机不自动共享该内部配置；拉取 dotfiles 明文删除前先保存各自需要的本机配置。
+
 ## Pi 模型 profile 和本机设置
 
 `dotfiles/.pi/agent/settings.shared.json` 是公共基线；主题、工具、软件包等在这里维护。`dotfiles/.pi/agent/model-profiles/<profile>.json` 是完整的 Pi 模型目录，不是 Pi 会自动合并的片段。按模型和端点组合命名，新增或修改某个目录时，按需更新包含同一 provider 的其他 profile。
@@ -68,7 +72,7 @@ dotfiles.pi = {
 };
 ```
 
-当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`devbox` 和 `zhb-nixos` 使用 `newapi`，默认模型分别为 `gpt-6.1-sol` 和 `gpt-6.2-sol`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
+当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 使用 `newapi`，默认模型为 `gpt-6.2-sol`；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gpt-6.1-sol`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
 
 **首次迁移**（以下 Shell 命令用 Bash 或 sh 执行）：
 
