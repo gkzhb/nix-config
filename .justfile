@@ -84,6 +84,10 @@ test-justfile:
 test-pi-settings:
     python3 scripts/tests/test-pi-sync-settings.py
 
+# Evaluate encrypted uv config wiring without decrypting or activating.
+test-uv-config:
+    nix eval --accept-flake-config --impure --json --file scripts/tests/test-uv-config.nix
+
 # Test Darwin GC ordering with fake tools; never touches real profiles.
 test-nix-darwin-gc:
     python3 scripts/tests/test-nix-darwin-gc.py

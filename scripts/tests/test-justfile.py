@@ -250,6 +250,7 @@ class JustfileTests(unittest.TestCase):
                     "system-manager",
                 ],
             ),
+            ("test-uv-config", ["eval", "--accept-flake-config", "--impure", "--json", "--file", "scripts/tests/test-uv-config.nix"]),
             ("format", ["fmt", "--accept-flake-config"]),
             ("check-format", ["flake", "check", "--accept-flake-config"]),
             (

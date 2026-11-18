@@ -52,6 +52,10 @@ just update-dotfiles
 - 缓存、登录凭据、运行状态和安装产物不应作为公共配置同步。目录链接下的软件写入也会进入工作区，需要配合 `.gitignore` 和提交前审查。
 - 密钥使用 sops-nix 加密管理，不将明文凭据提交到 dotfiles。
 
+## devbox uv 加密配置
+
+devbox 的完整 `uv.toml` 已迁入独立的 `secrets/devbox-uv.yaml`，运行时解密后通过单文件链接提供；不再使用 `dotfiles/.config/uv` 的整目录映射。首次激活须先处理旧目录链接，详见 [devbox uv 加密与迁移](devbox-uv.md)。其他主机不自动共享该内部配置；拉取 dotfiles 明文删除前先保存各自需要的本机配置。
+
 ## Pi 模型 profile 和本机设置
 
 `dotfiles/.pi/agent/settings.shared.json` 是公共基线；主题、工具、软件包等在这里维护。`dotfiles/.pi/agent/model-profiles/<profile>.json` 是完整的 Pi 模型目录，不是 Pi 会自动合并的片段。按模型和端点组合命名，新增或修改某个目录时，按需更新包含同一 provider 的其他 profile。

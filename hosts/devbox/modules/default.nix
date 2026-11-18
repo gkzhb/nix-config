@@ -16,6 +16,7 @@ in
   imports = [
     ./redis.nix
     ./dolt.nix
+    ./uv.nix
   ];
 
   config = {

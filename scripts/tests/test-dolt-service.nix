@@ -47,8 +47,10 @@ let
         "tls-key:/etc/letsencrypt/live/byte.gkzhb.top/privkey.pem"
       ]
       && lib.hasInfix "dolt-prepare-root.py" service.ExecStartPre;
-    passwordOnlySops =
-      builtins.attrNames cfg.sops.secrets == [ "dolt-root-password" ]
+    separateSopsFiles =
+      cfg.sops.secrets.dolt-root-password.sopsFile != cfg.sops.secrets.uv-config.sopsFile;
+    passwordOnlyDoltSops =
+      builtins.elem "dolt-root-password" (builtins.attrNames cfg.sops.secrets)
       && cfg.sops.secrets.dolt-root-password.mode == "0400"
       && cfg.sops.secrets.dolt-root-password.owner == "root"
       && cfg.sops.age.keyFile == "/home/zhanghaibin.zhb/.config/sops/age/keys.txt"
