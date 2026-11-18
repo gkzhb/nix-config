@@ -68,7 +68,7 @@ dotfiles.pi = {
 };
 ```
 
-当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`devbox` 和 `zhb-nixos` 使用 `newapi`。`mixed` 同时包含两个供应商，目前没有主机选用。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
+当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`devbox` 和 `zhb-nixos` 使用 `newapi`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
 
 **首次迁移**（以下 Shell 命令用 Bash 或 sh 执行）：
 
