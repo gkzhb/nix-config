@@ -16,7 +16,7 @@
       enable = true;
       modelProfile = "newapi";
       defaultProvider = "newapi";
-      defaultModel = "gpt-6.1-sol";
+      defaultModel = "gpt-6.2-sol";
       enabledModels = [ "newapi/**" ];
     };
     # CoC also stores installed extensions and mutable state here. Only its

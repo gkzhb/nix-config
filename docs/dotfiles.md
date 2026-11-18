@@ -67,12 +67,12 @@ dotfiles.pi = {
   enable = true;
   modelProfile = "newapi";
   defaultProvider = "newapi";
-  defaultModel = "gpt-6.1-sol";
+  defaultModel = "gpt-6.2-sol";
   enabledModels = [ "newapi/**" ];
 };
 ```
 
-当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 使用 `newapi`；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gpt-6.1-sol`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
+当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 使用 `newapi`，默认模型为 `gpt-6.2-sol`；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gpt-6.1-sol`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
 
 **首次迁移**（以下 Shell 命令用 Bash 或 sh 执行）：
 
