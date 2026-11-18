@@ -78,7 +78,7 @@ let
       home = zhbHome;
       profile = "newapi";
       provider = "newapi";
-      model = "gpt-6.1-sol";
+      model = "gpt-6.2-sol";
     }
   ];
   links = darwin.config.dotfiles;

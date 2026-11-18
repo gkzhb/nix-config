@@ -674,14 +674,14 @@
       # .hermes/config.yaml
       settings = {
         model = {
-          default = "gpt-6.1-sol";
+          default = "gpt-6.2-sol";
           provider = "custom:NewAPI";
           context_length = 500000;
         };
         custom_providers = [
           {
             name = "NewAPI";
-            model = "gpt-6.1-sol";
+            model = "gpt-6.2-sol";
             base_url = "http://localhost:8056";
             key_env = "NEWAPI_API_KEY";
             api_mode = "anthropic_messages";
