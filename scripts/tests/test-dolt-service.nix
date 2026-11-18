@@ -8,6 +8,8 @@ let
   hm = cfg.home-manager.users."zhanghaibin.zhb";
   dolt = cfg.systemd.services.dolt;
   service = dolt.serviceConfig;
+  directory = cfg.systemd.services.dolt-data-directory;
+  prepare = directory.serviceConfig;
   serverConfig = builtins.elemAt (lib.splitString " " service.ExecStart) 3;
   checks = {
     systemServiceOnly = !(hm.systemd.user.services ? dolt);
@@ -16,11 +18,21 @@ let
       lib.hasPrefix "${pkgs.dolt}/bin/dolt sql-server --config " service.ExecStart
       && lib.hasSuffix " --skip-root-user-initialization" service.ExecStart;
     persistentData = service.WorkingDirectory == "/home/zhanghaibin.zhb/scripts/services/dolt";
-    privateDirectory = builtins.elem "d /home/zhanghaibin.zhb/scripts/services/dolt 0700 zhanghaibin.zhb zhanghaibin.zhb -" cfg.systemd.tmpfiles.rules;
+    noPrivilegedHomeTmpfiles =
+      !(lib.any (rule: lib.hasInfix "${service.WorkingDirectory} " rule) cfg.systemd.tmpfiles.rules);
+    privateDirectory =
+      prepare.User == service.User
+      && prepare.Group == service.Group
+      && prepare.ExecStart == "${pkgs.coreutils}/bin/install -d -m 0700 ${service.WorkingDirectory}"
+      && prepare.UMask == "0077";
     directoryReady =
       builtins.elem "dolt-data-directory.service" dolt.after
       && builtins.elem "dolt-data-directory.service" dolt.requires
-      && cfg.systemd.services.dolt-data-directory.serviceConfig.User == service.User;
+      && prepare.Type == "oneshot"
+      && prepare.RemainAfterExit;
+    directoryMountReady =
+      (directory.unitConfig.RequiresMountsFor or [ ]) == [ service.WorkingDirectory ];
+    noTmpfilesDependency = !(builtins.elem "systemd-tmpfiles-setup.service" dolt.after);
     privateSocket = service.RuntimeDirectory == "dolt" && service.RuntimeDirectoryMode == "0700";
     waitsForSecrets =
       builtins.elem "sops-install-secrets.service" dolt.after

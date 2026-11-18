@@ -10,10 +10,27 @@ include Dolt, sops, age, mkcert and openssl.
 - Unix socket: **/run/dolt/dolt.sock**, under a 0700 user-owned runtime directory.
 - Persistent databases: `~/scripts/services/dolt/<database>/` (unchanged).
 - Privilege state: `~/scripts/services/dolt/.doltcfg/privileges.db` (unchanged).
-- A preparation oneshot creates the data root 0700 before WorkingDirectory is
-  entered, including first activation. system tmpfiles also defines its owner.
+- `dolt-data-directory.service` is the sole owner of data-root preparation.
+  It waits for the data mount and runs as the Dolt user, creating the directory
+  0700 before Dolt enters WorkingDirectory, including first activation.
+  Privileged system tmpfiles must not manage this HOME path.
 - The service starts with `system-manager.target`; user linger is no longer
   required for Dolt.
+
+## Symlinked HOME and tmpfiles safety
+
+On devbox, `/home/zhanghaibin.zhb` resolves through `/data00` (owned by `tiger`)
+into `/data00/home` (owned by root). systemd-tmpfiles rejects that ownership
+transition during privileged path canonicalization. A redundant data-directory
+rule previously made System Manager activation return an error even when Home
+Manager and Dolt had started successfully.
+
+Keep directory creation in the ordered user-run preparation service, not in
+`systemd.tmpfiles.rules`. Do not chown `/data00`, relax parent permissions, or
+change the database path to work around this check. The user-run service cannot
+repair root-owned data: inspect existing ownership and backups rather than
+adding privileged recursive chown. Activation is not transactional; inspect
+Home Manager and Dolt separately after any error.
 
 ## Root password and system SOPS
 

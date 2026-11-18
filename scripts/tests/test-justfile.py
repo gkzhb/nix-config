@@ -203,7 +203,7 @@ class JustfileTests(unittest.TestCase):
                 else:
                     marker.mkdir()
                 self.assert_call(
-                    ["update-dotfiles"], "git", ["-C", "dotfiles", "pull", "--ff-only"]
+                    ["update-dotfiles"], "git", ["-C", "dotfiles", "pull", "--ff-only", "--no-rebase"]
                 )
                 if worktree:
                     marker.unlink()

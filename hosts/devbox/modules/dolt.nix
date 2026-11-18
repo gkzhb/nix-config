@@ -34,11 +34,12 @@ in
   };
 
   environment.systemPackages = [ pkgs.dolt ];
-  systemd.tmpfiles.rules = [ "d ${dataDir} 0700 ${user} ${user} -" ];
-  # WorkingDirectory is entered before ExecStartPre, so create it in a
-  # separate ordered unit for first activation, not only at boot via tmpfiles.
+  # WorkingDirectory is entered before ExecStartPre. Prepare it as the user,
+  # including first activation; privileged tmpfiles rejects the ownership
+  # transition through devbox's symlinked HOME (/data00 -> /data00/home).
   systemd.services.dolt-data-directory = {
     description = "Prepare persistent Dolt data directory";
+    unitConfig.RequiresMountsFor = [ dataDir ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -55,7 +56,6 @@ in
     after = [
       "dolt-data-directory.service"
       "sops-install-secrets.service"
-      "systemd-tmpfiles-setup.service"
       "home-manager-${user}.service"
     ];
     requires = [

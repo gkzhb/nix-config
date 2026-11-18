@@ -47,7 +47,7 @@ update-dotfiles:
     if [ ! -e dotfiles ] && [ ! -L dotfiles ]; then
         git clone git@github.com:gkzhb/dotfiles.git dotfiles
     elif [ -d dotfiles ] && { [ -d dotfiles/.git ] || [ -f dotfiles/.git ]; }; then
-        git -C dotfiles pull --ff-only
+        git -C dotfiles pull --ff-only --no-rebase
     else
         echo "dotfiles exists but is not a Git checkout; refusing to overwrite it." >&2
         exit 1
