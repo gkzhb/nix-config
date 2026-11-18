@@ -8,11 +8,11 @@
 - Home Manager disables the whole-directory dotfiles mapping for devbox and links only `~/.config/uv/uv.toml` to the runtime secret. Other files under `~/.config/uv` remain local. No `UV_CONFIG_FILE` is set, preserving ordinary uv project/user configuration discovery.
 - Home Manager requires and starts after `sops-install-secrets.service`; its preflight refuses a symlinked uv directory or unreadable secret rather than writing through the old checkout link or installing a dangling configuration.
 
-The shared dotfiles repository no longer tracks plaintext `uv.toml`; `.config/uv/.gitignore` excludes host-local copies. Other hosts **do not** receive this internal index or a new recipient. Before pulling the removal on another host that uses it, preserve its local configuration privately or implement that host's own SOPS secret. With no user index configuration, uv normally falls back to PyPI; project settings can still override it.
+The shared dotfiles repository **keeps its original tracked `uv.toml`** for other hosts. Only devbox disables that directory mapping and uses its private encrypted configuration instead. Do not replace the shared baseline with the devbox secret or delete it during migration. Other hosts keep their existing mapping and do not receive the devbox internal index or a new SOPS recipient.
 
 ## First activation on this devbox
 
-The existing `~/.config/uv` is a whole-directory Home Manager symlink. Replace **only that symlink**, not its target, before activating. The implementation session kept an exact mode-0400 backup under `~/.local/state/uv-config-migration/pre-sops-*/uv.toml` and an ignored checkout symlink to it so uv keeps its current configuration until migration. Do not commit that transitional symlink or print the backup content.
+For a devbox that still uses the old mapping, `~/.config/uv` is a whole-directory Home Manager symlink. Replace **only that symlink**, not its target, before activating. The implementation session preserved the devbox-specific configuration in mode-0400 backups under `~/.local/state/uv-config-migration/`; the active devbox is now migrated. The shared checkout retains its original configuration for other hosts. Never copy the devbox private backup into that tracked file or print its contents.
 
 Run these commands in Bash/sh immediately before activation (not concurrently with uv jobs):
 
@@ -49,7 +49,7 @@ stat -Lc '%a %U %G' /run/secrets/uv-config
 uv --offline python find
 ```
 
-Expected resolved target is under `/run/secrets.d/<generation>/uv-config` (via `/run/secrets/uv-config`), mode `400`, owned by the devbox user. Once verified, remove the ignored checkout `uv.toml` symlink and privately held migration backups you no longer need. Do not remove the new `~/.config/uv/uv.toml` link.
+Expected resolved target is under `/run/secrets.d/<generation>/uv-config` (via `/run/secrets/uv-config`), mode `400`, owned by the devbox user. Once verified, privately held migration backups can be removed when no longer needed. Do not remove the new `~/.config/uv/uv.toml` link or the tracked `dotfiles/.config/uv/uv.toml` used by other hosts.
 
 ## Edit and validate
 

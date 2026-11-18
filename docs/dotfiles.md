@@ -54,7 +54,7 @@ just update-dotfiles
 
 ## devbox uv 加密配置
 
-devbox 的完整 `uv.toml` 已迁入独立的 `secrets/devbox-uv.yaml`，运行时解密后通过单文件链接提供；不再使用 `dotfiles/.config/uv` 的整目录映射。首次激活须先处理旧目录链接，详见 [devbox uv 加密与迁移](devbox-uv.md)。其他主机不自动共享该内部配置；拉取 dotfiles 明文删除前先保存各自需要的本机配置。
+devbox 的完整 `uv.toml` 已迁入独立的 `secrets/devbox-uv.yaml`，运行时解密后通过单文件链接提供；不再使用 `dotfiles/.config/uv` 的整目录映射。首次激活须先处理旧目录链接，详见 [devbox uv 加密与迁移](devbox-uv.md)。`dotfiles/.config/uv/uv.toml` 保留原有公共配置，其他主机继续使用原来的整目录映射；仅 devbox 覆盖为 SOPS 配置，不删除或替换公共文件。
 
 ## Pi 模型 profile 和本机设置
 

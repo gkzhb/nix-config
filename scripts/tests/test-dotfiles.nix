@@ -260,6 +260,26 @@ let
           linux
         ];
     tuiosDisabledHasNoLinks = !(disabled.config.xdg.configFile ? tuios);
+    uvSharedDirectory =
+      lib.all
+        (
+          home:
+          home.dotfiles.configLinks.uv == ".config/uv"
+          && home.xdg.configFile ? uv
+          && !home.xdg.configFile.uv.force
+          && !home.xdg.configFile.uv.recursive
+          && lib.hasInfix "${home.dotfiles.root}/.config/uv" home.xdg.configFile.uv.source.buildCommand
+        )
+        [
+          darwin.config
+          linux.config
+          mac.config
+          zhbHome
+        ];
+    uvDevboxOnlyOverride =
+      devboxHome.dotfiles.configLinks.uv == null
+      && !(devboxHome.xdg.configFile ? uv)
+      && lib.hasInfix "/run/secrets/uv-config" devboxHome.xdg.configFile."uv/uv.toml".source.buildCommand;
     televisionDirectory =
       !darwin.config.xdg.configFile.television.recursive
       && !darwin.config.xdg.configFile.television.force
