@@ -94,6 +94,6 @@ in
     };
   };
 
-  # Certbot renewal does not restart Dolt automatically. After successful renewal
-  # run `sudo systemctl restart dolt.service` to reload the original cert/key.
+  # certbot-renew.service's deploy hook restarts an active Dolt after successful
+  # renewal so its runtime credential snapshots contain the new cert/key.
 }

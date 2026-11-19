@@ -93,6 +93,11 @@ test-uv-config:
 test-nix-darwin-gc:
     python3 scripts/tests/test-nix-darwin-gc.py
 
+# Evaluate the certbot timer and test its deploy hook; no renewal or activation.
+test-certbot:
+    nix eval --accept-flake-config --impure --json --file scripts/tests/test-certbot-service.nix
+    python3 -B scripts/tests/test-certbot-deploy.py
+
 # Evaluate the shared GC module and timer; no activation or garbage collection.
 test-system-manager-gc:
     nix eval --accept-flake-config --impure --json --file scripts/tests/test-system-manager-gc.nix

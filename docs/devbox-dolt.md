@@ -73,18 +73,15 @@ in its SANs. Do not use `--no-tls` or skip certificate verification. No system
 or browser trust-store changes are made. mkcert is available as a tool but is
 not the certificate used by Dolt.
 
-**Renewal:** the original certificate inspected during development expires
-2026-11-19 11:52:03 UTC. Certbot renews its `live/` symlinks; the next Dolt restart
-reads the renewed originals automatically, with **no re-encryption or Nix
-rebuild required**. But Dolt and systemd credentials do not live-reload files.
-After successful renewal run:
+**Renewal:** `certbot-renew.timer` checks the existing certificate monthly.
+After successful renewal, its deploy hook restarts an active `dolt.service`
+to refresh the systemd credential snapshots, with **no re-encryption or Nix
+rebuild required**. Failed/skipped renewals and inactive Dolt are left alone.
+See [devbox Certbot migration](devbox-certbot.md) for cron removal and verification.
 
-```sh
-sudo systemctl restart dolt.service
-```
-
-A Certbot deploy hook can automate that restart if desired; none is installed
-by this change. Do not stop database service in a failed-renewal hook. Reusing
+Dolt and systemd credentials do not live-reload files. If renewing manually
+outside the managed service, run `sudo systemctl restart dolt.service` after
+successful renewal. Do not stop database service in a failed-renewal hook. Reusing
 Nginx's wildcard key means the Dolt process user can access its runtime copy;
 a dedicated publicly issued certificate reduces that cross-service exposure.
 

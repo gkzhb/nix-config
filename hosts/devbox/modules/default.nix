@@ -15,6 +15,7 @@ in
 {
   imports = [
     ./redis.nix
+    ./certbot.nix
     ./dolt.nix
     ./uv.nix
   ];
