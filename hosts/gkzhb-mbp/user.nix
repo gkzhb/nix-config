@@ -16,6 +16,7 @@
       modelProfile = "magpie";
       defaultProvider = "magpie";
       defaultModel = "auto/gpt-6.1-sol";
+      workerModel = "magpie/auto/ds-v4-flash";
       enabledModels = [ "magpie/**" ];
     };
   };

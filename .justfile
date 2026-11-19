@@ -80,9 +80,10 @@ edit-secrets:
 test-justfile:
     python3 scripts/tests/test-justfile.py
 
-# Test Pi settings sync in temporary agent directories; no activation.
+# Test Pi settings sync and Shepherdr rendering in temporary directories; no activation.
 test-pi-settings:
     python3 scripts/tests/test-pi-sync-settings.py
+    python3 scripts/tests/test-pi-sync-shepherdr.py
 
 # Evaluate encrypted uv config wiring without decrypting or activating.
 test-uv-config:

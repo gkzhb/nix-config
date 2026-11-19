@@ -46,7 +46,7 @@ just update-dotfiles
 
 - **目录映射**适合独立配置目录，新增文件即可生效；保持 `recursive = false`，避免拆成逐文件链接。
 - **文件映射**适合与 Home Manager 生成文件、插件或本地状态共享的目录。
-- Pi 的旧映射默认链接 `settings.json`、`models.json`、`hud-footer.json` 和 `extensions`、`system-prompts`、`shepherdr` 三个目录。主机启用 `dotfiles.pi` 后，`settings.json` 改为本机普通文件，`models.json` 链接到所选 profile。两种模式都不管理 `pi-stamp.json`，因为 pi-stamp 0.53.0 拒绝将配置文件软链接；需要自定义时通过 `/stamp` 创建本机普通文件。
+- Pi 的旧映射默认链接 `settings.json`、`models.json`、`hud-footer.json` 和 `extensions`、`system-prompts`、`shepherdr` 三个目录。主机启用 `dotfiles.pi` 后，`settings.json` 改为本机普通文件，`models.json` 链接到所选 profile，`shepherdr` 链接到本机渲染目录。两种模式都不管理 `pi-stamp.json`，因为 pi-stamp 0.53.0 拒绝将配置文件软链接；需要自定义时通过 `/stamp` 创建本机普通文件。
 - 每个目标只保留一个配置所有者，避免软链接映射与 `programs.*` 同时生成同一文件。
 - 本机特有配置优先使用软件原生的 include、配置片段或覆盖机制，独立于共享配置保存；确认加载顺序和优先级。
 - 缓存、登录凭据、运行状态和安装产物不应作为公共配置同步。目录链接下的软件写入也会进入工作区，需要配合 `.gitignore` 和提交前审查。
@@ -68,6 +68,7 @@ dotfiles.pi = {
   modelProfile = "newapi";
   defaultProvider = "newapi";
   defaultModel = "gpt-6.2-sol";
+  workerModel = "newapi/ds-v4-flash";
   enabledModels = [ "newapi/**" ];
 };
 ```
@@ -95,7 +96,22 @@ dotfiles.pi = {
 
 **日常同步**：每次 Home Manager **激活**都会自动同步；仅构建或 dry-run 不会写入。只改了公共基线时，也可以手动运行 `pi-sync-settings`，不必重建；修改主机默认值或 profile 后，重新激活即可。同步按「本机设置 → 公共基线 → 主机默认值」递归合并对象，同名数组整项替换；未被覆盖的本机字段保留。删除基线中的字段不会自动删除本机字段。Pi 的修改只写本机，下次激活或手动同步时会重新应用有声明的字段。不要在 Pi 正写设置时激活或同步。凭据、会话、已安装的包和扩展运行状态仍不纳入此同步。该机制只针对默认的 `~/.pi/agent`，不管理其他 `PI_CODING_AGENT_DIR`。
 
-**回到旧映射**：备份移走本机普通 `settings.json`，然后禁用主机的 `dotfiles.pi` 并重新激活。不要把备份写回仍指向 checkout 的路径。
+**回到旧映射**：备份移走本机普通 `settings.json`，然后禁用主机的 `dotfiles.pi` 并重新激活。`shepherdr` 会重新链接到 checkout；`.shepherdr-rendered` 不会自动删除。不要把备份写回仍指向 checkout 的路径。
+
+## Shepherdr 主机模型
+
+激活时，`pi-sync-shepherdr` 读取 checkout 中 `dotfiles/.pi/agent/shepherdr/profiles/{general,reviewer,explorer}/profile.json`，渲染三份完整的本机 profile。只覆盖 `model`；其余字段（包括 `thinking`、`blocking` 和 `share_context`）保留。`prompt` 和 `prepare` 引用须指向模板目录中的同级文件，并以链接继续读取 checkout 内容。只渲染这三个 profile；模板原有 `model` 仅供没有启用 `dotfiles.pi` 的旧映射使用。
+
+| 主机 | `general` / `reviewer` | `explorer` |
+| --- | --- | --- |
+| `gkzhb-MBP` | `magpie/auto/gpt-6.1-sol` | `magpie/auto/ds-v4-flash` |
+| `devbox` | `byte/gpt-6.1-sol` | `byte/ds-v4-flash` |
+| `zhb-nixos` | `newapi/gpt-6.2-sol` | `newapi/ds-v4-flash` |
+
+- `general` 和 `reviewer` 使用 Nix 声明的 `defaultProvider/defaultModel`，不会跟随父会话当前模型或 Pi 中临时保存的默认值。只有 `explorer` 使用 `workerModel`；不配置时它也使用 Nix 默认。激活前会检查这些完整模型 ID 是否存在于所选模型目录中。
+- 首次激活会把 Home Manager 管理的 `~/.pi/agent/shepherdr` 链接从 checkout 切换到 `~/.pi/agent/.shepherdr-rendered`；不改写 checkout，也不导入旧目录里的本机状态或自定义 profile。若原链接或目录是手工管理的，先备份移走，避免冲突。仅构建或 dry-run 不会渲染。
+- 修改主机模型后重新激活；只改共享 `profile.json` 可运行 `pi-sync-shepherdr`，不必重建。不要直接编辑渲染产物。可以用 `realpath ~/.pi/agent/shepherdr` 和 `jq -r .model ~/.pi/agent/shepherdr/profiles/*/profile.json` 检查结果。
+- 此方案按**控制端**主机渲染。Shepherdr 远程 `spawn` 仍会把控制端 profile 的显式模型传给目标机；两端模型目录不兼容时，不要用这些 profile 跨主机启动。
 
 ## Fish worktree 导航
 

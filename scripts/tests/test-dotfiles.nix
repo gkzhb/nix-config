@@ -61,12 +61,15 @@ let
     }
   ];
   syncPackages = home: lib.filter (package: package.name == "pi-sync-settings") home.home.packages;
+  shepherdrPackages =
+    home: lib.filter (package: package.name == "pi-sync-shepherdr") home.home.packages;
   profiledHomes = [
     {
       home = mac.config;
       profile = "magpie";
       provider = "magpie";
       model = "auto/gpt-6.1-sol";
+      worker = "magpie/auto/ds-v4-flash";
       scope = [ "magpie/**" ];
     }
     {
@@ -74,6 +77,7 @@ let
       profile = "byte";
       provider = "byte";
       model = "gpt-6.1-sol";
+      worker = "byte/ds-v4-flash";
       scope = [
         "newapi/**"
         "magpie/**"
@@ -85,6 +89,7 @@ let
       profile = "newapi";
       provider = "newapi";
       model = "gpt-6.2-sol";
+      worker = "newapi/ds-v4-flash";
       scope = [ "newapi/**" ];
     }
   ];
@@ -209,18 +214,32 @@ let
         profile,
         provider,
         model,
+        worker,
         scope,
       }:
       let
         source = ".pi/agent/model-profiles/${profile}.json";
         activation = home.home.activation.checkDotfiles.data;
         target = home.home.file.".pi/agent/models.json";
-        inherit (home.home.activation) checkPiSettings syncPiSettings;
+        inherit (home.home.activation)
+          checkPiSettings
+          syncPiSettings
+          checkPiShepherdr
+          syncPiShepherdr
+          ;
+        shepherdr = home.home.file.".pi/agent/shepherdr";
+        shepherdrSync = builtins.head (shepherdrPackages home);
+        configuredModels = builtins.toJSON {
+          general = "${provider}/${model}";
+          reviewer = "${provider}/${model}";
+          explorer = worker;
+        };
       in
       home.dotfiles.pi.enable
       && home.dotfiles.pi.modelProfile == profile
       && home.dotfiles.pi.defaultProvider == provider
       && home.dotfiles.pi.defaultModel == model
+      && home.dotfiles.pi.workerModel == worker
       && home.dotfiles.pi.enabledModels == scope
       && home.dotfiles.homeLinks.".pi/agent/models.json" == source
       && lib.hasInfix "${home.dotfiles.root}/${source}" target.source.buildCommand
@@ -235,8 +254,29 @@ let
       && syncPiSettings.after == [ "linkGeneration" ]
       && lib.hasInfix "run " syncPiSettings.data
       && lib.hasInfix "/bin/pi-sync-settings " syncPiSettings.data
+      && home.dotfiles.homeLinks.".pi/agent/shepherdr" == null
+      && lib.hasInfix "${home.home.homeDirectory}/.pi/agent/.shepherdr-rendered" shepherdr.source.buildCommand
+      && !shepherdr.force
+      && !shepherdr.recursive
+      && lib.hasInfix ".pi/agent/shepherdr" activation
+      && checkPiShepherdr.before == [ "writeBoundary" ]
+      && checkPiShepherdr.after == [ "checkDotfiles" ]
+      && lib.hasInfix "/bin/pi-sync-shepherdr --check" checkPiShepherdr.data
+      && syncPiShepherdr.before == [ "linkGeneration" ]
+      && syncPiShepherdr.after == [ "writeBoundary" ]
+      && lib.hasInfix "run " syncPiShepherdr.data
+      && lib.hasInfix "/bin/pi-sync-shepherdr" syncPiShepherdr.data
+      && lib.hasInfix configuredModels shepherdrSync.text
     ) profiledHomes;
-    piLegacyDoesNotSync = !(darwin.config.home.activation ? syncPiSettings);
+    piShepherdrDefaultsToPiModel =
+      profiled.config.dotfiles.pi.workerModel == null
+      && lib.hasInfix ''"explorer":"magpie/auto/gpt-6.1-sol"'' (builtins.head (
+        shepherdrPackages profiled.config
+      )).text;
+    piLegacyDoesNotSync =
+      !(darwin.config.home.activation ? syncPiSettings)
+      && !(darwin.config.home.activation ? syncPiShepherdr)
+      && shepherdrPackages darwin.config == [ ];
     piSyncInstalled = builtins.length (syncPackages profiled.config) == 1;
     piSyncNotInstalledInLegacyConfig = syncPackages darwin.config == [ ];
     piEmptyDefaultScope = profiled.config.dotfiles.pi.enabledModels == [ ];

@@ -10,6 +10,26 @@ let
   piSharedSettings = ".pi/agent/settings.shared.json";
   piSettings = ".pi/agent/settings.json";
   piSettingsPath = lib.escapeShellArg "${config.home.homeDirectory}/${piSettings}";
+  piModelCatalog = ".pi/agent/model-profiles/${pi.modelProfile}.json";
+  piShepherdr = ".pi/agent/shepherdr";
+  piShepherdrRendered = "${config.home.homeDirectory}/.pi/agent/.shepherdr-rendered";
+  piDefaultModel = "${pi.defaultProvider}/${pi.defaultModel}";
+  piSyncShepherdr = pkgs.writeShellScriptBin "pi-sync-shepherdr" ''
+    exec ${lib.getExe pkgs.python3} ${../../scripts/pi-sync-shepherdr.py} \
+      --templates ${lib.escapeShellArg "${cfg.root}/${piShepherdr}"} \
+      --catalog ${lib.escapeShellArg "${cfg.root}/${piModelCatalog}"} \
+      --output ${lib.escapeShellArg piShepherdrRendered} \
+      --models ${
+        lib.escapeShellArg (
+          builtins.toJSON {
+            general = piDefaultModel;
+            reviewer = piDefaultModel;
+            explorer = if pi.workerModel == null then piDefaultModel else pi.workerModel;
+          }
+        )
+      } \
+      "$@"
+  '';
   piSyncSettings = pkgs.writeShellScriptBin "pi-sync-settings" ''
     exec ${lib.getExe pkgs.python3} ${../../scripts/pi-sync-settings.py} \
       --settings ${piSettingsPath} \
@@ -48,8 +68,8 @@ let
     "conf.d/notification.mac.fish"
     "conf.d/yabai.mac.fish"
   ];
-  # Keep credentials, sessions and installed packages local. Link only selected
-  # immediate children of the Pi agent directory, without splitting directories.
+  # Legacy mappings link selected immediate children of the Pi agent directory.
+  # Keep credentials, sessions and installed packages local.
   # pi-stamp rejects symlinked settings; leave its optional config local.
   piEntries = [
     "settings.json"
@@ -67,7 +87,10 @@ let
   allSources = lib.unique (
     builtins.attrValues (activeLinks cfg.configLinks)
     ++ builtins.attrValues (activeLinks cfg.homeLinks)
-    ++ lib.optional pi.enable piSharedSettings
+    ++ lib.optionals pi.enable [
+      piSharedSettings
+      piShepherdr
+    ]
   );
 in
 {
@@ -85,7 +108,7 @@ in
       linkOption "HOME target to checkout-relative source; null disables a mapping."
     );
     pi = {
-      enable = lib.mkEnableOption "Pi model profiles and activation-time sync of writable local settings";
+      enable = lib.mkEnableOption "Pi model catalogs and activation-time sync of settings and Shepherdr profiles";
       modelProfile = lib.mkOption {
         type = lib.types.strMatching "[A-Za-z0-9][A-Za-z0-9_-]*";
         description = "Name of a complete JSON model catalog in .pi/agent/model-profiles in the checkout.";
@@ -97,6 +120,11 @@ in
       defaultModel = lib.mkOption {
         type = lib.types.nonEmptyStr;
         description = "Default Pi model ID within the provider, applied by pi-sync-settings.";
+      };
+      workerModel = lib.mkOption {
+        type = lib.types.nullOr (lib.types.strMatching "[^/[:space:]]+/[^[:space:]]+");
+        default = null;
+        description = "Full provider/model ID for the Shepherdr explorer; null uses the Pi default model.";
       };
       enabledModels = lib.mkOption {
         type = lib.types.listOf lib.types.nonEmptyStr;
@@ -118,7 +146,10 @@ in
       message = "dotfiles.pi requires settings.json to be a writable local file, not managed by home.file.";
     };
 
-    home.packages = lib.optional pi.enable piSyncSettings;
+    home.packages = lib.optionals pi.enable [
+      piSyncSettings
+      piSyncShepherdr
+    ];
 
     dotfiles.configLinks = lib.mapAttrs (_: lib.mkDefault) (
       lib.genAttrs [
@@ -164,11 +195,18 @@ in
       )
       // lib.optionalAttrs pi.enable {
         ${piSettings} = null;
-        ".pi/agent/models.json" = ".pi/agent/model-profiles/${pi.modelProfile}.json";
+        ${piShepherdr} = null;
+        ".pi/agent/models.json" = piModelCatalog;
       };
 
     xdg.configFile = mkLinks (activeLinks cfg.configLinks);
-    home.file = mkLinks (activeLinks cfg.homeLinks);
+    home.file =
+      mkLinks (activeLinks cfg.homeLinks)
+      // lib.optionalAttrs pi.enable {
+        # Keep the same top-level Home Manager target, so linkGeneration replaces
+        # the previous checkout link without writing through it.
+        ${piShepherdr}.source = config.lib.file.mkOutOfStoreSymlink piShepherdrRendered;
+      };
 
     # Do not inspect the mutable checkout at evaluation time. Check all sources
     # before Home Manager can change links, without deleting conflicting targets.
@@ -198,6 +236,17 @@ in
     home.activation.syncPiSettings = lib.mkIf pi.enable (
       lib.hm.dag.entryAfter [ "linkGeneration" ] ''
         run ${lib.getExe piSyncSettings} "''${piSettingsSeed[@]}"
+      ''
+    );
+
+    home.activation.checkPiShepherdr = lib.mkIf pi.enable (
+      lib.hm.dag.entryBetween [ "writeBoundary" ] [ "checkDotfiles" ] ''
+        ${lib.getExe piSyncShepherdr} --check
+      ''
+    );
+    home.activation.syncPiShepherdr = lib.mkIf pi.enable (
+      lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
+        run ${lib.getExe piSyncShepherdr}
       ''
     );
 

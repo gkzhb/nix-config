@@ -17,6 +17,7 @@
       modelProfile = "newapi";
       defaultProvider = "newapi";
       defaultModel = "gpt-6.2-sol";
+      workerModel = "newapi/ds-v4-flash";
       enabledModels = [ "newapi/**" ];
     };
     # CoC also stores installed extensions and mutable state here. Only its

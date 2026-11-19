@@ -13,6 +13,7 @@
       modelProfile = "byte";
       defaultProvider = "byte";
       defaultModel = "gpt-6.1-sol";
+      workerModel = "byte/ds-v4-flash";
       enabledModels = [
         "newapi/**"
         "magpie/**"
