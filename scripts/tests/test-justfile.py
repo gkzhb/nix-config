@@ -12,7 +12,10 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 JUST = shutil.which("just")
-TOOLS = ("nixos-rebuild", "system-manager", "home-manager", "darwin-rebuild", "nix", "git")
+TOOLS = (
+    "nixos-rebuild", "system-manager", "home-manager", "darwin-rebuild",
+    "nix", "git", "systemctl", "journalctl",
+)
 
 
 @unittest.skipUnless(JUST, "just is required")
@@ -23,9 +26,18 @@ class JustfileTests(unittest.TestCase):
         self.root = Path(self.temp.name).resolve()
         self.justfile = self.root / ".justfile"
         shutil.copyfile(ROOT / ".justfile", self.justfile)
+        (self.root / "scripts").mkdir()
+        shutil.copyfile(
+            ROOT / "scripts/check-home-manager.sh",
+            self.root / "scripts/check-home-manager.sh",
+        )
         self.bin = self.root / "bin"
         self.bin.mkdir()
         (self.bin / "sh").symlink_to(shutil.which("sh"))
+        # npm's rust-just launcher needs Node even when the tool PATH is isolated.
+        node = shutil.which("node")
+        if node:
+            (self.bin / "node").symlink_to(node)
         self.log = self.root / "calls.jsonl"
         self.cwd = self.root / "nested directory"
         self.cwd.mkdir()
@@ -37,7 +49,13 @@ class JustfileTests(unittest.TestCase):
             "    log.write(json.dumps({'tool': Path(sys.argv[0]).name,\n"
             "        'args': sys.argv[1:], 'cwd': os.getcwd(),\n"
             "        'unfree': os.environ.get('NIXPKGS_ALLOW_UNFREE')}) + '\\n')\n"
-            "sys.exit(int(os.environ.get('ROUTING_EXIT', '0')))\n"
+            "tool = Path(sys.argv[0]).name\n"
+            "if tool == 'systemctl' and 'status' in sys.argv:\n"
+            "    print('fake Home Manager service status')\n"
+            "if tool == 'journalctl':\n"
+            "    print('fake Home Manager activation log')\n"
+            "key = 'ROUTING_EXIT_' + tool.upper().replace('-', '_')\n"
+            "sys.exit(int(os.environ.get(key, os.environ.get('ROUTING_EXIT', '0'))))\n"
         )
         for tool in TOOLS:
             executable = self.bin / tool
@@ -59,6 +77,7 @@ class JustfileTests(unittest.TestCase):
             text=True,
             capture_output=True,
         )
+        self.last_result = result
         if success:
             self.assertEqual(result.returncode, 0, result.stderr)
         else:
@@ -81,7 +100,7 @@ class JustfileTests(unittest.TestCase):
             (["build"], "nixos-rebuild", "home-nixos"),
             (["build-zhb"], "nixos-rebuild", "zhb-nixos"),
             (["build-nixos", "other-nixos"], "nixos-rebuild", "other-nixos"),
-            (["build-devbox"], "system-manager", "devbox"),
+            (["build-system-manager", "devbox"], "system-manager", "devbox"),
             (["build-vps"], "system-manager", "gkzhb-vps"),
             (["build-mido"], "system-manager", "mido"),
             (
@@ -106,6 +125,86 @@ class JustfileTests(unittest.TestCase):
                 else:
                     args.extend(["--option", "accept-flake-config", "true"])
                 self.assert_call(recipes, tool, args)
+
+    def test_devbox_checks_home_manager_after_switch(self):
+        for recipes in (["build-devbox"], ["build-system-manager", "devbox", "zhanghaibin.zhb"]):
+            with self.subTest(recipes=recipes):
+                calls = self.run_recipe(*recipes)
+                self.assertEqual([call["tool"] for call in calls], ["system-manager", "systemctl"])
+                self.assertEqual(calls[0]["args"], [
+                    "switch", "--flake", ".#devbox", "--sudo",
+                    "--nix-option", "accept-flake-config", "true",
+                ])
+                self.assertEqual(calls[1]["args"], [
+                    "is-active", "--quiet", "home-manager-zhanghaibin.zhb.service",
+                ])
+                self.assertTrue(all(call["cwd"] == str(self.root) for call in calls))
+
+    def test_home_manager_failure_prints_diagnostics_and_fails(self):
+        self.env["ROUTING_EXIT_SYSTEMCTL"] = "3"
+        recipes_to_check = [
+            ["build-devbox"], ["build-system-manager", "devbox", "zhanghaibin.zhb"],
+            ["check-home-manager", "zhanghaibin.zhb"],
+        ]
+        for recipes in recipes_to_check:
+            for journal_exit in ("0", "4"):
+                with self.subTest(recipes=recipes, journal_exit=journal_exit):
+                    self.env["ROUTING_EXIT_JOURNALCTL"] = journal_exit
+                    calls = self.run_recipe(*recipes, success=False)
+                    checks = calls[1:] if recipes[0] != "check-home-manager" else calls
+                    self.assertEqual([call["tool"] for call in checks], [
+                        "systemctl", "systemctl", "journalctl",
+                    ])
+                    self.assertEqual(checks[1]["args"], [
+                        "--no-pager", "--full", "status",
+                        "home-manager-zhanghaibin.zhb.service",
+                    ])
+                    self.assertEqual(checks[2]["args"], [
+                        "--boot", "--unit", "home-manager-zhanghaibin.zhb.service",
+                        "--no-pager", "--lines", "80",
+                    ])
+                    self.assertIn("fake Home Manager service status", self.last_result.stderr)
+                    self.assertIn("fake Home Manager activation log", self.last_result.stderr)
+
+    def test_home_manager_checker_is_reusable_for_multiple_users(self):
+        for recipes in (
+            ["check-home-manager", "alice", "bob.user"],
+            ["build-system-manager", "other-system", "alice", "bob.user"],
+            ["build-system-manager", "devbox", "alice", "bob.user"],
+        ):
+            with self.subTest(recipes=recipes):
+                calls = self.run_recipe(*recipes)
+                checks = calls[1:] if recipes[0] == "build-system-manager" else calls
+                self.assertEqual([call["args"] for call in checks], [
+                    ["is-active", "--quiet", "home-manager-alice.service"],
+                    ["is-active", "--quiet", "home-manager-bob.user.service"],
+                ])
+
+    def test_home_manager_checker_continues_after_failure(self):
+        self.env["ROUTING_EXIT_SYSTEMCTL"] = "4"
+        calls = self.run_recipe("check-home-manager", "alice", "bob", success=False)
+        self.assertEqual([call["tool"] for call in calls], [
+            "systemctl", "systemctl", "journalctl",
+            "systemctl", "systemctl", "journalctl",
+        ])
+        self.assertIn("home-manager-bob.service", self.last_result.stderr)
+
+    def test_switch_failure_skips_home_manager_check(self):
+        self.env["ROUTING_EXIT_SYSTEM_MANAGER"] = "42"
+        for recipes in (["build-devbox"], ["build-system-manager", "devbox", "zhanghaibin.zhb"]):
+            with self.subTest(recipes=recipes):
+                calls = self.run_recipe(*recipes, success=False)
+                self.assertEqual([call["tool"] for call in calls], ["system-manager"])
+
+    def test_home_manager_checker_requires_users(self):
+        self.assertEqual(self.run_recipe("check-home-manager", success=False), [])
+        result = subprocess.run(
+            [str(self.bin / "sh"), str(self.root / "scripts/check-home-manager.sh")],
+            env=self.env, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Usage:", result.stderr)
+        self.assertEqual(self.run_recipe("check-home-manager", "", success=False), [])
 
     def test_package_wrappers(self):
         cases = [
@@ -149,6 +248,16 @@ class JustfileTests(unittest.TestCase):
                 hostile,
             ],
         )
+        self.assert_call(
+            ["check-home-manager", hostile],
+            "systemctl",
+            ["is-active", "--quiet", f"home-manager-{hostile}.service"],
+        )
+        calls = self.run_recipe("build-system-manager", hostile, hostile)
+        self.assertEqual(calls[0]["args"][2], f".#{hostile}")
+        self.assertEqual(calls[1]["args"], [
+            "is-active", "--quiet", f"home-manager-{hostile}.service",
+        ])
         self.assertFalse((self.root / "INJECTED").exists())
 
     def test_required_arguments(self):

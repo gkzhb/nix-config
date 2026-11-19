@@ -83,6 +83,29 @@ devbox user's Home Manager configuration is integrated into its System Manager
 configuration, so use `just build-devbox` rather than a standalone Home Manager
 command. Darwin also updates its integrated Home Manager configuration.
 
+`just build-devbox` passes `zhanghaibin.zhb` to the shared System Manager
+recipe and checks `home-manager-zhanghaibin.zhb.service` after a successful switch. An inactive,
+failed or missing service makes the command fail and prints its status and the
+last 80 journal lines from the current boot. System Manager can otherwise report
+finished jobs even when Home Manager activation fails.
+
+The read-only checker is reusable on any systemd host with system-level Home
+Manager units (not standalone Home Manager or nix-darwin):
+
+```bash
+just check-home-manager alice bob
+# Pass users explicitly for any host:
+just build-system-manager other-host alice bob
+# Use the script without Just:
+sh scripts/check-home-manager.sh alice bob
+```
+
+The checker examines `home-manager-<user>.service` for every supplied user; it
+does not start services or activate configurations. Missing journal permissions
+may limit diagnostics but never turn a failed check into success. Other System
+Manager commands without explicit users (including `build-system-manager devbox`)
+retain their existing switch-only behavior.
+
 Flake commands explicitly accept this repository's `nixConfig` (including its
 substituters and trusted public keys) for each invocation. Review `flake.nix`
 before running these commands; no global Nix trust setting is changed. The
@@ -106,7 +129,7 @@ Existing shortcuts remain available and delegate to the shared commands:
 | --- | --- |
 | `just build` (also the default recipe) | `just build-nixos home-nixos` |
 | `just build-zhb` | `just build-nixos zhb-nixos` |
-| `just build-devbox` | `just build-system-manager devbox` |
+| `just build-devbox` | `just build-system-manager devbox zhanghaibin.zhb` |
 | `just build-vps` | `just build-system-manager gkzhb-vps` |
 | `just build-mido` | `just build-system-manager mido` |
 | `just build-home <user>` | `just build-home-manager <user>` |

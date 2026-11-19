@@ -6,10 +6,21 @@ build: (build-nixos "home-nixos")
 build-nixos host:
     nixos-rebuild switch --flake ".#$1" --accept-flake-config
 
-# Build and activate a System Manager configuration.
+# Build and activate; optionally check the supplied Home Manager users.
 [positional-arguments]
-build-system-manager host:
-    system-manager switch --flake ".#$1" --sudo --nix-option accept-flake-config true
+build-system-manager host *users:
+    #!/bin/sh
+    set -eu
+    host="$1"; shift
+    system-manager switch --flake ".#$host" --sudo --nix-option accept-flake-config true
+    if [ "$#" -gt 0 ]; then
+        sh scripts/check-home-manager.sh "$@"
+    fi
+
+# Check system-level Home Manager services on this host without activation.
+[positional-arguments]
+check-home-manager +users:
+    sh scripts/check-home-manager.sh "$@"
 
 # Build and activate a standalone Home Manager configuration (user/config key).
 [positional-arguments]
@@ -28,7 +39,7 @@ build-package target *flags:
 
 build-zhb: (build-nixos "zhb-nixos")
 
-build-devbox: (build-system-manager "devbox")
+build-devbox: (build-system-manager "devbox" "zhanghaibin.zhb")
 
 build-vps: (build-system-manager "gkzhb-vps")
 

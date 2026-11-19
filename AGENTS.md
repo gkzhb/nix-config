@@ -10,7 +10,7 @@
 公共构建入口（沿用 `switch`，会构建并激活配置）：
 
 - NixOS：`sudo just build-nixos <host>`
-- System Manager：`just build-system-manager <host>`
+- System Manager：`just build-system-manager <host> [用户名...]`（传入用户名时检查对应 Home Manager 服务；`build-devbox` 快捷入口显式传入 `zhanghaibin.zhb`）
 - standalone Home Manager：`just build-home-manager <配置名>`（参数为 `homeConfigurations` 中的键，通常是用户名）
 - nix-darwin：`just build-darwin <host>`（省略参数默认为 `gkzhb-MBP`）
 - 仅构建软件包、不激活：`just build-package <target> [flags...]`
@@ -43,7 +43,7 @@
 
 用户配置仍在 `hosts/devbox/user.nix`，复用系统的 nixpkgs 和 overlays；用户包和 Home Manager generation 保留原有 profile 路径。已有账号由宿主管理，配置中的 `users.users."zhanghaibin.zhb".enable = false` 仅提供 Home Manager 所需的身份信息，不让 userborn 接管该账号。
 
-`just build-devbox` 会一起构建并激活两者。激活后检查 `systemctl status home-manager-zhanghaibin.zhb.service` 和用户服务状态；不要仅凭 System Manager 退出成功判断 Home Manager 激活成功。
+`just build-devbox` 会一起构建并激活两者，成功 switch 后自动检查 `home-manager-zhanghaibin.zhb.service`；失败会打印状态及当前启动的最近 80 行日志，并返回非零退出码。检查脚本 `scripts/check-home-manager.sh` 可在不同 systemd 主机复用，通过 `just check-home-manager <用户名...>` 手动运行，或向 `just build-system-manager <host> <用户名...>` 传入用户（公共入口不设置默认用户，用户名由主机快捷入口或调用者传入）。仅检查系统级 Home Manager 服务，不启动服务、不执行激活；仍应检查用户服务状态，不要仅凭 System Manager 退出成功判断 Home Manager 激活成功。
 
 ### mido
 
