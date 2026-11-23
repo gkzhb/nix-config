@@ -35,10 +35,9 @@ in
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+          # Preserve existing files/directories on the first dotfiles activation.
+          home-manager.backupFileExtension = "before-home-manager";
           home-manager.users.zhb = ../../hosts/home-nixos/user.nix;
-
-          # Optionally, use home-manager.extraSpecialArgs to pass
-          # arguments to home.nix
         }
         sops-nix.nixosModules.sops
         minifluxng.nixosModules.minifluxng

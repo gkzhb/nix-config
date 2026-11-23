@@ -4,6 +4,28 @@ let
   openclawVersion = openclawPkg.version;
 in
 {
+  imports = [ ../../modules/home-manager/dotfiles.nix ];
+
+  dotfiles = {
+    enable = true;
+    pi = {
+      enable = true;
+      modelProfile = "newapi";
+      defaultProvider = "newapi";
+      defaultModel = "gpt-6.2-sol";
+      workerModel = "newapi/ds-v4-flash";
+      enabledModels = [
+        "newapi/**"
+        "magpie/**"
+      ];
+    };
+    # CoC keeps installed extensions and runtime state in this directory.
+    configLinks = {
+      coc = null;
+      "coc/ultisnips" = ".config/coc/ultisnips";
+    };
+  };
+
   home = {
     username = "zhb";
     homeDirectory = "/home/zhb";
@@ -15,6 +37,7 @@ in
     file."scripts/backups/cleanup_backups.py".source = ./scripts/backups/cleanup_backups.py;
   };
   programs.home-manager.enable = true;
+  programs.fish.enable = true;
 
   xdg.desktopEntries.steam = {
     name = "Steam";

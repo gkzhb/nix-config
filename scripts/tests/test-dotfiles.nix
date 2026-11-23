@@ -42,6 +42,8 @@ let
   devboxHome = devbox.home-manager.users."zhanghaibin.zhb";
   zhbNixos = flake.nixosConfigurations.zhb-nixos.config;
   zhbHome = zhbNixos.home-manager.users.zhb;
+  homeNixos = flake.nixosConfigurations.home-nixos.config;
+  homeNixosHome = homeNixos.home-manager.users.zhb;
   mac = mkHome "aarch64-darwin" [
     ../../hosts/gkzhb-mbp/user.nix
     ({ pkgs, ... }: {
@@ -64,6 +66,17 @@ let
   shepherdrPackages =
     home: lib.filter (package: package.name == "pi-sync-shepherdr") home.home.packages;
   profiledHomes = [
+    {
+      home = homeNixosHome;
+      profile = "newapi";
+      provider = "newapi";
+      model = "gpt-6.2-sol";
+      worker = "newapi/ds-v4-flash";
+      scope = [
+        "newapi/**"
+        "magpie/**"
+      ];
+    }
     {
       home = mac.config;
       profile = "magpie";
@@ -99,6 +112,20 @@ let
     home = home.config.dotfiles.homeLinks;
   }) { inherit darwin linux; };
   checks = {
+    homeNixosIntegrated =
+      homeNixosHome.dotfiles.enable
+      && homeNixosHome.dotfiles.root == "/home/zhb/nix-config/dotfiles"
+      && homeNixosHome.home.stateVersion == "25.11"
+      && homeNixosHome.programs.fish.enable
+      && homeNixosHome.xdg.configFile ? "fish/config.fish"
+      && homeNixos.home-manager.useGlobalPkgs
+      && homeNixos.home-manager.useUserPackages
+      && homeNixos.home-manager.backupFileExtension == "before-home-manager"
+      && !homeNixos.home-manager.overwriteBackup;
+    homeNixosCocStateUnmanaged =
+      !(homeNixosHome.xdg.configFile ? coc)
+      && homeNixosHome.dotfiles.configLinks."coc/ultisnips" == ".config/coc/ultisnips"
+      && !homeNixosHome.xdg.configFile."coc/ultisnips".force;
     zhbNixosIntegrated =
       zhbHome.dotfiles.enable
       && zhbHome.dotfiles.root == "/home/zhb/nix-config/dotfiles"
@@ -340,6 +367,7 @@ assert lib.assertMsg (
   inherit checks roots;
   # Forcing the activation derivation checks Home Manager assertions as well.
   activationDrv = darwin.activationPackage.drvPath;
+  homeNixosActivationDrv = homeNixosHome.home.activationPackage.drvPath;
   profiledActivationDrv = profiled.activationPackage.drvPath;
   syncSettingsDrv = (builtins.head (syncPackages profiled.config)).drvPath;
   symlink = {

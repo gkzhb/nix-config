@@ -73,7 +73,7 @@ dotfiles.pi = {
 };
 ```
 
-当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 使用 `newapi`，默认模型为 `gpt-6.2-sol`；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gpt-6.1-sol`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
+当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 和 `home-nixos` 使用 `newapi`，默认模型为 `gpt-6.2-sol`，其中 `home-nixos` 还保留原有 `magpie/**` 轮换范围；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gpt-6.1-sol`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
 
 **首次迁移**（以下 Shell 命令用 Bash 或 sh 执行）：
 
@@ -91,7 +91,7 @@ dotfiles.pi = {
    ```
 
 2. 先提交/分发 **dotfiles 仓库**里的新基线和 profile，再更新目标机的 checkout（`just update-dotfiles`）。在 **nix-config 仓库**中，确保 `scripts/pi-sync-settings.py` 已被 Git 跟踪，flake 才能看到它。保留旧的 `settings.json`/`models.json` 源文件供尚未迁移的主机使用；不要继续在那里维护已迁移的配置。若目标原来是 Home Manager 管理的链接，直接激活即可；如果 `models.json` 是手工管理的普通文件或链接，先备份移走，避免目标冲突。
-3. 使用对应的 `just build-darwin` / `just build-devbox` / `sudo just build-zhb` 激活新 Nix 配置，无需再手动同步。Home Manager 会先检查 JSON，确认旧 `settings.json` 链接是否属于上一代，再移除该链接并以旧内容为基础生成本机文件。已有普通文件会直接参与合并。若设置路径是手工链接，先备份实际内容，再把链接移开并用备份恢复为普通文件；激活会拒绝沿手工链接写入。
+3. 使用对应的 `just build-darwin` / `just build-devbox` / `sudo just build-zhb` / `sudo just build-nixos home-nixos` 激活新 Nix 配置，无需再手动同步。Home Manager 会先检查 JSON，确认旧 `settings.json` 链接是否属于上一代，再移除该链接并以旧内容为基础生成本机文件。已有普通文件会直接参与合并。若设置路径是手工链接，先备份实际内容，再把链接移开并用备份恢复为普通文件；激活会拒绝沿手工链接写入。
 4. 验证 `test -f ~/.pi/agent/settings.json && test ! -L ~/.pi/agent/settings.json`、`realpath ~/.pi/agent/models.json`；在非项目目录新开 Pi 会话检查启动模型（恢复旧会话会使用会话记录中的模型）。
 
 **日常同步**：每次 Home Manager **激活**都会自动同步；仅构建或 dry-run 不会写入。只改了公共基线时，也可以手动运行 `pi-sync-settings`，不必重建；修改主机默认值或 profile 后，重新激活即可。同步按「本机设置 → 公共基线 → 主机默认值」递归合并对象，同名数组整项替换；未被覆盖的本机字段保留。删除基线中的字段不会自动删除本机字段。Pi 的修改只写本机，下次激活或手动同步时会重新应用有声明的字段。不要在 Pi 正写设置时激活或同步。凭据、会话、已安装的包和扩展运行状态仍不纳入此同步。该机制只针对默认的 `~/.pi/agent`，不管理其他 `PI_CODING_AGENT_DIR`。
@@ -106,7 +106,7 @@ dotfiles.pi = {
 | --- | --- | --- |
 | `gkzhb-MBP` | `magpie/auto/gpt-6.1-sol` | `magpie/auto/ds-v4-flash` |
 | `devbox` | `byte/gpt-6.1-sol` | `byte/ds-v4-flash` |
-| `zhb-nixos` | `newapi/gpt-6.2-sol` | `newapi/ds-v4-flash` |
+| `zhb-nixos` / `home-nixos` | `newapi/gpt-6.2-sol` | `newapi/ds-v4-flash` |
 
 - `general` 和 `reviewer` 使用 Nix 声明的 `defaultProvider/defaultModel`，不会跟随父会话当前模型或 Pi 中临时保存的默认值。只有 `explorer` 使用 `workerModel`；不配置时它也使用 Nix 默认。激活前会检查这些完整模型 ID 是否存在于所选模型目录中。
 - 首次激活会把 Home Manager 管理的 `~/.pi/agent/shepherdr` 链接从 checkout 切换到 `~/.pi/agent/.shepherdr-rendered`；不改写 checkout，也不导入旧目录里的本机状态或自定义 profile。若原链接或目录是手工管理的，先备份移走，避免冲突。仅构建或 dry-run 不会渲染。
@@ -132,6 +132,24 @@ dotfiles.pi = {
 迁移原路径后、激活之前，软件可能暂时无法读取配置，应缩短这一间隔并保留可恢复的备份。
 
 `hud-footer.json` 已纳入映射。若 HOME 中仍是普通文件，激活前先比较它与 `dotfiles/.pi/agent/hud-footer.json`，将普通文件备份移走后再激活；模块不会强制覆盖。pi-hud-footer 0.8.0 支持经软链接读取和保存配置，菜单修改也会写入 dotfiles 工作区。
+
+## home-nixos 首次迁移
+
+本机通过 `hosts/home-nixos/user.nix` 接入，保留原有 Home Manager 服务和 `stateVersion`。若已从 `~/.dotfiles` 准备好 `~/nix-config/dotfiles/`，先确认其中保留了所需本机配置，再激活；不要用较旧的远端副本替换这个工作区。Neovim lockfile、Yazi 插件和本机 Pi 扩展若需随链接继续使用，应复制到对应 checkout 路径并使用 `.git/info/exclude` 忽略。CoC 仅链接 `ultisnips`，Fish 仅链接已声明的片段；其他本机文件留在 HOME。
+
+首次激活前退出 Pi 并按上文备份 `settings.json` 和 `models.json`。已有普通文件或目录会保留为同路径的 `*.before-home-manager`，不会覆盖已有备份；有冲突的手工链接则应先检查并备份。激活后以服务状态和实际链接为准：
+
+```sh
+sudo just build-nixos home-nixos
+systemctl status home-manager-zhb.service
+realpath ~/.config/nvim ~/.config/coc/ultisnips ~/.pi/agent/models.json
+test -f ~/.pi/agent/settings.json && test ! -L ~/.pi/agent/settings.json
+fish -ic 'functions cfg; functions dv'
+```
+
+确认激活成功、目标已指向 checkout 后，可逐项比较并删除内容相同的 `*.before-home-manager` 副本。例如用 `diff -qr ~/.config/coc/ultisnips.before-home-manager ~/.config/coc/ultisnips/` 比较目录；不同的副本先保留。不要删除仍在使用的原路径或 Pi 的可写 `settings.json`。
+
+旧裸仓库继续保留用于恢复，不再用它直接管理 HOME。若首次从裸仓库本地克隆，GitHub 远端待首次 `just update-dotfiles` 获取；它只允许快进，不会覆盖本地独有提交。
 
 ## zhb-nixos 首次迁移
 
