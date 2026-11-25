@@ -154,7 +154,10 @@ nix eval --accept-flake-config --impure --json --expr \
   'import ./scripts/tests/flake-output-shape.nix { flakeRef = toString ./.; }'
 ```
 
-## System Manager Garbage Collection
+## System Generation Garbage Collection
+
+`home-nixos` uses a weekly NixOS timer to retain five system generations and
+collect unreferenced store paths. See [preview, manual cleanup and activation](docs/home-nixos-gc.md).
 
 System Manager hosts (`gkzhb-vps`, `devbox`, `mido`) use a shared weekly cleanup
 module that retains five generations before running Nix garbage collection.

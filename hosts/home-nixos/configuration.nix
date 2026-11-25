@@ -47,6 +47,19 @@
     impure-env = "GOPROXY=http://localhost:8333,direct";
   };
 
+  # Prune only the NixOS system profile, then let the built-in job collect
+  # unreferenced store paths. Do not pass -d, which prunes other profiles too.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    persistent = true;
+    randomizedDelaySec = "1h";
+  };
+  systemd.services.nix-gc = {
+    unitConfig.ConditionPathExists = "/nix/var/nix/profiles/system";
+    serviceConfig.ExecStartPre = "${config.nix.package}/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations +5";
+  };
+
   networking.hostName = "home-nixos"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
