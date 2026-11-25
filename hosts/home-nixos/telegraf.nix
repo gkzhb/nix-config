@@ -51,6 +51,8 @@
         };
         processes = { };
         mqtt_consumer = {
+          # Retry this input without stopping unrelated collectors when mido is offline.
+          startup_error_behavior = "retry";
           servers = [ "tcp://100.64.0.15:1883" ];
           topics = [ "device/+/battery" ];
           topic_tag = "mqtt_topic";
