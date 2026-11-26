@@ -109,6 +109,10 @@ test-certbot:
     nix eval --accept-flake-config --impure --json --file scripts/tests/test-certbot-service.nix
     python3 -B scripts/tests/test-certbot-deploy.py
 
+# Test cccc-cli Cargo download timeouts without downloading crates or activation.
+test-cccc-timeout:
+    nix build --accept-flake-config --impure --no-link --file scripts/tests/test-cccc-timeout.nix -L
+
 # Evaluate devbox-only Botmux font links; no activation or worker restart.
 test-botmux-fonts:
     nix eval --accept-flake-config --impure --json --file scripts/tests/test-botmux-fonts.nix

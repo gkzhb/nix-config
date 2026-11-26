@@ -181,6 +181,20 @@ nix build .#cccc-cli
 Hosts that import this overlay can add `pkgs.knots` and `pkgs.cccc-cli` to
 their package lists. Adding these definitions does not install them on any host.
 
+`cccc-cli` uses a package-local Cargo vendor fetcher with 30-second connection
+(including proxy/TLS setup) and read-idle timeouts. The upstream Python downloader
+is otherwise unchanged: proxy environment inheritance, concurrency, retries and
+source/vendor hashes are preserved. Cargo's `CARGO_HTTP_TIMEOUT` does not control
+this Python fetcher. The timeout patch fails explicitly if upstream changes the
+expected constants, rather than silently becoming ineffective.
+
+Verify the actual vendor-stage helper without fetching Cargo dependencies or
+activating a host:
+
+```sh
+just test-cccc-timeout
+```
+
 Both packages were built and tested on `aarch64-darwin`, including installed
 binary version checks. `cccc-cli` was also built and tested on `x86_64-linux`:
 all 109 tests, the installed version check, and a Ruby analysis smoke test pass.

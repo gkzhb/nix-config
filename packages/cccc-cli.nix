@@ -17,6 +17,20 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-4MkN5D+jP74hmL/S47TwGkpIXXjM6OD/1hQPy8KkRSY=";
 
+  # fetchCargoVendor uses Python requests, not Cargo's HTTP timeout settings.
+  # Allow slow proxy/TLS setup without changing the downloader for other packages.
+  depsExtraArgs.preBuild = ''
+    fetcherDir="$TMPDIR/cccc-cargo-fetcher"
+    mkdir -p "$fetcherDir"
+    cp "$(command -v fetch-cargo-vendor-util)" "$fetcherDir/fetch-cargo-vendor-util"
+    chmod u+w "$fetcherDir/fetch-cargo-vendor-util"
+    substituteInPlace "$fetcherDir/fetch-cargo-vendor-util" \
+      --replace-fail 'CONNECT_TIMEOUT = 2  #' 'CONNECT_TIMEOUT = 30  #' \
+      --replace-fail 'READ_TIMEOUT = 10  #' 'READ_TIMEOUT = 30  #'
+    chmod u-w "$fetcherDir/fetch-cargo-vendor-util"
+    export PATH="$fetcherDir:$PATH"
+  '';
+
   # ruby-prism-sys generates its C bindings with libclang at build time.
   nativeBuildInputs = [ rustPlatform.bindgenHook ];
   nativeCheckInputs = [ git ];

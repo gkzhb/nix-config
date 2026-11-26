@@ -360,6 +360,10 @@ class JustfileTests(unittest.TestCase):
                 ],
             ),
             ("test-uv-config", ["eval", "--accept-flake-config", "--impure", "--json", "--file", "scripts/tests/test-uv-config.nix"]),
+            ("test-cccc-timeout", [
+                "build", "--accept-flake-config", "--impure", "--no-link",
+                "--file", "scripts/tests/test-cccc-timeout.nix", "-L",
+            ]),
             ("format", ["fmt", "--accept-flake-config"]),
             ("check-format", ["flake", "check", "--accept-flake-config"]),
             (
