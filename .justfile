@@ -109,6 +109,10 @@ test-certbot:
     nix eval --accept-flake-config --impure --json --file scripts/tests/test-certbot-service.nix
     python3 -B scripts/tests/test-certbot-deploy.py
 
+# Evaluate devbox-only Botmux font links; no activation or worker restart.
+test-botmux-fonts:
+    nix eval --accept-flake-config --impure --json --file scripts/tests/test-botmux-fonts.nix
+
 # Evaluate the shared GC module and timer; no activation or garbage collection.
 test-system-manager-gc:
     nix eval --accept-flake-config --impure --json --file scripts/tests/test-system-manager-gc.nix

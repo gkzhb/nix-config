@@ -49,5 +49,6 @@
   imports = [
     ../../modules/home-manager/dotfiles.nix
     ./user-systemd.nix
+    ./botmux-fonts.nix
   ];
 }

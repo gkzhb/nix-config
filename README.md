@@ -163,6 +163,13 @@ System Manager hosts (`gkzhb-vps`, `devbox`, `mido`) use a shared weekly cleanup
 module that retains five generations before running Nix garbage collection.
 See [configuration, activation and verification](docs/system-manager-gc.md).
 
+## Devbox Botmux Fonts
+
+Only the devbox Home Manager configuration declares Nix-backed links in
+`~/.botmux/fonts/`. Latin, CJK and emoji font sources and the non-activating
+`just test-botmux-fonts` check are described in [Botmux fonts](docs/botmux-fonts.md).
+Other hosts and shared dotfiles are unchanged.
+
 ## Independent Update Channels
 
 The main `nixpkgs` input supplies the system and ordinary software. The separately
