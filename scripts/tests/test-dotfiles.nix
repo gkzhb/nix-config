@@ -89,7 +89,7 @@ let
       home = devboxHome;
       profile = "byte";
       provider = "byte";
-      model = "gpt-6.1-sol";
+      model = "gemini-4-neon-chat";
       worker = "byte/ds-v4-flash";
       scope = [
         "newapi/**"

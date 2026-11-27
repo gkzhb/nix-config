@@ -16,7 +16,7 @@ SCRIPT = REPO / "scripts/pi-sync-shepherdr.py"
 PROFILES = ("general", "reviewer", "explorer")
 HOSTS = {
     "magpie": ("magpie/auto/gpt-6.1-sol", "magpie/auto/ds-v4-flash"),
-    "byte": ("byte/gpt-6.1-sol", "byte/ds-v4-flash"),
+    "byte": ("byte/gemini-4-neon-chat", "byte/ds-v4-flash"),
     "newapi": ("newapi/gpt-6.2-sol", "newapi/ds-v4-flash"),
 }
 

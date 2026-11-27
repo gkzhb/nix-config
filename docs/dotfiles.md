@@ -73,7 +73,7 @@ dotfiles.pi = {
 };
 ```
 
-当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 和 `home-nixos` 使用 `newapi`，默认模型为 `gpt-6.2-sol`，其中 `home-nixos` 还保留原有 `magpie/**` 轮换范围；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gpt-6.1-sol`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
+当前配置：`gkzhb-MBP` 使用 `magpie`，启动和轮换范围只包含 Magpie 模型；`zhb-nixos` 和 `home-nixos` 使用 `newapi`，默认模型为 `gpt-6.2-sol`，其中 `home-nixos` 还保留原有 `magpie/**` 轮换范围；`devbox` 按本机配置使用 `byte` profile，默认 `byte/gemini-4-neon-chat`，保留 `newapi/**`、`magpie/**`、`byte/**` 的轮换范围。`byte` profile 使用 `https://llm.byte.gkzhb.top/v1`，凭据仅引用环境变量 `$BYTE_NEWAPI_API_KEY`，模型能力和 session affinity 设置沿用本机 `models.json`。请确认目标机能访问 profile 中的端点并有对应凭据。`enabledModels` 为空表示不限制范围；非空时应包含默认模型，否则 Pi 可能选择范围内的其他模型。模型 profile 只控制 `models.json`，不影响共享扩展（例如 `magpie.ts`）自行注册的 provider。
 
 **首次迁移**（以下 Shell 命令用 Bash 或 sh 执行）：
 
@@ -105,7 +105,7 @@ dotfiles.pi = {
 | 主机 | `general` / `reviewer` | `explorer` |
 | --- | --- | --- |
 | `gkzhb-MBP` | `magpie/auto/gpt-6.1-sol` | `magpie/auto/ds-v4-flash` |
-| `devbox` | `byte/gpt-6.1-sol` | `byte/ds-v4-flash` |
+| `devbox` | `byte/gemini-4-neon-chat` | `byte/ds-v4-flash` |
 | `zhb-nixos` / `home-nixos` | `newapi/gpt-6.2-sol` | `newapi/ds-v4-flash` |
 
 - `general` 和 `reviewer` 使用 Nix 声明的 `defaultProvider/defaultModel`，不会跟随父会话当前模型或 Pi 中临时保存的默认值。只有 `explorer` 使用 `workerModel`；不配置时它也使用 Nix 默认。激活前会检查这些完整模型 ID 是否存在于所选模型目录中。
