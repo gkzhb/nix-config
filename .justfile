@@ -73,6 +73,10 @@ update:
 update-edge:
     nix flake update --accept-flake-config nixpkgs-edge
 
+# Update only the official Magpie release input; activation remains explicit.
+update-magpie:
+    nix flake update --accept-flake-config magpie-releases
+
 update-nix:
     nix flake update --accept-flake-config nixpkgs nix-ld sops-nix home-manager nix-darwin system-manager
 
@@ -112,6 +116,10 @@ test-certbot:
 # Test cccc-cli Cargo download timeouts without downloading crates or activation.
 test-cccc-timeout:
     nix build --accept-flake-config --impure --no-link --file scripts/tests/test-cccc-timeout.nix -L
+
+# Evaluate Magpie package and user service; no activation or credentials.
+test-magpie-service:
+    nix eval --accept-flake-config --impure --json --file scripts/tests/test-magpie-service.nix
 
 # Evaluate devbox-only Botmux font links; no activation or worker restart.
 test-botmux-fonts:

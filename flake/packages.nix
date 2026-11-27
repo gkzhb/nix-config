@@ -41,6 +41,7 @@ in
             aoci-code
             ;
           default = pkgs.mmx-cli;
+          magpie-cli = inputs.magpie-releases.packages.${system}.magpie-cli;
         }
         // lib.optionalAttrs (lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.new-api) {
           inherit (pkgs) new-api;

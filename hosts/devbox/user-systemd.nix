@@ -1,14 +1,49 @@
 {
   config,
+  inputs,
   pkgs,
   ...
 }:
 
 let
   new-api = pkgs.callPackage ../../packages/new-api.nix { };
+  magpie-cli = inputs.magpie-releases.packages.${pkgs.stdenv.hostPlatform.system}.magpie-cli;
 
 in
 {
+  home.packages = [ magpie-cli ];
+
+  systemd.user.services.magpie = {
+    Unit = {
+      Description = "Magpie LLM gateway";
+      After = [ "network.target" ];
+    };
+    Install.WantedBy = [ "default.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "${magpie-cli}/bin/magpie serve";
+      WorkingDirectory = "%h";
+      Environment = [
+        "MAGPIE_ADDR=127.0.0.1:3425"
+        "MAGPIE_DRAIN=30s"
+        # Do not discover other agents' sign-ins or send usage telemetry.
+        "MAGPIE_NO_ACCOUNTS=1"
+        "DO_NOT_TRACK=1"
+        "XDG_CONFIG_HOME=%h/.config"
+        "XDG_CACHE_HOME=%h/.cache"
+        "XDG_DATA_HOME=%h/.local/share"
+        "XDG_STATE_HOME=%h/.local/state"
+        "PATH=%h/.nix-profile/bin:%h/.local/bin:/run/system-manager/sw/bin:/usr/local/bin:/usr/bin:/bin"
+      ];
+      Restart = "on-failure";
+      RestartSec = "5s";
+      TimeoutStopSec = "45s";
+      UMask = "0077";
+      NoNewPrivileges = true;
+      RestrictSUIDSGID = true;
+    };
+  };
+
   systemd.user.services.dsh-web = {
     Unit = {
       Description = "DeepSeek Harness web service";

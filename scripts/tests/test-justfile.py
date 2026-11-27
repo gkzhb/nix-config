@@ -216,6 +216,23 @@ class JustfileTests(unittest.TestCase):
                 args.insert(2, "--accept-flake-config")
                 self.assert_call(recipes, "nix", args, unfree)
 
+    def test_magpie_workflows(self):
+        self.assert_call(
+            ["update-magpie"], "nix",
+            ["flake", "update", "--accept-flake-config", "magpie-releases"],
+        )
+        self.assert_call(
+            ["test-magpie-service"], "nix",
+            [
+                "eval", "--accept-flake-config", "--impure", "--json",
+                "--file", "scripts/tests/test-magpie-service.nix",
+            ],
+        )
+        self.assert_call(
+            ["build-package", "magpie-cli", "--no-link"], "nix",
+            ["build", ".#magpie-cli", "--accept-flake-config", "-L", "--no-link"],
+        )
+
     def test_arguments_are_passed_literally(self):
         hostile = "name with spaces'\"; $(touch INJECTED); #"
         for recipe, tool in [

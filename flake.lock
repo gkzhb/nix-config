@@ -358,6 +358,26 @@
         "type": "github"
       }
     },
+    "magpie-releases": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795754644,
+        "narHash": "sha256-QX0oavAC+S7NndR/eRKRoFIPNLBM1WjpRBvnYPgn/3g=",
+        "owner": "yetone",
+        "repo": "magpie-releases",
+        "rev": "24025d504160a9b7387cff0e763ca6f934680e8c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yetone",
+        "repo": "magpie-releases",
+        "type": "github"
+      }
+    },
     "minifluxng": {
       "inputs": {
         "nixpkgs": [
@@ -600,6 +620,7 @@
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager_2",
         "llm-agents": "llm-agents",
+        "magpie-releases": "magpie-releases",
         "minifluxng": "minifluxng",
         "nix-darwin": "nix-darwin",
         "nix-ld": "nix-ld",

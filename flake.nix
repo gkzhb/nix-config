@@ -41,6 +41,11 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    magpie-releases = {
+      url = "github:yetone/magpie-releases";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     minifluxng.url = "github:gkzhb/miniflux.nix";
     minifluxng.inputs.nixpkgs.follows = "nixpkgs";
 
