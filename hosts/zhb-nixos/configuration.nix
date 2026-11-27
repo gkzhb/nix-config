@@ -468,6 +468,7 @@
     })
     brave
     helium
+    browseros-neo
     kitty
     bitwarden-desktop
     # calibre
@@ -476,7 +477,11 @@
     eden # Nintendo Switch emulator
     kdePackages.kfind
     ghidra
-    heroic
+    mangohud
+    # Expose the overlay in Heroic's FHS runtime as well as on the host.
+    (heroic.override {
+      extraPkgs = p: [ p.mangohud ];
+    })
     # digikam
 
     nil
